@@ -1,10 +1,11 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { refreshAccessToken } from "@/services/authService";
 import axios from "axios";
-export const API_BASE_URL = "http://localhost:5171";
+export const API_URL = `${import.meta.env.VITE_API_URL1}/api`;
+export const API_BASE_URL = import.meta.env.VITE_API_URL1;
 
 const api = axios.create({
-  baseURL: "http://localhost:5171/api",
+  baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },

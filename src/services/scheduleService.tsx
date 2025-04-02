@@ -28,7 +28,7 @@ export const getAllSchedules = async (filter: PaginationFilter) => {
 export const getScheduleById = async (id: number) => {
   try {
     const response = await api.get(`/Schedule/${id}`);
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error(`Error fetching schedule with ID ${id}:`, error);
     return {
@@ -90,7 +90,7 @@ export const createSchedule = async (
 ) => {
   try {
     const response = await api.post("/Schedule", schedule);
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error("Error creating schedule:", error);
     return {
@@ -133,7 +133,7 @@ export const cancelSchedule = async (id: number) => {
 export const getStudentsByScheduleId = async (id: number) => {
   try {
     const response = await api.get(`/Schedule/${id}/students`);
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error(`Error fetching students for schedule ID ${id}:`, error);
     return {

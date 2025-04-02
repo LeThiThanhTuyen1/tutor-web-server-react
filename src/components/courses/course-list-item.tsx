@@ -2,19 +2,10 @@
 
 import { memo, useState } from "react";
 import { motion } from "framer-motion";
-import {
-  Calendar,
-  DollarSign,
-  User,
-  Edit,
-  ExternalLink,
-  Users,
-  X,
-} from "lucide-react";
+import { Calendar, DollarSign, User, ExternalLink, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/ui/button";
 import { cn } from "../layout/cn";
-import { Checkbox } from "@/ui/checkbox";
 import { Badge } from "@/ui/badge.tsx";
 import { cancelCourse } from "@/services/courseService";
 import { useToast } from "@/hooks/use-toast";
@@ -43,7 +34,6 @@ const STATUS_STYLES: Record<string, string> = {
 function CourseListItemComponent({
   course,
   isSelected,
-  onSelect,
   isTutor,
   onCourseUpdated,
 }: CourseListItemProps) {
@@ -86,10 +76,6 @@ function CourseListItemComponent({
     }
   };
 
-  // Check if course can be cancelled (only coming or ongoing courses)
-  const canCancel =
-    isTutor && (course.status === "coming" || course.status === "ongoing");
-
   return (
     <>
       <motion.div
@@ -109,14 +95,6 @@ function CourseListItemComponent({
             {/* Left section with course info */}
             <div className="flex-1">
               <div className="flex items-start gap-3">
-                {isTutor && (
-                  <Checkbox
-                    checked={isSelected}
-                    onCheckedChange={() => onSelect(course.id)}
-                    className="mt-1 h-5 w-5 border-indigo-300 dark:border-indigo-700 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
-                  />
-                )}
-
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-indigo-950 dark:text-indigo-50">
@@ -170,70 +148,34 @@ function CourseListItemComponent({
 
             {/* Right section with actions */}
             <div className="flex flex-row md:flex-col gap-2 justify-end md:min-w-[140px]">
-              <>
+              <Button
+                variant="default"
+                size="sm"
+                className="flex-1 md:w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
+              >
+                <Link
+                  to={`/courses/${course.id}`}
+                  className="flex items-center w-full justify-center"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  View Details
+                </Link>
+              </Button>
+              {!isTutor && (
                 <Button
                   variant="default"
                   size="sm"
                   className="flex-1 md:w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
                 >
                   <Link
-                    to={`/courses/${course.id}`}
+                    to={`/enrollment/${course.id}`}
                     className="flex items-center w-full justify-center"
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
-                    View Details
+                    Enroll Now
                   </Link>
                 </Button>
-                {!isTutor && (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="flex-1 md:w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
-                  >
-                    <Link
-                      to={`/enrollment/${course.id}`}
-                      className="flex items-center w-full justify-center"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Enroll Now
-                    </Link>
-                  </Button>
-                )}
-                {isTutor && (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 md:w-full border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300"
-                    >
-                      <Link
-                        to={`tutor/courses/${course.id}/edit`}
-                        className="flex items-center w-full justify-center"
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Link>
-                    </Button>
-
-                    {/* Cancel Course Button - Only show for courses that aren't already canceled or completed */}
-                    {canCancel && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setIsCancelDialogOpen(true)}
-                        className="border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300"
-                        disabled={
-                          course.status === "canceled" ||
-                          course.status === "completed"
-                        }
-                      >
-                        <X className="h-4 w-4 mr-2" />
-                        Cancel
-                      </Button>
-                    )}
-                  </>
-                )}
-              </>
+              )}
             </div>
           </div>
         </div>

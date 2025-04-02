@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/ui/button";
@@ -27,9 +27,18 @@ import {
   Save,
   ArrowLeft,
 } from "lucide-react";
-import { createCourse, updateCourse } from "@/services/courseService";
+import {
+  createCourse,
+  deleteCourses,
+  updateCourse,
+} from "@/services/courseService";
 import { Link } from "react-router-dom";
 import { ToastContainer } from "@/ui/toast";
+import {
+  createSchedule,
+  deleteSchedules,
+  updateSchedule,
+} from "@/services/scheduleService";
 
 // Day of week mapping
 const DAYS_OF_WEEK = [
@@ -47,11 +56,14 @@ const TEACHING_MODES = ["online", "offline"];
 
 interface CourseSchedule {
   id?: number;
+  courseId?: number;
   dayOfWeek: number;
   startHour: string;
   endHour: string;
   mode: string;
   location: string;
+  tutorId: number;
+  status: string;
 }
 
 interface CourseFormProps {
@@ -65,19 +77,22 @@ interface CourseFormProps {
     endDate: string;
     fee: number;
     maxStudents: number;
+    createdAt: Date;
     schedule: CourseSchedule[];
   };
 }
 
 export default function CourseForm({
   isEditing = false,
-  courseId,
   initialData,
 }: CourseFormProps) {
   const navigate = useNavigate();
   const { toast, toasts, dismiss } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Track schedules to be deleted (only used in edit mode)
+  const [schedulesToDelete, setSchedulesToDelete] = useState<number[]>([]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -107,75 +122,67 @@ export default function CourseForm({
         fee: initialData.fee || 0,
         maxStudents: initialData.maxStudents || 10,
         schedule: initialData.schedule || [],
-        createdAt: new Date().toISOString().split("T")[0],
+        createdAt: initialData.createdAt
+          ? new Date(initialData.createdAt).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
         status: "coming",
       });
     }
   }, [isEditing, initialData]);
 
-  // Handle input changes
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  // Handle input changes - memoized with useCallback
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
 
-    // Clear error for this field
-    if (formErrors[name]) {
-      setFormErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-  };
+      // Clear error for this field
+      if (formErrors[name]) {
+        setFormErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+      }
+    },
+    [formErrors]
+  );
 
-  // Handle number input changes
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    const numValue = value === "" ? 0 : Number(value);
-    setFormData((prev) => ({
-      ...prev,
-      [name]: numValue,
-    }));
+  // Handle number input changes - memoized with useCallback
+  const handleNumberChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      const numValue = value === "" ? 0 : Number(value);
+      setFormData((prev) => ({
+        ...prev,
+        [name]: numValue,
+      }));
 
-    // Clear error for this field
-    if (formErrors[name]) {
-      setFormErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-  };
+      // Clear error for this field
+      if (formErrors[name]) {
+        setFormErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+      }
+    },
+    [formErrors]
+  );
 
-  // Handle select changes
-  //   const handleSelectChange = (name: string, value: string) => {
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       [name]: value,
-  //     }));
-
-  //     // Clear error for this field
-  //     if (formErrors[name]) {
-  //       setFormErrors((prev) => {
-  //         const newErrors = { ...prev };
-  //         delete newErrors[name];
-  //         return newErrors;
-  //       });
-  //     }
-  //   };
-
-  // Add a new schedule item
-  const addScheduleItem = () => {
+  // Add a new schedule item - memoized with useCallback
+  const addScheduleItem = useCallback(() => {
     const newSchedule: CourseSchedule = {
       dayOfWeek: 1,
       startHour: "09:00",
       endHour: "10:00",
       mode: "online",
+      status: "scheduled",
+      tutorId: 0,
+      courseId: 0,
       location: "",
     };
 
@@ -183,37 +190,50 @@ export default function CourseForm({
       ...prev,
       schedule: [...prev.schedule, newSchedule],
     }));
-  };
+  }, []);
 
-  // Remove a schedule item
-  const removeScheduleItem = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      schedule: prev.schedule.filter((_, i) => i !== index),
-    }));
-  };
+  // Remove a schedule item - memoized with useCallback
+  const removeScheduleItem = useCallback(
+    (index: number) => {
+      setFormData((prev) => {
+        const updatedSchedule = [...prev.schedule];
 
-  // Update a schedule item
-  const updateScheduleItem = (
-    index: number,
-    field: keyof CourseSchedule,
-    value: string | number
-  ) => {
-    setFormData((prev) => {
-      const updatedSchedule = [...prev.schedule];
-      updatedSchedule[index] = {
-        ...updatedSchedule[index],
-        [field]: value,
-      };
-      return {
-        ...prev,
-        schedule: updatedSchedule,
-      };
-    });
-  };
+        // If we're in edit mode and the schedule has an ID, add it to the delete list
+        const scheduleToRemove = updatedSchedule[index];
+        if (isEditing && scheduleToRemove.id) {
+          setSchedulesToDelete((prev) => [...prev, scheduleToRemove.id!]);
+        }
 
-  // Validate form
-  const validateForm = () => {
+        // Remove the schedule from the form data
+        return {
+          ...prev,
+          schedule: updatedSchedule.filter((_, i) => i !== index),
+        };
+      });
+    },
+    [isEditing]
+  );
+
+  // Update a schedule item - memoized with useCallback
+  const updateScheduleItem = useCallback(
+    (index: number, field: keyof CourseSchedule, value: string | number) => {
+      setFormData((prev) => {
+        const updatedSchedule = [...prev.schedule];
+        updatedSchedule[index] = {
+          ...updatedSchedule[index],
+          [field]: value,
+        };
+        return {
+          ...prev,
+          schedule: updatedSchedule,
+        };
+      });
+    },
+    []
+  );
+
+  // Validate form - memoized with useCallback
+  const validateForm = useCallback(() => {
     const errors: Record<string, string> = {};
 
     if (!formData.courseName.trim()) {
@@ -245,9 +265,6 @@ export default function CourseForm({
       errors.maxStudents = "Maximum students must be greater than 0";
     }
 
-    // if (formData.schedule.length === 0) {
-    //   errors.schedule = "At least one schedule item is required";
-    // } else {
     // Validate each schedule item
     formData.schedule.forEach((item, index) => {
       if (!item.startHour) {
@@ -263,75 +280,155 @@ export default function CourseForm({
         errors[`schedule[${index}].endHour`] =
           "End time must be after start time";
       }
-      if (item.mode === "In-Person" && !item.location.trim()) {
+      if (item.mode === "offline" && !item.location.trim()) {
         errors[`schedule[${index}].location`] =
-          "Location is required for in-person classes";
+          "Location is required for offline classes";
       }
     });
-    // }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  };
+  }, [formData]);
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Handle form submission - memoized with useCallback
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!validateForm()) {
-      toast({
-        title: "Validation Error",
-        description: "Please fix the errors in the form",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Format dates for API
-      const formattedData = {
-        ...formData,
-        startDate: new Date(formData.startDate).toISOString(),
-        endDate: new Date(formData.endDate).toISOString(),
-      };
-      let response;
-      if (isEditing && courseId) {
-        response = await updateCourse(courseId, formattedData);
-      } else {
-        response = await createCourse(formattedData);
-      }
-      console.log(response);
-      if (response.succeeded) {
+      if (!validateForm()) {
         toast({
-          title: "Success",
-          description: isEditing
-            ? "Course updated successfully"
-            : "Course created successfully",
-          variant: "success",
-        });
-        setTimeout(() => {
-          navigate("/courses");
-        }, 500);
-      } else {
-        toast({
-          title: "Error",
-          description: response.message || "Failed to save course",
+          title: "Validation Error",
+          description: "Please fix the errors in the form",
           variant: "destructive",
         });
+        return;
       }
-    } catch (error) {
-      console.error("Error saving course:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+
+      setIsSubmitting(true);
+
+      try {
+        const formattedData = {
+          ...formData,
+          fee: formData.fee,
+          courseName: formData.courseName,
+          maxStudents: formData.maxStudents,
+          startDate: new Date(formData.startDate).toISOString(),
+          endDate: new Date(formData.endDate).toISOString(),
+        };
+
+        const { schedule, ...courseData } = formattedData;
+        let courseResponse;
+        let courseId;
+        let tutorId;
+
+        if (isEditing && initialData?.id) {
+          courseResponse = await updateCourse(initialData.id, courseData);
+          courseId = initialData.id;
+
+          if (courseResponse.succeeded && courseResponse.data) {
+            tutorId = courseResponse.data.tutorId;
+
+            if (schedulesToDelete.length > 0) {
+              await deleteSchedules(schedulesToDelete);
+            }
+          } else {
+            throw new Error(
+              courseResponse.errors?.join("\n") || "Failed to update course."
+            );
+          }
+        } else {
+          courseResponse = await createCourse(courseData);
+
+          if (courseResponse.succeeded && courseResponse.data) {
+            courseId = courseResponse.data.id;
+            tutorId = courseResponse.data.tutorId;
+          } else {
+            throw new Error(
+              courseResponse.errors?.join("\n") || "Failed to create course."
+            );
+          }
+        }
+
+        const schedulePromises = schedule.map((scheduleItem) => {
+          const scheduleData = {
+            ...scheduleItem,
+            courseId,
+            tutorId: Number(tutorId),
+          };
+
+          return isEditing && scheduleItem.id
+            ? updateSchedule(scheduleItem.id, scheduleData)
+            : createSchedule(scheduleData);
+        });
+
+        const scheduleResponses = await Promise.all(schedulePromises);
+        const scheduleFailed = scheduleResponses.some((res) => !res.succeeded);
+
+        if (scheduleFailed) {
+          if (!isEditing) await deleteCourses([Number(courseId)]);
+
+          toast({
+            title: "Error",
+            description: "Failed to save schedule(s).",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Success",
+            description: isEditing
+              ? "Course updated successfully"
+              : "Course created successfully",
+            variant: "success",
+          });
+
+          setTimeout(() => {
+            navigate("/tutor/courses");
+          }, 1000);
+        }
+      } catch (error) {
+        console.error("Error saving course:", error);
+
+        // Kiểm tra lỗi với TypeScript
+        let errorMessage = "An unexpected error occurred.";
+
+        if (error instanceof Error) {
+          // Nếu error là một Error object hợp lệ
+          errorMessage = error.message;
+        } else if (
+          typeof error === "object" &&
+          error !== null &&
+          "response" in error &&
+          typeof (error as any).response.data === "object"
+        ) {
+          // Lấy lỗi từ response của Axios
+          const responseData = (error as any).response.data;
+          if (responseData.errors && Array.isArray(responseData.errors)) {
+            errorMessage = responseData.errors.join("\n");
+          } else {
+            errorMessage = responseData.message || errorMessage;
+          }
+        }
+
+        // Hiển thị toast với lỗi cụ thể
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [
+      formData,
+      validateForm,
+      isEditing,
+      initialData,
+      schedulesToDelete,
+      toast,
+      navigate,
+    ]
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/30 dark:to-purple-950/30 p-4 md:p-6">
@@ -341,7 +438,7 @@ export default function CourseForm({
           asChild
           className="mb-6 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30"
         >
-          <Link to="/courses" className="flex items-center">
+          <Link to="/tutor/courses" className="flex items-center">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Courses
           </Link>
@@ -527,7 +624,10 @@ export default function CourseForm({
                         className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50"
                       >
                         <div className="flex justify-between items-center mb-4">
-                          <h4 className="font-medium">Schedule #{index + 1}</h4>
+                          <h4 className="font-medium">
+                            Schedule #{index + 1}{" "}
+                            {item.id ? `(ID: ${item.id})` : "(New)"}
+                          </h4>
                           <Button
                             type="button"
                             variant="destructive"
@@ -580,7 +680,8 @@ export default function CourseForm({
                               <SelectContent>
                                 {TEACHING_MODES.map((mode) => (
                                   <SelectItem key={mode} value={mode}>
-                                    {mode}
+                                    {mode.charAt(0).toUpperCase() +
+                                      mode.slice(1)}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -641,8 +742,7 @@ export default function CourseForm({
 
                           <div className="space-y-2 md:col-span-2">
                             <Label htmlFor={`location-${index}`}>
-                              Location{" "}
-                              {item.mode !== "In-Person" && "(Optional)"}
+                              Location {item.mode !== "offline" && "(Optional)"}
                             </Label>
                             <Input
                               id={`location-${index}`}

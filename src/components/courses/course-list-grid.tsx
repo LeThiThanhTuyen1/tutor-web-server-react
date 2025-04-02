@@ -10,23 +10,8 @@ import {
   lazy,
 } from "react";
 import { motion } from "framer-motion";
-import {
-  Plus,
-  Trash2,
-  AlertTriangle,
-  Search,
-  Filter,
-  Book,
-  Grid,
-  List,
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import {
-  getAllCourses,
-  deleteCourses,
-  getTutorCourseByUserId,
-  getStudentCourseByUserId,
-} from "@/services/courseService";
+import { AlertTriangle, Search, Filter, Book, Grid, List } from "lucide-react";
+import { getAllCourses, deleteCourses } from "@/services/courseService";
 import { Button } from "@/ui/button";
 import {
   Accordion,
@@ -45,9 +30,10 @@ import { cn } from "../layout/cn";
 import Pagination from "../layout/pagination";
 import { DeleteConfirmationModal } from "@/ui/modals/delete-confirm";
 import { PaginationFilter } from "@/types/paginated-response";
+import CourseCard from "./course-card";
 
 // Lazy load components for better performance
-const CourseCard = lazy(() => import("@/components/courses/course-card"));
+// const CourseCard = lazy(() => import("@/components/courses/course-card"));
 const CourseListItem = lazy(() => import("./course-list-item"));
 
 // Fallback components for lazy loading
@@ -97,7 +83,6 @@ export default function CourseList() {
 
   // Memoize the isTutor value to prevent unnecessary re-renders
   const isTutor = useMemo(() => user?.role === "Tutor", [user?.role]);
-  const isStudent = useMemo(() => user?.role === "Student", [user?.role]);
 
   // State
   const [courses, setCourses] = useState<any[]>([]);
@@ -136,11 +121,7 @@ export default function CourseList() {
   const fetchCourses = useCallback(async () => {
     try {
       setLoading(true);
-      const response = isTutor
-        ? await getTutorCourseByUserId(pagination)
-        : isStudent
-        ? await getStudentCourseByUserId(pagination)
-        : await getAllCourses(pagination);
+      const response = await getAllCourses(pagination);
 
       setCourses(response.data || []);
       setTotalPages(response.totalPages);
@@ -258,7 +239,7 @@ export default function CourseList() {
 
   const handleStatusChange = useCallback((status: string) => {
     setSelectedStatus(status);
-    setPagination((prev) => ({ ...prev, pageNumber: 1 })); // Reset to first page
+    setPagination((prev) => ({ ...prev, pageNumber: 1 })); 
   }, []);
 
   const handlePageChange = useCallback((newPage: number) => {
@@ -286,13 +267,7 @@ export default function CourseList() {
           transition={{ duration: 0.3, delay: index * 0.05 }}
         >
           <Suspense fallback={<CardSkeleton />}>
-            <CourseCard
-              course={course}
-              isSelected={selectedCourses.includes(course.id)}
-              onSelect={toggleCourseSelection}
-              onDelete={handleDeleteModalOpen}
-              isTutor={isTutor}
-            />
+            <CourseCard course={course} isTutor={isTutor} />
           </Suspense>
         </motion.div>
       ))}
@@ -608,33 +583,6 @@ export default function CourseList() {
           animate="show"
           className="flex-1"
         >
-          <div className="flex flex-wrap gap-2 mb-2">
-            {isTutor && (
-              <>
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
-                >
-                  <Link to="/tutor/course/new" className="flex items-center">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Course
-                  </Link>
-                </Button>
-                {selectedCourses.length > 0 && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    className="inline-flex items-center bg-red-600 text-white"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete ({selectedCourses.length})
-                  </Button>
-                )}
-              </>
-            )}
-          </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-indigo-100 dark:border-indigo-900 p-4 md:p-6">
             {loading ? (
               LoadingSkeletons
