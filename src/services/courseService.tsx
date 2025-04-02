@@ -93,10 +93,15 @@ export const createCourse = async (
     return response.data;
   } catch (error) {
     console.error("Error creating course:", error);
+    if (error instanceof Error && "response" in error) {
+      return (error as any).response.data;
+    }
+
     return {
       data: null,
       succeeded: false,
-      message: "Failed to create course",
+      message: "Failed to create course.",
+      errors: ["An unexpected error occurred."],
     };
   }
 };

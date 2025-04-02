@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import type React from "react";
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getCourseById, cancelCourse } from "@/services/courseService";
@@ -22,7 +22,6 @@ import {
   X,
   Edit,
 } from "lucide-react";
-import { Badge } from "@/ui/badge.tsx";
 import { cn } from "../layout/cn";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
@@ -37,6 +36,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { CancelCourseModal } from "@/ui/modals/cancel-course";
+import { Badge } from "@/ui/badge";
 
 // Status styles
 const STATUS_STYLES: Record<string, string> = {
@@ -147,7 +147,7 @@ export default function CourseDetail() {
   const canCancel =
     isTutor &&
     course &&
-    (course.status === "coming" || course.status === "ongoing");
+    (course.status === "ongoing" || course.status === "coming");
 
   if (loading) {
     return (
@@ -204,11 +204,12 @@ export default function CourseDetail() {
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             The course you're looking for doesn't exist or has been removed.
           </p>
-          <Button asChild>
-            <Link to="/courses" className="flex items-center">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Courses
-            </Link>
+          <Button
+            onClick={() => navigate(-1)}
+            className="bg-no hover:bg-no mb-6 text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-600"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Courses
           </Button>
         </div>
       </div>
@@ -221,14 +222,11 @@ export default function CourseDetail() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/30 dark:to-purple-950/30 p-4 md:p-6">
       <div className="max-w-4xl mx-auto">
         <Button
-          variant="ghost"
-          asChild
-          className="mb-6 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30"
+          onClick={() => navigate(-1)}
+          className="bg-no hover:bg-no mb-6 text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-600"
         >
-          <Link to="/courses" className="flex items-center">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Courses
-          </Link>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Courses
         </Button>
 
         <motion.div

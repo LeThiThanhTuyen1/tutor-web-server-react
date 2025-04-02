@@ -8,6 +8,7 @@ import {
   Users,
   Calendar,
   LogIn,
+  SettingsIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { RootState } from "@/store/store";
@@ -40,6 +41,11 @@ export default function Sidebar({ isOpen, isHomePage = false }: SidebarProps) {
         name: "Course",
         path: "/courses",
         icon: <BookOpen className="h-5 w-5" />,
+      },
+      {
+        name: "Setting",
+        path: "/setting",
+        icon: <SettingsIcon className="h-5 w-5" />,
       },
     ];
 
@@ -87,8 +93,8 @@ export default function Sidebar({ isOpen, isHomePage = false }: SidebarProps) {
             icon: <BookOpen className="h-5 w-5" />,
           },
           {
-            name: "Schedule",
-            path: "/tutor/schedule",
+            name: "My Schedule",
+            path: "/tutor/schedules",
             icon: <Calendar className="h-5 w-5" />,
           },
           {
@@ -113,14 +119,19 @@ export default function Sidebar({ isOpen, isHomePage = false }: SidebarProps) {
           icon: <BookOpen className="h-5 w-5" />,
         },
         {
-          name: "My Tutors",
-          path: "/student/tutors",
-          icon: <Users className="h-5 w-5" />,
+          name: "My Schedules",
+          path: "/student/schedules",
+          icon: <Calendar className="h-5 w-5" />,
         },
         {
-          name: "Schedule",
-          path: "/student/schedule",
-          icon: <Calendar className="h-5 w-5" />,
+          name: "Profile",
+          path: "/profile",
+          icon: <User className="h-5 w-5" />,
+        },
+        {
+          name: "Notification",
+          path: "/notification",
+          icon: <User className="h-5 w-5" />,
         },
       ];
     }

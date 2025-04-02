@@ -1,50 +1,39 @@
-// // notificationService.ts
-// import { store } from "@/store/store";
-// import {
-//   fetchNotifications,
-//   fetchUnreadNotifications,
-//   markAsRead,
-// } from "@/store/notificationSlice";
+// services/NotificationService.js
+import {
+  HubConnection,
+  HubConnectionBuilder,
+  LogLevel,
+} from "@microsoft/signalr";
 
-// // 🟢 Function-based Notification Service
-// export const notificationService = {
-//   fetchNotifications: async () => {
-//     try {
-//       const notifications = await store.dispatch(fetchNotifications()).unwrap();
-//       return notifications;
-//     } catch (error) {
-//       console.error("Error fetching notifications:", error);
-//       throw new Error(error as string);
-//     }
-//   },
+let connection: HubConnection;
 
-//   fetchUnreadNotifications: async () => {
-//     try {
-//       const unreadNotifications = await store
-//         .dispatch(fetchUnreadNotifications())
-//         .unwrap();
-//       return unreadNotifications;
-//     } catch (error) {
-//       console.error("Error fetching unread notifications:", error);
-//       throw new Error(error as string);
-//     }
-//   },
+export const connectToNotificationHub = async (
+  userId,
+  onReceiveNotification
+) => {
+  try {
+    connection = new HubConnectionBuilder()
+      .withUrl("http://localhost:5000/notificationHub", {
+        accessTokenFactory: () => localStorage.getItem("accessToken"),
+      })
+      .configureLogging(LogLevel.Information)
+      .build();
 
-//   markAsRead: async (id: number) => {
-//     try {
-//       const updatedId = await store.dispatch(markAsRead(id)).unwrap();
-//       return updatedId;
-//     } catch (error) {
-//       console.error("Error marking notification as read:", error);
-//       throw new Error(error as string);
-//     }
-//   },
+    connection.on("ReceiveNotification", (notification) => {
+      console.log("Received Notification:", notification);
+      onReceiveNotification(notification);
+    });
 
-//   getNotifications: () => {
-//     return store.getState().notifications.notifications;
-//   },
+    await connection.start();
+    console.log("SignalR connected");
+  } catch (error) {
+    console.error("Connection failed: ", error);
+  }
+};
 
-//   getUnreadCount: () => {
-//     return store.getState().notifications.unreadCount;
-//   },
-// };
+export const disconnectFromNotificationHub = async () => {
+  if (connection) {
+    await connection.stop();
+    console.log("SignalR disconnected");
+  }
+};

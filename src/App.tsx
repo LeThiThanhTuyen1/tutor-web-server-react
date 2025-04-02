@@ -15,16 +15,19 @@ import PublicLayout from "./components/layout/public-layout";
 import AuthPage from "./components/auth/auth-page";
 import HomePage from "./components/home/home-page";
 import Dashboard from "./components/dashboard/admin-dashboard";
-import CourseList from "./components/courses/course-list";
+import CourseList from "./components/courses/course-list-grid";
 import TutorList from "./components/tutors/tutor-list";
 import { getProfile } from "./services/authService";
 import ProfilePage from "./components/auth/profile-page";
 import NotFound from "./components/error/not-found";
 import TutorProfile from "./components/tutors/tutor-detail";
 import CourseDetail from "./components/courses/course-detail";
-import CourseForm from "./components/courses/course-form";
-import EditCoursePage from "./components/courses/edit-course";
+import CourseForm from "./components/tutors/course/course-form";
+import EditCoursePage from "./components/tutors/course/edit-course";
 import Forbidden from "./components/error/forbidden";
+import TutorCourseListComponent from "./components/tutors/course/tutor-course-list";
+import StudentCourseList from "./components/student/course/student-course-list";
+import StudentScheduleView from "./components/student/course/schedule/student-schedule-view";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -110,10 +113,11 @@ export default function App() {
           </TutorRoute>
         }
       >
+        <Route path="courses" element={<TutorCourseListComponent />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="tutors" element={<TutorList />} />
-        <Route path="course/new" element={<CourseForm />} />
-        <Route path="courses/:id" element={<EditCoursePage />} />
+        <Route path="schedules" element={<StudentScheduleView />} />
+        <Route path="courses/new" element={<CourseForm />} />
+        <Route path="courses/:id/edit" element={<EditCoursePage />} />
         <Route path="students" element={<div>Students Management</div>} />
         <Route path="settings" element={<div>Admin Settings</div>} />
       </Route>
@@ -131,6 +135,40 @@ export default function App() {
         <Route path="courses" element={<CourseList />} />
         <Route path="tutors" element={<TutorList />} />
         <Route path="tutor/:id" element={<TutorProfile />} />
+        <Route path="courses/:id" element={<CourseDetail />} />
+
+        {/*  Protected Routes */}
+        <Route
+          path="profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <ProtectedRoute>
+              <div>User Settings</div>
+            </ProtectedRoute>
+          }
+        />
+      </Route>
+
+      <Route
+        path="/student"
+        element={
+          <PublicLayout>
+            <Outlet />
+          </PublicLayout>
+        }
+      >
+        <Route index element={<HomePage />} />
+        <Route path="courses" element={<StudentCourseList />} />
+        <Route path="tutors" element={<TutorList />} />
+        <Route path="tutor/:id" element={<TutorProfile />} />
+        <Route path="schedules" element={<StudentScheduleView />} />
         <Route path="courses/:id" element={<CourseDetail />} />
 
         {/*  Protected Routes */}

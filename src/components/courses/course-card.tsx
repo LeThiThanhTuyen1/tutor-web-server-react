@@ -2,10 +2,9 @@
 
 import { memo } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Clock, DollarSign, User, Edit } from "lucide-react";
+import { Calendar, Clock, DollarSign, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "../../ui/button.tsx";
-import { Checkbox } from "../../ui/checkbox.tsx";
 import {
   Card,
   CardContent,
@@ -14,13 +13,10 @@ import {
   CardTitle,
 } from "../../ui/card.tsx";
 import { cn } from "@/components/layout/cn";
-import { Badge } from "../../ui/badge.tsx.tsx";
+import { Badge } from "@/ui/badge.tsx";
 
 interface CourseCardProps {
   course: any;
-  isSelected: boolean;
-  onSelect: (id: number) => void;
-  onDelete: (id: number) => void;
   isTutor: boolean;
 }
 
@@ -34,12 +30,7 @@ const STATUS_STYLES: Record<string, string> = {
     "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
 };
 
-function CourseCardComponent({
-  course,
-  isSelected,
-  onSelect,
-  isTutor,
-}: CourseCardProps) {
+function CourseCardComponent({ course, isTutor }: CourseCardProps) {
   return (
     <motion.div
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
@@ -48,8 +39,7 @@ function CourseCardComponent({
     >
       <Card
         className={cn(
-          "h-full overflow-hidden transition-all duration-200 hover:shadow-md border-indigo-100 dark:border-indigo-900",
-          isSelected && "ring-2 ring-indigo-500 dark:ring-indigo-400"
+          "h-full overflow-hidden transition-all duration-200 hover:shadow-md border-indigo-100 dark:border-indigo-900"
         )}
       >
         <div className="h-1 bg-gradient-to-r from-indigo-600 to-blue-600"></div>
@@ -61,14 +51,6 @@ function CourseCardComponent({
                 {course.courseName}
               </CardTitle>
             </div>
-
-            {isTutor && (
-              <Checkbox
-                checked={isSelected}
-                onCheckedChange={() => onSelect(course.id)}
-                className="h-5 w-5 border-indigo-300 dark:border-indigo-700 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
-              />
-            )}
           </div>
 
           <div className="flex items-center mt-2">
@@ -148,36 +130,6 @@ function CourseCardComponent({
                   Enroll Now
                 </Link>
               </Button>
-            )}
-            {isTutor && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300"
-                >
-                  <Link
-                    to={`tutor/course/${course.id}/edit`}
-                    className="flex items-center w-full justify-center"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
-                  </Link>
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="flex-1 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300"
-                >
-                  <Link
-                    to={`/courses/${course.id}/`}
-                    className="flex items-center w-full justify-center"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Cancel
-                  </Link>
-                </Button>
-              </>
             )}
           </>
         </CardFooter>
