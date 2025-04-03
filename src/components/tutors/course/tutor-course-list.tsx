@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import {
   Calendar,
   DollarSign,
-  Users,
   Edit,
   Plus,
   Trash2,
@@ -404,13 +403,7 @@ export default function TutorCourseList() {
                               <span>${course.fee}</span>
                             </div>
 
-                            <div className="flex items-center text-gray-600 dark:text-gray-400">
-                              <Users className="h-4 w-4 mr-1 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
-                              <span>
-                                {course.enrolledStudents || 0}/
-                                {course.maxStudents} students
-                              </span>
-                            </div>
+                            
 
                             <div className="flex items-center text-gray-600 dark:text-gray-400">
                               <Clock className="h-4 w-4 mr-1 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />

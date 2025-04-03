@@ -11,7 +11,10 @@ import {
 } from "react";
 import { motion } from "framer-motion";
 import { AlertTriangle, Search, Filter, Book, Grid, List } from "lucide-react";
-import { getAllCourses, deleteCourses } from "@/services/courseService";
+import {
+  getAllCourses,
+  deleteCourses,
+} from "@/services/courseService";
 import { Button } from "@/ui/button";
 import {
   Accordion,
@@ -31,6 +34,7 @@ import Pagination from "../layout/pagination";
 import { DeleteConfirmationModal } from "@/ui/modals/delete-confirm";
 import { PaginationFilter } from "@/types/paginated-response";
 import CourseCard, { STATUS_STYLES } from "./course-card";
+import { enrollCourse } from "@/services/enrollmentService";
 
 // Lazy load components for better performance
 // const CourseCard = lazy(() => import("@/components/courses/course-card"));
@@ -93,6 +97,7 @@ export default function CourseList() {
   );
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [key, setKey] = useState(0);
+  const [isEnrolling, setIsEnrolling] = useState<Record<number, boolean>>({});
 
   // Refs
   const lastCourseElementRef = useRef<HTMLDivElement | null>(null);
@@ -173,6 +178,51 @@ export default function CourseList() {
     });
   }, []);
 
+  // Handle course enrollment
+  const handleEnrollCourse = useCallback(
+    async (courseId: number) => {
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to enroll in this course",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      try {
+        setIsEnrolling((prev) => ({ ...prev, [courseId]: true }));
+
+        const response = await enrollCourse(courseId);
+
+        if (response.succeeded) {
+          toast({
+            title: "Success",
+            description: "You have successfully enrolled in this course",
+            variant: "success",
+          });
+          // Refresh the course list to update enrollment status
+          fetchCourses();
+        } else {
+          toast({
+            title: "Error",
+            description: response.message || "Failed to enroll in course",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred",
+          variant: "destructive",
+        });
+      } finally {
+        setIsEnrolling((prev) => ({ ...prev, [courseId]: false }));
+      }
+    },
+    [user, fetchCourses, toast]
+  );
+
   // Delete courses - wrapped in useCallback to prevent recreation
   // Removed toast from dependencies to prevent infinite loop
   const handleDeleteSelected = useCallback(async () => {
@@ -229,7 +279,7 @@ export default function CourseList() {
 
   const handleStatusChange = useCallback((status: string) => {
     setSelectedStatus(status);
-    setPagination((prev) => ({ ...prev, pageNumber: 1 })); 
+    setPagination((prev) => ({ ...prev, pageNumber: 1 }));
   }, []);
 
   const handlePageChange = useCallback((newPage: number) => {
@@ -285,6 +335,8 @@ export default function CourseList() {
               onDelete={handleDeleteModalOpen}
               isTutor={isTutor}
               onCourseUpdated={fetchCourses}
+              handleEnrollCourse={() => handleEnrollCourse(course.id)}
+              isEnrolling={isEnrolling[course.id] || false}
             />
           </Suspense>
         </motion.div>

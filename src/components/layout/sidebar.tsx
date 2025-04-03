@@ -13,110 +13,94 @@ import { useAuth } from "@/hooks/use-auth";
 
 interface SidebarProps {
   isOpen: boolean;
-  isHomePage?: boolean;
 }
 
-export default function Sidebar({ isOpen, isHomePage = false }: SidebarProps) {
-  const { user, isAuthenticated } = useAuth()
+export default function Sidebar({ isOpen }: SidebarProps) {
+  const { user, isAuthenticated } = useAuth();
 
-  const getNavItems = () => {
-    const publicItems = [
+  const navItems = {
+    Public: [
       { name: "Home", path: "/", icon: <Home className="h-5 w-5" /> },
       { name: "Tutors", path: "/tutors", icon: <Users className="h-5 w-5" /> },
       {
-        name: "Course",
+        name: "Courses",
         path: "/courses",
         icon: <BookOpen className="h-5 w-5" />,
       },
       {
-        name: "Setting",
-        path: "/setting",
+        name: "Settings",
+        path: "/settings",
         icon: <SettingsIcon className="h-5 w-5" />,
       },
-    ];
-
-    if (isAuthenticated) {
-      if (user?.role === "Admin") {
-        return [
-          ...publicItems,
-          {
-            name: "Dashboard",
-            path: "/admin/dashboard",
-            icon: <Home className="h-5 w-5" />,
-          },
-          {
-            name: "Manage Tutors",
-            path: "/admin/tutors",
-            icon: <User className="h-5 w-5" />,
-          },
-          {
-            name: "Manage Courses",
-            path: "/admin/courses",
-            icon: <BookOpen className="h-5 w-5" />,
-          },
-        ];
-      }
-
-      if (user?.role === "Tutor") {
-        return [
-          ...publicItems,
-          {
-            name: "My Dashboard",
-            path: "/tutor/dashboard",
-            icon: <Home className="h-5 w-5" />,
-          },
-          {
-            name: "My Courses",
-            path: "/tutor/courses",
-            icon: <BookOpen className="h-5 w-5" />,
-          },
-          {
-            name: "My Schedule",
-            path: "/schedules",
-            icon: <Calendar className="h-5 w-5" />,
-          },
-        ];
-      }
-
-      return [
-        ...publicItems,
-        {
-          name: "My Dashboard",
-          path: "/student/dashboard",
-          icon: <Home className="h-5 w-5" />,
-        },
-        {
-          name: "My Courses",
-          path: "/student/courses",
-          icon: <BookOpen className="h-5 w-5" />,
-        },
-        {
-          name: "My Schedule",
-          path: "/schedules",
-          icon: <Calendar className="h-5 w-5" />,
-        },
-      ];
-    }
-
-    return publicItems;
+    ],
+    Admin: [
+      {
+        name: "Dashboard",
+        path: "/admin/dashboard",
+        icon: <Home className="h-5 w-5" />,
+      },
+      {
+        name: "Manage Tutors",
+        path: "/admin/tutors",
+        icon: <User className="h-5 w-5" />,
+      },
+      {
+        name: "Manage Courses",
+        path: "/admin/courses",
+        icon: <BookOpen className="h-5 w-5" />,
+      },
+    ],
+    Tutor: [
+      {
+        name: "My Dashboard",
+        path: "/tutor/dashboard",
+        icon: <Home className="h-5 w-5" />,
+      },
+      {
+        name: "My Courses",
+        path: "/tutor/courses",
+        icon: <BookOpen className="h-5 w-5" />,
+      },
+      {
+        name: "My Schedule",
+        path: "/schedules",
+        icon: <Calendar className="h-5 w-5" />,
+      },
+    ],
+    Student: [
+      {
+        name: "My Dashboard",
+        path: "/student/dashboard",
+        icon: <Home className="h-5 w-5" />,
+      },
+      {
+        name: "My Courses",
+        path: "/student/courses",
+        icon: <BookOpen className="h-5 w-5" />,
+      },
+      {
+        name: "My Schedule",
+        path: "/schedules",
+        icon: <Calendar className="h-5 w-5" />,
+      },
+    ],
   };
 
-  const navItems = getNavItems();
+  const role = user?.role || "Public";
 
   return (
     <aside
-      className={`bg-gradient-to-br from-purple-600 to-indigo-600 border-r transition-all duration-300 rounded-lg shadow-lg
-        ${isOpen ? "w-64" : "w-20"} flex flex-col h-full
-        ${isHomePage ? "bg-opacity-90 backdrop-blur-sm" : ""}
-      `}
+      className={`bg-gradient-to-br from-purple-600 to-indigo-600 transition-all duration-300 ${
+        isOpen ? "w-64" : "w-20"
+      } flex flex-col h-full shadow-lg p-4 rounded-tr-lg rounded-br-lg`}
     >
-      <div className="p-4 flex items-center justify-between border-b border-purple-400 rounded-t-lg">
+      <div className="flex items-center justify-between border-b border-purple-400 pb-3">
         <div
           className={`flex items-center ${
             isOpen ? "" : "justify-center w-full"
           }`}
         >
-          <div className="h-8 w-8 bg-indigo-700 rounded-md flex items-center justify-center font-bold text-white">
+          <div className="h-8 w-8 bg-indigo-700 rounded-md flex items-center justify-center text-white font-bold">
             TC
           </div>
           {isOpen && (
@@ -126,34 +110,48 @@ export default function Sidebar({ isOpen, isHomePage = false }: SidebarProps) {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4">
-        <ul className="space-y-2 px-2">
-          {navItems.map((item) => (
-            <motion.li
-              key={item.path}
-              whileHover={{
-                scale: 1.05,
-                transition: { duration: 0.2 },
-              }}
-            >
-              <NavLink
-                to={item.path}
-                className={({ isActive }) => `
-                  flex items-center px-3 py-2 rounded-lg
-                  ${
-                    isActive
-                      ? "bg-purple-300 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
-                      : "text-white hover:bg-indigo-500"
-                  }
-                `}
+        {Object.keys(navItems).map(
+          (category) =>
+            (category === "Public" || category === role) && (
+              <div
+                key={category}
+                className="mb-6 bg-white/10 p-3 rounded-lg shadow-md"
               >
-                <span className="flex-shrink-0">{item.icon}</span>
-                {isOpen && <span className="ml-3">{item.name}</span>}
-              </NavLink>
-            </motion.li>
-          ))}
-        </ul>
+                {isOpen && (
+                  <h2 className="text-sm font-semibold text-gray-200 mb-2">
+                    {category}
+                  </h2>
+                )}
+                <ul className="space-y-2">
+                  {navItems[category].map((item) => (
+                    <motion.li
+                      key={item.path}
+                      whileHover={{
+                        scale: 1.05,
+                        transition: { duration: 0.2 },
+                      }}
+                    >
+                      <NavLink
+                        to={item.path}
+                        className={({ isActive }) => `
+                        flex items-center px-3 py-2 rounded-lg transition-all
+                        ${
+                          isActive
+                            ? "bg-purple-300 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
+                            : "text-white hover:bg-indigo-500"
+                        }
+                      `}
+                      >
+                        <span className="flex-shrink-0">{item.icon}</span>
+                        {isOpen && <span className="ml-3">{item.name}</span>}
+                      </NavLink>
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
+            )
+        )}
       </nav>
-
       <div className="p-4 border-t border-purple-400 rounded-b-lg">
         {isAuthenticated ? (
           <div className="flex items-center">

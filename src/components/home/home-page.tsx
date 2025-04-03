@@ -20,7 +20,6 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
-import type { RootState } from "@/store/store";
 import { getAllCourses } from "@/services/courseService";
 import { fadeIn, scaleIn, staggerContainer } from "../layout/animation";
 import SectionHeading from "../layout/section-heading";

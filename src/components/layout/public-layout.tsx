@@ -14,7 +14,7 @@ interface AppLayoutProps {
 
 export default function PublicLayout({ children }: AppLayoutProps) {
   const location = useLocation();
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

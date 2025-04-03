@@ -138,7 +138,7 @@ export const cancelCourse = async (id: number) => {
 export const getStudentsByCourseId = async (id: number) => {
   try {
     const response = await api.get(`/Course/${id}/students`);
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error(`Error fetching students for course ID ${id}:`, error);
     return {

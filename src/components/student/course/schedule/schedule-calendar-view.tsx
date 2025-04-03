@@ -138,8 +138,10 @@ const ScheduleEvent = React.memo(
             <span className="text-xs">{course.tutorName}</span>
           </div>
           <div className="flex items-center">
-              {/* <Globe className="h-4 w-4 mr-2 text-indigo-600" /> */}
-            {MODE_ICONS[schedule.mode] || <Globe className="h-4 w-4 mr-2 text-indigo-600" />}
+            {/* <Globe className="h-4 w-4 mr-2 text-indigo-600" /> */}
+            {MODE_ICONS[schedule.mode] || (
+              <Globe className="h-4 w-4 mr-2 text-indigo-600" />
+            )}
             <span className="capitalize text-sm"> {schedule.mode}</span>
           </div>
           {schedule.location && (

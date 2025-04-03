@@ -25,8 +25,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { ToastContainer } from "@/ui/toast";
 import { useToast } from "@/hooks/use-toast";
-("use client");
-
 import type React from "react";
 import {
   DropdownMenu,
@@ -103,6 +101,7 @@ export default function TutorReviews() {
   const { user } = useAuth();
   const isStudent = useMemo(() => user?.role === "Student", [user?.role]);
   const commentRef = useRef<HTMLTextAreaElement>(null);
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
 
   // Fetch data
   const fetchData = async () => {
@@ -117,7 +116,9 @@ export default function TutorReviews() {
         getTutorFeedbacks(tutorId),
       ]);
 
+      const hasUserFeedback = userResponse.data !== null;
       setUserFeedback(userResponse.data);
+      setShowFeedbackForm(isStudent && !hasUserFeedback);
 
       // Filter out user's feedback from all feedbacks
       const otherFeedbacks =
@@ -129,6 +130,10 @@ export default function TutorReviews() {
       setFeedbacks(otherFeedbacks);
     } catch (err) {
       console.error("Error fetching feedback:", err);
+      // If there's an error fetching user feedback, show the form anyway
+      if (isStudent) {
+        setShowFeedbackForm(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -136,8 +141,6 @@ export default function TutorReviews() {
 
   useEffect(() => {
     if (id) {
-      console.log("userFeedback", userFeedback);
-      console.log("feedback", feedbacks);
       fetchData();
     }
   }, [id]);
@@ -257,6 +260,7 @@ export default function TutorReviews() {
 
       // Update local state
       setUserFeedback(null);
+      setShowFeedbackForm(true);
 
       toast({
         title: "Success",
@@ -303,6 +307,9 @@ export default function TutorReviews() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
+
+      // Hide the form
+      setShowFeedbackForm(false);
 
       // Reset form
       setNewRating(0);
@@ -521,7 +528,7 @@ export default function TutorReviews() {
                   </Button>
                 </div>
               </motion.div>
-            ) : (
+            ) : showFeedbackForm ? (
               /* New review form */
               <motion.div
                 key="new-form"
@@ -566,7 +573,7 @@ export default function TutorReviews() {
                   </Button>
                 </form>
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
         </div>
       )}

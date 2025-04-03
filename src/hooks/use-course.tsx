@@ -11,6 +11,7 @@ import {
   deleteSelectedCourses,
   clearCurrentCourse,
   resetCourseError,
+  studentsByCourseId,
 } from "@/store/courseSlice";
 import { PaginationFilter } from "@/types/paginated-response";
 
@@ -25,6 +26,8 @@ export const useCourse = () => {
     error,
     totalPages,
     totalItems,
+    totalStudents,
+    students,
   } = useSelector((state: RootState) => state.courses);
 
   return {
@@ -37,6 +40,8 @@ export const useCourse = () => {
     error,
     totalPages,
     totalItems,
+    totalStudents,
+    students,
 
     // Actions
     getAllCourses: (pagination: PaginationFilter) =>
@@ -53,5 +58,7 @@ export const useCourse = () => {
     deleteCourses: (ids: number[]) => dispatch(deleteSelectedCourses(ids)),
     clearCourse: () => dispatch(clearCurrentCourse()),
     resetError: () => dispatch(resetCourseError()),
+    getStudentsByCourseId: (id: number) =>
+        dispatch(studentsByCourseId(id)),
   };
 };

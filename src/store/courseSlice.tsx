@@ -8,6 +8,7 @@ import {
   updateCourse,
   cancelCourse,
   deleteCourses,
+  getStudentsByCourseId,
 } from "@/services/courseService";
 import { PaginationFilter } from "@/types/paginated-response";
 
@@ -42,8 +43,10 @@ interface CourseState {
   courses: Course[];
   currentCourse: Course | null;
   tutorCourses: Course[];
-  studentCourses: Course[];
+  studentCourses: any[];
+  totalStudents: number;
   loading: boolean;
+  students: any[];
   error: string | null;
   totalPages: number;
   totalItems: number;
@@ -54,7 +57,9 @@ const initialState: CourseState = {
   currentCourse: null,
   tutorCourses: [],
   studentCourses: [],
+  totalStudents: 0,
   loading: false,
+  students: [],
   error: null,
   totalPages: 1,
   totalItems: 0,
@@ -97,7 +102,9 @@ export const fetchTutorCourses = createAsyncThunk(
     try {
       const response = await getTutorCourseByUserId(pagination);
       if (!response.succeeded) {
-        return rejectWithValue(response.message || "Failed to fetch tutor courses");
+        return rejectWithValue(
+          response.message || "Failed to fetch tutor courses"
+        );
       }
       return response;
     } catch (error: any) {
@@ -112,7 +119,9 @@ export const fetchStudentCourses = createAsyncThunk(
     try {
       const response = await getStudentCourseByUserId(pagination);
       if (!response.succeeded) {
-        return rejectWithValue(response.message || "Failed to fetch student courses");
+        return rejectWithValue(
+          response.message || "Failed to fetch student courses"
+        );
       }
       return response;
     } catch (error: any) {
@@ -138,7 +147,10 @@ export const createNewCourse = createAsyncThunk(
 
 export const updateExistingCourse = createAsyncThunk(
   "courses/updateCourse",
-  async ({ id, courseData }: { id: number; courseData: any }, { rejectWithValue }) => {
+  async (
+    { id, courseData }: { id: number; courseData: any },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await updateCourse(id, courseData);
       if (!response.succeeded) {
@@ -175,6 +187,21 @@ export const deleteSelectedCourses = createAsyncThunk(
         return rejectWithValue(response.message || "Failed to delete courses");
       }
       return ids;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "An error occurred");
+    }
+  }
+);
+
+export const studentsByCourseId = createAsyncThunk(
+  "courses/getStudentsByCourseId",
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await getStudentsByCourseId(id);
+      if (!response.succeeded) {
+        return rejectWithValue(response.message || "Failed to fetch students");
+      }
+      return response;
     } catch (error: any) {
       return rejectWithValue(error.message || "An error occurred");
     }
@@ -285,15 +312,19 @@ const courseSlice = createSlice({
       .addCase(updateExistingCourse.fulfilled, (state, action) => {
         state.loading = false;
         state.currentCourse = action.payload;
-        
+
         // Update in tutor courses if present
-        const tutorIndex = state.tutorCourses.findIndex(course => course.id === action.payload.id);
+        const tutorIndex = state.tutorCourses.findIndex(
+          (course) => course.id === action.payload.id
+        );
         if (tutorIndex !== -1) {
           state.tutorCourses[tutorIndex] = action.payload;
         }
-        
+
         // Update in all courses if present
-        const allIndex = state.courses.findIndex(course => course.id === action.payload.id);
+        const allIndex = state.courses.findIndex(
+          (course) => course.id === action.payload.id
+        );
         if (allIndex !== -1) {
           state.courses[allIndex] = action.payload;
         }
@@ -311,19 +342,23 @@ const courseSlice = createSlice({
       })
       .addCase(cancelExistingCourse.fulfilled, (state, action) => {
         state.loading = false;
-        
+
         // Update status in tutor courses
-        const tutorIndex = state.tutorCourses.findIndex(course => course.id === action.payload);
+        const tutorIndex = state.tutorCourses.findIndex(
+          (course) => course.id === action.payload
+        );
         if (tutorIndex !== -1) {
           state.tutorCourses[tutorIndex].status = "canceled";
         }
-        
+
         // Update status in all courses
-        const allIndex = state.courses.findIndex(course => course.id === action.payload);
+        const allIndex = state.courses.findIndex(
+          (course) => course.id === action.payload
+        );
         if (allIndex !== -1) {
           state.courses[allIndex].status = "canceled";
         }
-        
+
         // Update current course if it's the one being canceled
         if (state.currentCourse && state.currentCourse.id === action.payload) {
           state.currentCourse.status = "canceled";
@@ -343,19 +378,41 @@ const courseSlice = createSlice({
       .addCase(deleteSelectedCourses.fulfilled, (state, action) => {
         state.loading = false;
         const deletedIds = action.payload as number[];
-        
+
         // Remove from tutor courses
-        state.tutorCourses = state.tutorCourses.filter(course => !deletedIds.includes(course.id));
-        
+        state.tutorCourses = state.tutorCourses.filter(
+          (course) => !deletedIds.includes(course.id)
+        );
+
         // Remove from all courses
-        state.courses = state.courses.filter(course => !deletedIds.includes(course.id));
-        
+        state.courses = state.courses.filter(
+          (course) => !deletedIds.includes(course.id)
+        );
+
         // Clear current course if it was deleted
-        if (state.currentCourse && deletedIds.includes(state.currentCourse.id)) {
+        if (
+          state.currentCourse &&
+          deletedIds.includes(state.currentCourse.id)
+        ) {
           state.currentCourse = null;
         }
       })
       .addCase(deleteSelectedCourses.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    builder
+      .addCase(studentsByCourseId.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(studentsByCourseId.fulfilled, (state, action) => {
+        state.loading = false;
+        state.students = action.payload.data || [];
+        state.totalStudents = action.payload.data.length || 0;
+      })
+      .addCase(studentsByCourseId.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
