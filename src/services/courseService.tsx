@@ -114,10 +114,16 @@ export const updateCourse = async (
     const response = await api.put(`/Course/${id}`, course);
     return response.data;
   } catch (error) {
-    console.error(`Error updating course with ID ${id}:`, error);
+    console.error("Error creating course:", error);
+    if (error instanceof Error && "response" in error) {
+      return (error as any).response.data;
+    }
+
     return {
+      data: null,
       succeeded: false,
-      message: `Failed to update course with ID ${id}`,
+      message: "Failed to edit course.",
+      errors: ["An unexpected error occurred."],
     };
   }
 };

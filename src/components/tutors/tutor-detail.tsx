@@ -1,747 +1,324 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import type React from "react";
-
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { Skeleton } from "@/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
-import { Button } from "@/ui/button";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
-  Calendar,
-  Clock,
-  DollarSign,
   MapPin,
-  School,
+  Star,
+  Clock,
+  Globe,
+  BookOpen,
+  Award,
   User,
-  Users,
-  Video,
-  X,
-  Edit,
-  Mail,
-  Phone,
-  Search,
+  Pen,
 } from "lucide-react";
-import { cn } from "../layout/cn";
-import { motion } from "framer-motion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/ui/table";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
-import { CancelCourseModal } from "@/ui/modals/cancel-course";
-import { Badge } from "@/ui/badge";
-import { useCourse } from "@/hooks/use-course";
-import { Input } from "@/ui/input";
-import LazyImage from "../home/lazy-image";
 import { API_BASE_URL } from "@/config/axiosInstance";
-import { ContractModal } from "@/ui/modals/contract-modal";
-import { enrollCourse } from "@/services/enrollmentService";
-import { STATUS_STYLES } from "../courses/course-card";
+import { Link, useParams } from "react-router-dom";
+import { getTutorById } from "@/services/tutorService";
+import { getTutorFeedbacks } from "@/services/feedbackService";
+import TutorReviews from "./tutor-feedback";
+import { Button } from "@/ui/button";
 
-// Day of week mapping
-const DAYS_OF_WEEK = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
-
-// Mode icons
-const MODE_ICONS: Record<string, React.ReactNode> = {
-  online: <Video className="h-4 w-4" />,
-  "in-person": <MapPin className="h-4 w-4" />,
-  hybrid: <School className="h-4 w-4" />,
-};
-
-export default function CourseDetail() {
-  const { id } = useParams<{ id: string }>();
-  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
-  const [studentSearchTerm, setStudentSearchTerm] = useState("");
-  const [activeStudentTab, setActiveStudentTab] = useState("all");
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const { totalStudents, students, getStudentsByCourseId } = useCourse();
-  const [isContractDialogOpen, setIsContractDialogOpen] = useState(false);
-  const [isEnrolling, setIsEnrolling] = useState(false);
-
-  // Use our custom hook to access course state and actions
-  const { currentCourse, loading, getCourseById, cancelCourse } = useCourse();
-
-  // Check if the current user is the tutor of this course
-  const isTutor = user?.role === "Tutor";
+export default function TutorProfile() {
+  const { id } = useParams();
+  const [tutor, setTutor] = useState<any>(null);
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("about");
+  const tutorId = Number(id);
 
   useEffect(() => {
-    if (id) {
-      getCourseById(Number(id));
-      if (isTutor) {
-        getStudentsByCourseId(Number(id));
+    const fetchTutor = async () => {
+      try {
+        setLoading(true);
+        const response = await getTutorById(tutorId);
+        setTutor(response.data);
+      } catch (err) {
+        setError("Failed to load tutor profile. Please try again later.");
       }
+    };
+
+    const fetchFeedback = async () => {
+      try {
+        const response = await getTutorFeedbacks(tutorId);
+        setFeedbacks(response.data || []);
+      } catch (err) {
+        console.error("Error fetching feedback:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchTutor();
+      fetchFeedback();
     }
   }, [id]);
 
-  // Format time (e.g., "14:30" to "2:30 PM")
-  const formatTime = (time: string) => {
-    if (!time) return "";
-    const [hours, minutes] = time.split(":").map(Number);
-    const period = hours >= 12 ? "PM" : "AM";
-    const formattedHours = hours % 12 || 12;
-    return `${formattedHours}:${minutes.toString().padStart(2, "0")} ${period}`;
-  };
+  const { totalRatings, averageRating } = useMemo(() => {
+    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
 
-  // Handle course cancellation
-  const handleCancelCourse = async () => {
-    if (!id) return;
-
-    try {
-      setIsCancelling(true);
-      await cancelCourse(Number(id));
-
-      toast({
-        title: "Success",
-        description: "Course has been cancelled successfully",
-        variant: "success",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setIsCancelling(false);
-      setIsCancelDialogOpen(false);
-    }
-  };
-
-  // Handle course enrollment
-  const handleEnrollCourse = async () => {
-    if (!id) return;
-
-    try {
-      setIsEnrolling(true);
-      const response = await enrollCourse(Number(id));
-
-      if (response.succeeded) {
-        toast({
-          title: "Success",
-          description: "You have successfully enrolled in this course",
-          variant: "success",
-        });
-
-        // Refresh the course details
-        getCourseById(Number(id));
-      } else {
-        toast({
-          title: "Error",
-          description: response.message || "Failed to enroll in this course",
-          variant: "destructive",
-        });
+    feedbacks.forEach((feedback) => {
+      const rating = Math.round(feedback.rating);
+      if (rating >= 1 && rating <= 5) {
+        distribution[rating as keyof typeof distribution]++;
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setIsEnrolling(false);
-      setIsContractDialogOpen(false);
-    }
-  };
+    });
 
-  // Filter students based on search term and active tab
-  const filteredStudents = students
-    ? students.filter((student) => {
-        const matchesSearch = studentSearchTerm
-          ? student.name
-              ?.toLowerCase()
-              .includes(studentSearchTerm.toLowerCase()) ||
-            student.email
-              ?.toLowerCase()
-              .includes(studentSearchTerm.toLowerCase())
-          : true;
+    const total = feedbacks.length;
+    const average =
+      total > 0
+        ? feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) / total
+        : 0;
 
-        const matchesTab =
-          activeStudentTab === "all"
-            ? true
-            : student.status?.toLowerCase() === activeStudentTab?.toLowerCase();
-
-        return matchesSearch && matchesTab;
-      })
-    : [];
-
-  // Get counts for each status
-  const studentCounts = students
-    ? {
-        all: students.length,
-        active: students.filter((s) => s.status?.toLowerCase() === "active")
-          .length,
-        inactive: students.filter((s) => s.status?.toLowerCase() === "inactive")
-          .length,
-        pending: students.filter((s) => s.status?.toLowerCase() === "pending")
-          .length,
-      }
-    : { all: 0, active: 0, inactive: 0, pending: 0 };
-
-  // Check if course can be cancelled (only coming or ongoing courses)
-  const canCancel =
-    isTutor &&
-    currentCourse &&
-    (currentCourse.status === "ongoing" || currentCourse.status === "coming");
+    return {
+      ratingDistribution: distribution,
+      totalRatings: total,
+      averageRating: average,
+    };
+  }, [feedbacks]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/30 dark:to-purple-950/30 p-4 md:p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-6">
-            <Skeleton className="h-8 w-32" />
-          </div>
-          <Card className="border border-indigo-100 dark:border-indigo-900 mb-6">
-            <CardHeader>
-              <Skeleton className="h-8 w-3/4 mb-2" />
-              <Skeleton className="h-6 w-1/4" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-4 w-full mb-4" />
-              <Skeleton className="h-4 w-full mb-4" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-6 w-full" />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border border-indigo-100 dark:border-indigo-900 mb-6">
-            <CardHeader>
-              <Skeleton className="h-6 w-48" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-40 w-full" />
-            </CardContent>
-          </Card>
-
-          <div className="mt-8">
-            <Skeleton className="h-6 w-48 mb-4" />
-            <div className="space-y-2">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
-  if (!currentCourse) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/30 dark:to-purple-950/30 p-4 md:p-6">
-        <div className="max-w-4xl mx-auto text-center py-12">
-          <h2 className="text-2xl font-bold text-indigo-950 dark:text-indigo-50 mb-2">
-            Course Not Found
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            The course you're looking for doesn't exist or has been removed.
-          </p>
-          <Button
-            onClick={() => navigate(-1)}
-            className="bg-no hover:bg-no mb-6 text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-600"
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-500 mb-4">Error</h2>
+          <p className="text-gray-600 dark:text-gray-400">{error}</p>
+          <Link
+            to="/tutors"
+            className="mt-6 inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:underline"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Courses
-          </Button>
+            Back to Tutors
+          </Link>
         </div>
       </div>
     );
   }
 
-  const hasSchedules =
-    currentCourse.schedule && currentCourse.schedule.length > 0;
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/30 dark:to-purple-950/30 p-4 md:p-6">
-      <div className="max-w-4xl mx-auto">
-        <Button
-          onClick={() => navigate(-1)}
-          className="bg-no hover:bg-no mb-6 text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-600"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Courses
-        </Button>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-6"
-        >
-          {/* Course Overview Card */}
-          <Card className="border border-indigo-100 dark:border-indigo-900 overflow-hidden bg-white dark:bg-gray-800">
-            <div className="h-2 bg-gradient-to-r from-indigo-600 to-purple-600"></div>
-            <CardHeader className="pb-2">
-              <div className="flex flex-wrap justify-between items-start gap-2">
-                <CardTitle className="text-2xl font-bold text-indigo-950 dark:text-indigo-50">
-                  {currentCourse.courseName}
-                </CardTitle>
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "text-sm font-medium",
-                    STATUS_STYLES[currentCourse.status] ||
-                      "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-                  )}
-                >
-                  {currentCourse.status.charAt(0).toUpperCase() +
-                    currentCourse.status.slice(1)}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                {currentCourse.description}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <User className="h-5 w-5 mr-2 text-indigo-500 dark:text-indigo-400" />
-                  <span>
-                    Tutor:{" "}
-                    <span className="font-medium text-gray-900 dark:text-gray-100">
-                      {currentCourse.tutorName}
-                    </span>
-                  </span>
-                </div>
-
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Calendar className="h-5 w-5 mr-2 text-indigo-500 dark:text-indigo-400" />
-                  <span>
-                    Duration:{" "}
-                    <span className="font-medium text-gray-900 dark:text-gray-100">
-                      {new Date(currentCourse.startDate).toLocaleDateString()} -{" "}
-                      {new Date(currentCourse.endDate).toLocaleDateString()}
-                    </span>
-                  </span>
-                </div>
-
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <DollarSign className="h-5 w-5 mr-2 text-indigo-500 dark:text-indigo-400" />
-                  <span>
-                    Fee:{" "}
-                    <span className="font-medium text-gray-900 dark:text-gray-100">
-                      ${currentCourse.fee}
-                    </span>
-                  </span>
-                </div>
-
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Users className="h-5 w-5 mr-2 text-indigo-500 dark:text-indigo-400" />
-                  <span>
-                    Max Students:{" "}
-                    {isTutor ? (
-                      <span className="font-medium text-gray-900 dark:text-gray-100">
-                        {totalStudents || 0}/{currentCourse.maxStudents}
-                      </span>
-                    ) : (
-                      <span className="font-medium text-gray-900 dark:text-gray-100">
-                        {currentCourse.maxStudents}
-                      </span>
-                    )}
-                  </span>
-                </div>
-
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Clock className="h-5 w-5 mr-2 text-indigo-500 dark:text-indigo-400" />
-                  <span>
-                    Created:{" "}
-                    <span className="font-medium text-gray-900 dark:text-gray-100">
-                      {new Date(currentCourse.createdAt).toLocaleDateString()}
-                    </span>
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Course Schedule Card */}
-          <Card className="border border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold text-indigo-950 dark:text-indigo-50 flex items-center">
-                <Calendar className="h-5 w-5 mr-2 text-indigo-500 dark:text-indigo-400" />
-                Course Schedule
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {hasSchedules ? (
-                <Tabs defaultValue="table" className="w-full">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="table">Table View</TabsTrigger>
-                    <TabsTrigger value="calendar">Calendar View</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="table" className="w-full">
-                    <div className="rounded-md border border-indigo-300 dark:border-indigo-900">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Day</TableHead>
-                            <TableHead>Time</TableHead>
-                            <TableHead>Mode</TableHead>
-                            <TableHead>Location</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {currentCourse.schedule.map(
-                            (schedule: any, index: number) => (
-                              <TableRow key={index}>
-                                <TableCell className="font-medium">
-                                  {DAYS_OF_WEEK[schedule.dayOfWeek]}
-                                </TableCell>
-                                <TableCell>
-                                  {formatTime(schedule.startHour)} -{" "}
-                                  {formatTime(schedule.endHour)}
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center">
-                                    {MODE_ICONS[
-                                      schedule.mode?.toLowerCase()
-                                    ] || <School className="h-4 w-4 mr-1" />}
-                                    <span className="ml-1 capitalize">
-                                      {schedule.mode}
-                                    </span>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  {schedule.location || "N/A"}
-                                </TableCell>
-                              </TableRow>
-                            )
-                          )}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="calendar">
-                    <div className="grid grid-cols-7 gap-1 text-center">
-                      {DAYS_OF_WEEK.map((day, index) => (
-                        <div
-                          key={day}
-                          className="font-medium p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-t-md"
-                        >
-                          {day.substring(0, 3)}
-                        </div>
-                      ))}
-
-                      {DAYS_OF_WEEK.map((day, dayIndex) => {
-                        const daySchedules = currentCourse.schedule.filter(
-                          (s: any) => s.dayOfWeek === dayIndex
-                        );
-                        return (
-                          <div
-                            key={day}
-                            className={cn(
-                              "min-h-24 p-2 border border-indigo-100 dark:border-indigo-900 rounded-b-md",
-                              daySchedules.length > 0
-                                ? "bg-indigo-50/50 dark:bg-indigo-900/20"
-                                : ""
-                            )}
-                          >
-                            {daySchedules.length > 0 ? (
-                              <div className="space-y-2">
-                                {daySchedules.map(
-                                  (schedule: any, index: number) => (
-                                    <div
-                                      key={index}
-                                      className="text-xs p-1.5 bg-indigo-100 dark:bg-indigo-800 rounded text-left"
-                                    >
-                                      <div className="font-medium">
-                                        {formatTime(schedule.startHour)} -{" "}
-                                        {formatTime(schedule.endHour)}
-                                      </div>
-                                      <div className="flex items-center mt-1 text-indigo-700 dark:text-indigo-300">
-                                        {MODE_ICONS[
-                                          schedule.mode?.toLowerCase()
-                                        ] || (
-                                          <School className="h-3 w-3 mr-1" />
-                                        )}
-                                        <span className="ml-1 capitalize">
-                                          {schedule.mode}
-                                        </span>
-                                      </div>
-                                      {schedule.location && (
-                                        <div className="mt-1 text-gray-600 dark:text-gray-400 truncate">
-                                          <MapPin className="h-3 w-3 inline mr-1" />
-                                          {schedule.location}
-                                        </div>
-                                      )}
-                                    </div>
-                                  )
-                                )}
-                              </div>
-                            ) : (
-                              <div className="h-full flex items-center justify-center text-gray-400 text-xs">
-                                No classes
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <Calendar className="h-12 w-12 mx-auto mb-2 text-indigo-300 dark:text-indigo-700" />
-                  <p>No schedule information available for this course.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Students List - Only visible to tutors */}
-          {isTutor && (
-            <Card className="border border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold text-indigo-950 dark:text-indigo-50 flex items-center">
-                  <Users className="h-5 w-5 mr-2 text-indigo-500 dark:text-indigo-400" />
-                  Enrolled Students
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="space-y-4">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <Skeleton key={i} className="h-16 w-full" />
-                    ))}
-                  </div>
-                ) : students && students.length > 0 && isTutor ? (
-                  <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <div className="relative flex-grow max-w-md">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <Input
-                          placeholder="Search students..."
-                          value={studentSearchTerm}
-                          onChange={(e) => setStudentSearchTerm(e.target.value)}
-                          className="pl-10"
-                        />
-                      </div>
-                    </div>
-
-                    <Tabs
-                      defaultValue="all"
-                      onValueChange={setActiveStudentTab}
-                    >
-                      <TabsList className="mb-4">
-                        <TabsTrigger value="all">
-                          All ({studentCounts.all})
-                        </TabsTrigger>
-                        <TabsTrigger value="active">
-                          Active ({studentCounts.active})
-                        </TabsTrigger>
-                        <TabsTrigger value="inactive">
-                          Inactive ({studentCounts.inactive})
-                        </TabsTrigger>
-                        <TabsTrigger value="pending">
-                          Pending ({studentCounts.pending})
-                        </TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value="all" className="mt-0">
-                        {renderStudentList(filteredStudents)}
-                      </TabsContent>
-
-                      <TabsContent value="active" className="mt-0">
-                        {renderStudentList(filteredStudents)}
-                      </TabsContent>
-
-                      <TabsContent value="inactive" className="mt-0">
-                        {renderStudentList(filteredStudents)}
-                      </TabsContent>
-
-                      <TabsContent value="pending" className="mt-0">
-                        {renderStudentList(filteredStudents)}
-                      </TabsContent>
-                    </Tabs>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <Users className="h-12 w-12 mx-auto mb-2 text-indigo-300 dark:text-indigo-700" />
-                    <p>No students enrolled in this course yet.</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-2">
-            {!isTutor && (
-              <Button
-                className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
-                onClick={() => setIsContractDialogOpen(true)}
-                disabled={isEnrolling}
-              >
-                {isEnrolling ? "Enrolling..." : "Enroll Now"}
-              </Button>
-            )}
-
-            <Button
-              variant="outline"
-              className="border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300"
-            >
-              <Link to={`/tutor/${currentCourse.tutorId}`}>View Tutor</Link>
-            </Button>
-
-            {/* Edit Button - Only for tutors */}
-            {isTutor && (
-              <Button
-                variant="outline"
-                className="border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300"
-              >
-                <Link
-                  to={`/tutor/courses/${currentCourse.id}/edit`}
-                  className="flex items-center"
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Course
-                </Link>
-              </Button>
-            )}
-
-            {/* Cancel Button - Only for tutors and courses that can be cancelled */}
-            {canCancel && (
-              <Button
-                variant="outline"
-                onClick={() => setIsCancelDialogOpen(true)}
-                disabled={
-                  currentCourse.status === "canceled" ||
-                  currentCourse.status === "completed"
-                }
-                className="border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Cancel Course
-              </Button>
-            )}
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Cancel Course Confirmation Modal */}
-      <CancelCourseModal
-        isOpen={isCancelDialogOpen}
-        onCancel={() => setIsCancelDialogOpen(false)}
-        onConfirm={handleCancelCourse}
-        isCancelling={isCancelling}
-      />
-
-      {/* Contract Modal for Enrollment */}
-      {!isTutor && currentCourse && (
-        <ContractModal
-          isOpen={isContractDialogOpen}
-          onClose={() => setIsContractDialogOpen(false)}
-          onConfirm={handleEnrollCourse}
-          isProcessing={isEnrolling}
-          courseTitle={currentCourse.courseName}
-          tutorName={currentCourse.tutorName}
-          studentName={user?.name || "Student"}
-          fee={currentCourse.fee}
-        />
-      )}
-    </div>
-  );
-}
-
-// Helper function to render student list
-function renderStudentList(students: any[]) {
-  if (students.length === 0) {
+  if (!tutor) {
     return (
-      <div className="text-center py-6 text-gray-500 dark:text-gray-400">
-        <p>No students match your filters.</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Tutor Not Found</h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            The tutor you're looking for doesn't exist or has been removed.
+          </p>
+          <Link
+            to="/tutors"
+            className="mt-6 inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:underline"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Tutors
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {students.map((student) => (
-        <div
-          key={student.id}
-          className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-        >
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 border border-indigo-100 dark:border-indigo-800">
-              <LazyImage
-                src={`${API_BASE_URL}/${student.profileImage}`}
-                alt={student.fullName}
+    <div className="container mx-auto px-4 py-8">
+      <Link
+        to="/tutors"
+        className="inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:underline mb-6"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Tutors
+      </Link>
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-8">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 h-32 relative"></div>
+
+        <div className="px-6 py-4 sm:px-8 sm:py-6">
+          {/* Profile Image and Basic Info */}
+          <div className="flex flex-col sm:flex-row sm:items-end -mt-20 mb-6">
+            <div className="relative">
+              <img
+                src={
+                  tutor?.profileImage
+                    ? `${API_BASE_URL}/${
+                        tutor.profileImage
+                      }?t=${new Date().getTime()}`
+                    : "/placeholder.svg?height=120&width=120"
+                }
+                alt={tutor.tutorName}
+                className="h-32 w-32 rounded-full border-4 border-white dark:border-gray-800 object-cover bg-white"
               />
             </div>
 
-            <div className="flex-1">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <div>
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                    {student.name}
-                  </h3>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm">
-                    <div className="flex items-center text-gray-600 dark:text-gray-400">
-                      <span>{student.fullName}</span>
-                    </div>
-                    <div className="flex items-center text-gray-600 dark:text-gray-400">
-                      <Mail className="h-3.5 w-3.5 mr-1 text-indigo-500 dark:text-indigo-400" />
-                      <span>{student.email}</span>
-                    </div>
-                    <div className="flex items-center text-gray-600 dark:text-gray-400">
-                      <Phone className="h-3.5 w-3.5 mr-1 text-indigo-500 dark:text-indigo-400" />
-                      <span>{student.phone}</span>
-                    </div>
+            <div className="mt-4 sm:mt-0 sm:ml-6 flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <h1 className="text-2xl font-bold">{tutor.tutorName}</h1>
+                <div className="flex items-center mt-2 sm:mt-0">
+                  <div className="flex items-center mr-4">
+                    <Star className="h-5 w-5 text-yellow-500 fill-current mr-1" />
+                    <span className="font-medium">
+                      {averageRating.toFixed(1)}
+                    </span>
+                    <span className="text-gray-500 ml-1">
+                      ({totalRatings}{" "}
+                      {totalRatings === 1 ? "review" : "reviews"})
+                    </span>
                   </div>
-                </div>
-
-                <div className="flex items-center">
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "text-xs font-medium",
-                      student.status?.toLowerCase() === "active"
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
-                        : student.status?.toLowerCase() === "inactive"
-                        ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                        : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
-                    )}
-                  >
-                    {student.status}
-                  </Badge>
+                  <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                    ${tutor.feeRange?.minFee || 0} - $
+                    {tutor.feeRange?.maxFee || 0}/hr
+                  </span>
                 </div>
               </div>
 
-              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                <span className="flex items-center">
-                  <Calendar className="h-3 w-3 mr-1" />
-                  Enrolled on{" "}
-                  {new Date(student.enrolledAt).toLocaleDateString()}
-                </span>
+              <div className="flex flex-wrap items-center text-gray-600 dark:text-gray-400 mt-2">
+                {tutor.location && (
+                  <div className="flex items-center mr-4 mb-2">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    <span>{tutor.location}</span>
+                  </div>
+                )}
+                <div className="flex items-center mr-4 mb-2">
+                  <Clock className="h-4 w-4 mr-1" />
+                  <span>{tutor.experience || 0} years experience</span>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Navigation Tabs */}
+          <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
+            <nav className="flex space-x-8">
+              <button
+                onClick={() => setActiveTab("about")}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "about"
+                    ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                }`}
+              >
+                About
+              </button>
+              <button
+                onClick={() => setActiveTab("reviews")}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "reviews"
+                    ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                }`}
+              >
+                Reviews ({totalRatings})
+              </button>
+            </nav>
+          </div>
+
+          {activeTab === "about" && (
+            <div>
+              {/* Subjects */}
+              {tutor.subjects && (
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold mb-3 flex items-center">
+                    <BookOpen className="h-5 w-5 mr-2 text-indigo-600 dark:text-indigo-400" />
+                    Subjects
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {tutor.subjects
+                      .split(",")
+                      .map((subject: string) => subject.trim())
+                      .map((subject: string, index: number) => {
+                        const colors = [
+                          "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",
+                          "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
+                          "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+                          "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
+                          "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",
+                        ];
+                        const colorClass = colors[index % colors.length];
+                        return (
+                          <span
+                            key={subject}
+                            className={`px-3 py-1 rounded-full text-sm ${colorClass}`}
+                          >
+                            {subject}
+                          </span>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              {/* Teaching Modes */}
+              {tutor.teachingModes && tutor.teachingModes.length > 0 && (
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold mb-3 flex items-center">
+                    <Globe className="h-5 w-5 mr-2 text-indigo-600 dark:text-indigo-400" />
+                    Teaching Mode
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {tutor.teachingModes.map((mode: any, index: number) => {
+                      return (
+                        <span
+                          key={index}
+                          className="px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300"
+                        >
+                          {mode}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* About */}
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-3 flex items-center">
+                  <User className="h-5 w-5 mr-2 text-indigo-600 dark:text-indigo-400" />
+                  About
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                  {tutor.introduction || "No introduction provided."}
+                </p>
+              </div>
+
+              {/* Education */}
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-3 flex items-center">
+                  <Award className="h-5 w-5 mr-2 text-indigo-600 dark:text-indigo-400" />
+                  Education
+                </h2>
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                  <h3 className="font-medium">
+                    {tutor.school || "Not specified"}
+                  </h3>
+                </div>
+              </div>
+
+              {/* Contact */}
+              <div className="flex justify-center mt-8">
+                <Button
+                  onClick={() => setActiveTab("reviews")}
+                  className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90 transition-colors flex items-center"
+                >
+                  <Pen className="h-5 w-5 mr-2" />
+                  Review Tutor
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "reviews" && (
+            <div>
+              <TutorReviews />
+            </div>
+          )}
         </div>
-      ))}
+      </div>
     </div>
   );
 }

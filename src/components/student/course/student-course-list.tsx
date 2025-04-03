@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, BookOpen, XCircle, Eye } from 'lucide-react';
+import { Search, BookOpen, XCircle, Eye } from "lucide-react";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Checkbox } from "@/ui/checkbox";
@@ -19,7 +19,7 @@ import { ToastContainer } from "@/ui/toast";
 import { CancelCourseModal } from "@/ui/modals/cancel-course";
 import { formatRelativeDate } from "@/components/courses/course-utils";
 import { PaginationFilter } from "@/types/paginated-response";
-import { cn } from "@/components/layout/cn";
+import { cn } from "@/ui/cn";
 import { Link } from "react-router-dom";
 import { Badge } from "@/ui/badge";
 import { useCourse } from "@/hooks/use-course";
@@ -105,13 +105,13 @@ export default function StudentCourseList() {
     try {
       setIsCancelling(true);
       await cancelCourse(courseToCancel);
-      
+
       toast({
         title: "Success",
         description: "Course has been cancelled successfully",
         variant: "success",
       });
-      
+
       // Refresh courses after cancellation
       getStudentCourses(pagination);
     } catch (error) {
@@ -261,7 +261,7 @@ export default function StudentCourseList() {
                   ))}
                 </ul>
               )}
-              
+
               {totalPages > 1 && (
                 <div className="mt-6 p-4">
                   <div className="flex justify-center">
@@ -269,10 +269,18 @@ export default function StudentCourseList() {
                       {Array.from({ length: totalPages }, (_, i) => (
                         <Button
                           key={i}
-                          variant={pagination.pageNumber === i + 1 ? "default" : "outline"}
+                          variant={
+                            pagination.pageNumber === i + 1
+                              ? "default"
+                              : "outline"
+                          }
                           size="sm"
                           onClick={() => handlePageChange(i + 1)}
-                          className={pagination.pageNumber === i + 1 ? "bg-indigo-600" : ""}
+                          className={
+                            pagination.pageNumber === i + 1
+                              ? "bg-indigo-600"
+                              : ""
+                          }
                         >
                           {i + 1}
                         </Button>

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Calendar, DollarSign, User, ExternalLink, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/ui/button";
-import { cn } from "../layout/cn";
+import { cn } from "../../ui/cn";
 import { Badge } from "@/ui/badge.tsx";
 import { cancelCourse } from "@/services/courseService";
 import { useToast } from "@/hooks/use-toast";

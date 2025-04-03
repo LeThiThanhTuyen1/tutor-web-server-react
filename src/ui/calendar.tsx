@@ -5,7 +5,7 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/components/layout/cn";
+import { cn } from "@/ui/cn";
 import { Button } from "@/ui/button";
 
 export interface CalendarProps {

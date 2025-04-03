@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/components/layout/cn";
+import { cn } from "@/ui/cn";
 import type React from "react";
 import { createContext, useContext, useState } from "react";
 

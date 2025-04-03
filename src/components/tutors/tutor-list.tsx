@@ -19,6 +19,7 @@ export default function TutorList() {
   const [minExperience, setMinExperience] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [subjectSuggestions, setSubjectSuggestions] = useState<string[]>([]);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Fetch tutors on component mount
   useEffect(() => {
@@ -68,9 +69,22 @@ export default function TutorList() {
     setSelectedSubjects(subjectList);
   };
 
+  const handleReset = () => {
+    setLocation("");
+    setSelectedSubjects([]);
+    setSelectedTeachingMode("");
+    setMinExperience("");
+    setPriceRange([0, 100]);
+    setMinRating(0);
+    setTutors([]);
+    setErrorMessage("");
+    fetchTutors();
+  };
+
   // Handle search with all criteria
   const handleSearch = async () => {
     setLoading(true);
+    setErrorMessage("");
     try {
       // Validate inputs
       const minExp = minExperience
@@ -102,9 +116,15 @@ export default function TutorList() {
       };
 
       const response = await searchTutors(searchCriteria, pagination);
-      setTutors(response.data || []);
+      if (!response.succeeded) {
+        setErrorMessage(response.message || "No tutors found.");
+        setTutors([]);
+      } else {
+        setTutors(response.data || []);
+      }
     } catch (error) {
       console.error("Search failed:", error);
+      setErrorMessage("An error occurred while searching. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -148,7 +168,7 @@ export default function TutorList() {
               <input
                 type="text"
                 placeholder="Enter subjects, separated by commas"
-                value={selectedSubjects.join(",")}
+                value={selectedSubjects.join(", ")}
                 onChange={handleSubjectChange}
                 className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
@@ -193,7 +213,6 @@ export default function TutorList() {
                 <option value="">All</option>
                 <option value="Online">Online</option>
                 <option value="Offline">Offline</option>
-                <option value="Both">Both</option>
               </select>
             </div>
 
@@ -272,6 +291,12 @@ export default function TutorList() {
         >
           Search
         </button>
+        <button
+          onClick={handleReset}
+          className="px-6 py-2 ml-4 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors"
+        >
+          Reset
+        </button>
       </div>
 
       {/* Tutor List */}
@@ -279,6 +304,13 @@ export default function TutorList() {
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : errorMessage ? (
+          <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">
+            <h3 className="text-xl font-semibold mb-2 text-red-600">
+              No Results Found
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">{errorMessage}</p>
           </div>
         ) : tutors.length === 0 ? (
           <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">
@@ -337,12 +369,10 @@ export default function TutorList() {
                       <span>{tutor.teachingMode}</span>
                     </div>
                   )}
-                  {tutor.experience && (
-                    <div className="flex items-center mr-4">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span>{tutor.experience || 0} years experience</span>
-                    </div>
-                  )}
+                  <div className="flex items-center mr-4">
+                    <Clock className="h-4 w-4 mr-1" />
+                    <span>{tutor.experience || 0} years experience</span>
+                  </div>
                 </div>
 
                 {tutor.subjects && (

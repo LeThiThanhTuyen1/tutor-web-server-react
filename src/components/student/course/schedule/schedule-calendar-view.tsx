@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/ui/button";
 import React from "react";
-import { cn } from "@/components/layout/cn";
+import { cn } from "@/ui/cn";
 import { CustomTooltip } from "@/ui/custom-tooltip";
 import { STATUS_STYLES } from "@/components/courses/course-card";
 

@@ -27,11 +27,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         path: "/courses",
         icon: <BookOpen className="h-5 w-5" />,
       },
-      {
-        name: "Settings",
-        path: "/settings",
-        icon: <SettingsIcon className="h-5 w-5" />,
-      },
     ],
     Admin: [
       {
@@ -48,6 +43,12 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         name: "Manage Courses",
         path: "/admin/courses",
         icon: <BookOpen className="h-5 w-5" />,
+      },
+
+      {
+        name: "Settings",
+        path: "/setting",
+        icon: <SettingsIcon className="h-5 w-5" />,
       },
     ],
     Tutor: [
@@ -66,6 +67,11 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         path: "/schedules",
         icon: <Calendar className="h-5 w-5" />,
       },
+      {
+        name: "Settings",
+        path: "/setting",
+        icon: <SettingsIcon className="h-5 w-5" />,
+      },
     ],
     Student: [
       {
@@ -83,6 +89,12 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         path: "/schedules",
         icon: <Calendar className="h-5 w-5" />,
       },
+
+      {
+        name: "Settings",
+        path: "/setting",
+        icon: <SettingsIcon className="h-5 w-5" />,
+      },
     ],
   };
 
@@ -92,8 +104,9 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     <aside
       className={`bg-gradient-to-br from-purple-600 to-indigo-600 transition-all duration-300 ${
         isOpen ? "w-64" : "w-20"
-      } flex flex-col h-full shadow-lg p-4 rounded-tr-lg rounded-br-lg`}
+      } flex flex-col h-full shadow-lg p-4 rounded-tr-lg rounded-br-lg overflow-hidden relative`}
     >
+      {" "}
       <div className="flex items-center justify-between border-b border-purple-400 pb-3">
         <div
           className={`flex items-center ${
@@ -108,7 +121,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           )}
         </div>
       </div>
-
       <nav className="flex-1 overflow-y-auto py-4">
         {Object.keys(navItems).map(
           (category) =>

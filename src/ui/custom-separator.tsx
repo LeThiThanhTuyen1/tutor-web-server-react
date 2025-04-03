@@ -1,13 +1,13 @@
-import { cn } from "@/components/layout/cn"
-import { Separator } from "./separator"
+import { cn } from "@/ui/cn";
+import { Separator } from "./separator";
 
 interface CustomSeparatorProps {
-  label?: string
-  orientation?: "horizontal" | "vertical"
-  variant?: "default" | "dashed" | "dotted" | "gradient"
-  labelPosition?: "start" | "center" | "end"
-  className?: string
-  decorative?: boolean
+  label?: string;
+  orientation?: "horizontal" | "vertical";
+  variant?: "default" | "dashed" | "dotted" | "gradient";
+  labelPosition?: "start" | "center" | "end";
+  className?: string;
+  decorative?: boolean;
 }
 
 export function CustomSeparator({
@@ -21,7 +21,7 @@ export function CustomSeparator({
 }: CustomSeparatorProps) {
   // Vertical separators don't support labels
   if (orientation === "vertical" && label) {
-    console.warn("Labels are not supported for vertical separators")
+    console.warn("Labels are not supported for vertical separators");
   }
 
   // If it's a vertical separator or no label, just render a basic separator
@@ -33,12 +33,13 @@ export function CustomSeparator({
         className={cn(
           variant === "dashed" && "border border-dashed bg-transparent",
           variant === "dotted" && "border border-dotted bg-transparent",
-          variant === "gradient" && "bg-gradient-to-r from-transparent via-foreground to-transparent",
-          className,
+          variant === "gradient" &&
+            "bg-gradient-to-r from-transparent via-foreground to-transparent",
+          className
         )}
         {...props}
       />
-    )
+    );
   }
 
   // For horizontal separators with labels
@@ -57,9 +58,10 @@ export function CustomSeparator({
           "flex-grow",
           variant === "dashed" && "border border-dashed bg-transparent",
           variant === "dotted" && "border border-dotted bg-transparent",
-          variant === "gradient" && "bg-gradient-to-r from-transparent via-foreground to-transparent",
+          variant === "gradient" &&
+            "bg-gradient-to-r from-transparent via-foreground to-transparent",
           labelPosition === "center" && "flex-1",
-          className,
+          className
         )}
         {...props}
       />
@@ -78,8 +80,9 @@ export function CustomSeparator({
             "flex-1",
             variant === "dashed" && "border border-dashed bg-transparent",
             variant === "dotted" && "border border-dotted bg-transparent",
-            variant === "gradient" && "bg-gradient-to-r from-foreground via-transparent to-transparent",
-            className,
+            variant === "gradient" &&
+              "bg-gradient-to-r from-foreground via-transparent to-transparent",
+            className
           )}
           {...props}
         />
@@ -91,6 +94,5 @@ export function CustomSeparator({
         </div>
       )}
     </div>
-  )
+  );
 }
-

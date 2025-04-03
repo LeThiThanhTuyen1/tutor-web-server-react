@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useCallback, useMemo, Suspense, lazy, useEffect } from "react";
+import {
+  useState,
+  useCallback,
+  useMemo,
+  Suspense,
+  lazy,
+  useEffect,
+} from "react";
 import { motion } from "framer-motion";
 import {
   CalendarIcon,
@@ -24,7 +31,7 @@ import {
   getStudentCourseByUserId,
   getTutorCourseByUserId,
 } from "@/services/courseService";
-import { cn } from "@/components/layout/cn";
+import { cn } from "@/ui/cn";
 import { useAuth } from "@/hooks/use-auth";
 
 // Lazy load the calendar view for better performance

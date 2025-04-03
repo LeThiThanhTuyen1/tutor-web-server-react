@@ -36,7 +36,7 @@ import { Separator } from "@/ui/separator";
 import { Textarea } from "@/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/ui/radio-group";
 import {
-    Select,
+  Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -54,7 +54,7 @@ import {
 } from "@/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { fadeIn } from "./animation";
+import { fadeIn } from "../layout/animation";
 import { useNavigate } from "react-router-dom";
 
 export default function SettingsPage() {
@@ -279,7 +279,6 @@ export default function SettingsPage() {
         <div className="grid gap-8">
           {/* Account Settings */}
           <TabsContent value="account" className="space-y-8">
-
             <Card>
               <CardHeader>
                 <CardTitle>Password</CardTitle>
