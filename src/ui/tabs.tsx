@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { cn } from "@/components/layout/cn";
+import { cn } from "@/ui/cn";
 const TabsContext = React.createContext<{
   value: string;
   onValueChange: (value: string) => void;

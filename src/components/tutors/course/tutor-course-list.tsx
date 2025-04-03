@@ -30,7 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastContainer } from "@/ui/toast";
 import { CancelCourseModal } from "@/ui/modals/cancel-course";
 import { PaginationFilter } from "@/types/paginated-response";
-import { cn } from "@/components/layout/cn";
+import { cn } from "@/ui/cn";
 import { Badge } from "@/ui/badge";
 import { DeleteConfirmationModal } from "@/ui/modals/delete-confirm";
 import { useCourse } from "@/hooks/use-course";
@@ -402,8 +402,6 @@ export default function TutorCourseList() {
                               <DollarSign className="h-4 w-4 mr-1 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
                               <span>${course.fee}</span>
                             </div>
-
-                            
 
                             <div className="flex items-center text-gray-600 dark:text-gray-400">
                               <Clock className="h-4 w-4 mr-1 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />

@@ -11,10 +11,7 @@ import {
 } from "react";
 import { motion } from "framer-motion";
 import { AlertTriangle, Search, Filter, Book, Grid, List } from "lucide-react";
-import {
-  getAllCourses,
-  deleteCourses,
-} from "@/services/courseService";
+import { getAllCourses, deleteCourses } from "@/services/courseService";
 import { Button } from "@/ui/button";
 import {
   Accordion,
@@ -29,7 +26,7 @@ import { ToastContainer } from "@/ui/toast";
 import { fadeIn, staggerContainer } from "../layout/animation";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { cn } from "../layout/cn";
+import { cn } from "../../ui/cn";
 import Pagination from "../layout/pagination";
 import { DeleteConfirmationModal } from "@/ui/modals/delete-confirm";
 import { PaginationFilter } from "@/types/paginated-response";

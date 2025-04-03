@@ -246,6 +246,8 @@ export default function CourseForm({
 
     if (!formData.startDate) {
       errors.startDate = "Start date is required";
+    } else if (!isEditing && new Date(formData.startDate) < new Date()) {
+      errors.startDate = "Start date must be in the future";
     }
 
     if (!formData.endDate) {

@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../ui/card.tsx";
-import { cn } from "@/components/layout/cn";
+import { cn } from "@/ui/cn.ts";
 import { Badge } from "@/ui/badge.tsx";
 
 interface CourseCardProps {

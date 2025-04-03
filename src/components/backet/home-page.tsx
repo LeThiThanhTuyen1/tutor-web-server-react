@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { getAllCourses } from "@/services/courseService";
 import { fadeIn, scaleIn, staggerContainer } from "../layout/animation";
-import SectionHeading from "../layout/section-heading";
+import SectionHeading from "./section-heading";
 import LazyImage from "./lazy-image";
 import { getAllTutors } from "@/services/tutorService";
 import { API_BASE_URL } from "@/config/axiosInstance";
@@ -120,7 +120,7 @@ const tutorBenefits = [
 ];
 
 export default function HomePage() {
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated, user } = useAuth();
   const [courses, setCourses] = useState<any[]>([]);
   const [tutors, setTutors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

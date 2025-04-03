@@ -1,4 +1,4 @@
-import { cn } from "@/components/layout/cn";
+import { cn } from "@/ui/cn";
 import * as React from "react";
 
 export interface TextareaProps

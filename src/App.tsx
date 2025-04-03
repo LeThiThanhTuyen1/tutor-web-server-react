@@ -6,12 +6,11 @@ import { Routes, Route, Navigate, useNavigate, Outlet } from "react-router-dom";
 import { login } from "./store/authSlice";
 
 // Layouts
-import AppLayout from "./components/layout/app-layout";
 import PublicLayout from "./components/layout/public-layout";
 
 // Pages
 import AuthPage from "./components/auth/auth-page";
-import HomePage from "./components/home/home-page";
+import HomePage from "./components/backet/home-page";
 import CourseList from "./components/courses/course-list-grid";
 import TutorList from "./components/tutors/tutor-list";
 import { getProfile } from "./services/authService";
@@ -31,7 +30,7 @@ import EnrollmentPage from "./components/student/course/enrollment-page";
 import { AdminDashboard } from "./components/dashboard/admin-dashboard";
 import { TutorDashboard } from "./components/dashboard/tutor-dashboard";
 import { StudentDashboard } from "./components/dashboard/student-dashboard";
-import SettingsPage from "./components/layout/setting-page";
+import SettingsPage from "./components/backet/setting-page";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();

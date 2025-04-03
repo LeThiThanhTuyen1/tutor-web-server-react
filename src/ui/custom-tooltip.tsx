@@ -3,7 +3,7 @@
 import type React from "react";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/components/layout/cn";
+import { cn } from "@/ui/cn";
 
 interface CustomTooltipProps {
   content: React.ReactNode;
