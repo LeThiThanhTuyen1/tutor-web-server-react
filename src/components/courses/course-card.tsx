@@ -21,7 +21,7 @@ interface CourseCardProps {
 }
 
 // Status styles - moved outside component to prevent recreation on each render
-const STATUS_STYLES: Record<string, string> = {
+export const STATUS_STYLES: Record<string, string> = {
   ongoing:
     "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
   completed: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",

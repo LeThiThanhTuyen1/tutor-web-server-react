@@ -30,7 +30,7 @@ import { cn } from "../layout/cn";
 import Pagination from "../layout/pagination";
 import { DeleteConfirmationModal } from "@/ui/modals/delete-confirm";
 import { PaginationFilter } from "@/types/paginated-response";
-import CourseCard from "./course-card";
+import CourseCard, { STATUS_STYLES } from "./course-card";
 
 // Lazy load components for better performance
 // const CourseCard = lazy(() => import("@/components/courses/course-card"));
@@ -60,16 +60,6 @@ const ListItemSkeleton = () => (
     </div>
   </div>
 );
-
-// Status styles - moved outside component to prevent recreation on each render
-const STATUS_STYLES: Record<string, string> = {
-  ongoing:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
-  completed: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  canceled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  coming:
-    "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-};
 
 const statusOptions = ["All", ...Object.keys(STATUS_STYLES)];
 

@@ -3,9 +3,7 @@
 import type React from "react";
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate, Outlet } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import { login } from "./store/authSlice";
-import type { RootState } from "./store/store";
 
 // Layouts
 import AppLayout from "./components/layout/app-layout";
@@ -27,17 +25,17 @@ import EditCoursePage from "./components/tutors/course/edit-course";
 import Forbidden from "./components/error/forbidden";
 import TutorCourseListComponent from "./components/tutors/course/tutor-course-list";
 import StudentCourseList from "./components/student/course/student-course-list";
-import StudentScheduleView from "./components/student/course/schedule/student-schedule-view";
+import ScheduleView from "./components/student/course/schedule/schedule-view";
+import { useAuth } from "./hooks/use-auth";
+import { useDispatch } from "react-redux";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated } = useAuth();
   return isAuthenticated ? children : <Navigate to="/auth/login" replace />;
 };
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { isAuthenticated, user } = useAuth()
   return isAuthenticated && user?.role === "Admin" ? (
     children
   ) : (
@@ -46,9 +44,8 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const TutorRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { isAuthenticated, user } = useAuth();
+  
   return isAuthenticated && user?.role === "Tutor" ? (
     children
   ) : (
@@ -115,7 +112,6 @@ export default function App() {
       >
         <Route path="courses" element={<TutorCourseListComponent />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="schedules" element={<StudentScheduleView />} />
         <Route path="courses/new" element={<CourseForm />} />
         <Route path="courses/:id/edit" element={<EditCoursePage />} />
         <Route path="students" element={<div>Students Management</div>} />
@@ -155,7 +151,16 @@ export default function App() {
           }
         />
       </Route>
-
+      <Route
+        path="schedules"
+        element={
+          <PublicLayout>
+            <ProtectedRoute>
+              <ScheduleView />
+            </ProtectedRoute>
+          </PublicLayout>
+        }
+      />
       <Route
         path="/student"
         element={
@@ -168,7 +173,6 @@ export default function App() {
         <Route path="courses" element={<StudentCourseList />} />
         <Route path="tutors" element={<TutorList />} />
         <Route path="tutor/:id" element={<TutorProfile />} />
-        <Route path="schedules" element={<StudentScheduleView />} />
         <Route path="courses/:id" element={<CourseDetail />} />
 
         {/*  Protected Routes */}

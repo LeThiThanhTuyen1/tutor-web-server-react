@@ -11,6 +11,7 @@ import { cancelCourse } from "@/services/courseService";
 import { useToast } from "@/hooks/use-toast";
 import { CancelCourseModal } from "@/ui/modals/cancel-course";
 import { ToastContainer } from "@/ui/toast";
+import { STATUS_STYLES } from "./course-card";
 
 interface CourseListItemProps {
   course: any;
@@ -20,16 +21,6 @@ interface CourseListItemProps {
   isTutor: boolean;
   onCourseUpdated?: () => void;
 }
-
-// Status styles - moved outside component to prevent recreation on each render
-const STATUS_STYLES: Record<string, string> = {
-  ongoing:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
-  completed: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  canceled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  coming:
-    "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-};
 
 function CourseListItemComponent({
   course,

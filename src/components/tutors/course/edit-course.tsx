@@ -5,15 +5,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getCourseById } from "@/services/courseService";
 import { Skeleton } from "@/ui/skeleton";
 import CourseForm from "./course-form";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store/store";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function EditCoursePage() {
   const { id } = useParams<{ id: string }>();
   const [course, setCourse] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useAuth()
   const navigate = useNavigate();
 
   // Check if user is a tutor

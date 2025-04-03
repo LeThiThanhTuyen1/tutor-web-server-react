@@ -20,7 +20,6 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
-import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { getAllCourses } from "@/services/courseService";
 import { fadeIn, scaleIn, staggerContainer } from "../layout/animation";
@@ -28,6 +27,7 @@ import SectionHeading from "../layout/section-heading";
 import LazyImage from "./lazy-image";
 import { getAllTutors } from "@/services/tutorService";
 import { API_BASE_URL } from "@/config/axiosInstance";
+import { useAuth } from "@/hooks/use-auth";
 
 const testimonials = [
   {
@@ -121,9 +121,7 @@ const tutorBenefits = [
 ];
 
 export default function HomePage() {
-  const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { isAuthenticated, user } = useAuth()
   const [courses, setCourses] = useState<any[]>([]);
   const [tutors, setTutors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

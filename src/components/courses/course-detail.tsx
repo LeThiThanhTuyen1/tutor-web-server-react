@@ -5,7 +5,6 @@ import type React from "react";
 
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getCourseById, cancelCourse } from "@/services/courseService";
 import { Skeleton } from "@/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Button } from "@/ui/button";
@@ -37,16 +36,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { CancelCourseModal } from "@/ui/modals/cancel-course";
 import { Badge } from "@/ui/badge";
-
-// Status styles
-const STATUS_STYLES: Record<string, string> = {
-  ongoing:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
-  completed: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  canceled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  coming:
-    "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-};
+import { STATUS_STYLES } from "./course-card";
+import { useCourse } from "@/hooks/use-course";
 
 // Day of week mapping
 const DAYS_OF_WEEK = [
@@ -68,33 +59,22 @@ const MODE_ICONS: Record<string, React.ReactNode> = {
 
 export default function CourseDetail() {
   const { id } = useParams<{ id: string }>();
-  const [course, setCourse] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Use our custom hook to access course state and actions
+  const { currentCourse, loading, getCourseById, cancelCourse } = useCourse();
+
   // Check if the current user is the tutor of this course
   const isTutor = user?.role === "Tutor";
 
   useEffect(() => {
-    async function fetchData() {
-      if (id) {
-        setLoading(true);
-        try {
-          const courseData = await getCourseById(Number(id));
-          setCourse(courseData);
-        } catch (error) {
-          console.error("Error fetching course data:", error);
-        } finally {
-          setLoading(false);
-        }
-      }
+    if (id) {
+      getCourseById(Number(id));
     }
-
-    fetchData();
   }, [id]);
 
   // Format time (e.g., "14:30" to "2:30 PM")
@@ -112,25 +92,13 @@ export default function CourseDetail() {
 
     try {
       setIsCancelling(true);
-      const response = await cancelCourse(Number(id));
+      await cancelCourse(Number(id));
 
-      if (response.succeeded) {
-        toast({
-          title: "Success",
-          description: "Course has been cancelled successfully",
-          variant: "success",
-        });
-
-        // Refresh course data
-        const updatedCourse = await getCourseById(Number(id));
-        setCourse(updatedCourse);
-      } else {
-        toast({
-          title: "Error",
-          description: response.message || "Failed to cancel course",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Success",
+        description: "Course has been cancelled successfully",
+        variant: "success",
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -146,8 +114,8 @@ export default function CourseDetail() {
   // Check if course can be cancelled (only coming or ongoing courses)
   const canCancel =
     isTutor &&
-    course &&
-    (course.status === "ongoing" || course.status === "coming");
+    currentCourse &&
+    (currentCourse.status === "ongoing" || currentCourse.status === "coming");
 
   if (loading) {
     return (
@@ -194,7 +162,7 @@ export default function CourseDetail() {
     );
   }
 
-  if (!course) {
+  if (!currentCourse) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/30 dark:to-purple-950/30 p-4 md:p-6">
         <div className="max-w-4xl mx-auto text-center py-12">
@@ -216,7 +184,8 @@ export default function CourseDetail() {
     );
   }
 
-  const hasSchedules = course.schedule && course.schedule.length > 0;
+  const hasSchedules =
+    currentCourse.schedule && currentCourse.schedule.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/30 dark:to-purple-950/30 p-4 md:p-6">
@@ -241,24 +210,24 @@ export default function CourseDetail() {
             <CardHeader className="pb-2">
               <div className="flex flex-wrap justify-between items-start gap-2">
                 <CardTitle className="text-2xl font-bold text-indigo-950 dark:text-indigo-50">
-                  {course.courseName}
+                  {currentCourse.courseName}
                 </CardTitle>
                 <Badge
                   variant="outline"
                   className={cn(
                     "text-sm font-medium",
-                    STATUS_STYLES[course.status] ||
+                    STATUS_STYLES[currentCourse.status] ||
                       "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
                   )}
                 >
-                  {course.status.charAt(0).toUpperCase() +
-                    course.status.slice(1)}
+                  {currentCourse.status.charAt(0).toUpperCase() +
+                    currentCourse.status.slice(1)}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                {course.description}
+                {currentCourse.description}
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -267,7 +236,7 @@ export default function CourseDetail() {
                   <span>
                     Tutor:{" "}
                     <span className="font-medium text-gray-900 dark:text-gray-100">
-                      {course.tutorName}
+                      {currentCourse.tutorName}
                     </span>
                   </span>
                 </div>
@@ -277,8 +246,8 @@ export default function CourseDetail() {
                   <span>
                     Duration:{" "}
                     <span className="font-medium text-gray-900 dark:text-gray-100">
-                      {new Date(course.startDate).toLocaleDateString()} -{" "}
-                      {new Date(course.endDate).toLocaleDateString()}
+                      {new Date(currentCourse.startDate).toLocaleDateString()} -{" "}
+                      {new Date(currentCourse.endDate).toLocaleDateString()}
                     </span>
                   </span>
                 </div>
@@ -288,7 +257,7 @@ export default function CourseDetail() {
                   <span>
                     Fee:{" "}
                     <span className="font-medium text-gray-900 dark:text-gray-100">
-                      ${course.fee}
+                      ${currentCourse.fee}
                     </span>
                   </span>
                 </div>
@@ -298,7 +267,7 @@ export default function CourseDetail() {
                   <span>
                     Max Students:{" "}
                     <span className="font-medium text-gray-900 dark:text-gray-100">
-                      {course.maxStudents}
+                      {currentCourse.maxStudents}
                     </span>
                   </span>
                 </div>
@@ -308,7 +277,7 @@ export default function CourseDetail() {
                   <span>
                     Created:{" "}
                     <span className="font-medium text-gray-900 dark:text-gray-100">
-                      {new Date(course.createdAt).toLocaleDateString()}
+                      {new Date(currentCourse.createdAt).toLocaleDateString()}
                     </span>
                   </span>
                 </div>
@@ -344,7 +313,7 @@ export default function CourseDetail() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {course.schedule.map(
+                          {currentCourse.schedule.map(
                             (schedule: any, index: number) => (
                               <TableRow key={index}>
                                 <TableCell className="font-medium">
@@ -387,7 +356,7 @@ export default function CourseDetail() {
                       ))}
 
                       {DAYS_OF_WEEK.map((day, dayIndex) => {
-                        const daySchedules = course.schedule.filter(
+                        const daySchedules = currentCourse.schedule.filter(
                           (s: any) => s.dayOfWeek === dayIndex
                         );
                         return (
@@ -456,7 +425,7 @@ export default function CourseDetail() {
           <div className="flex flex-wrap gap-2">
             {!isTutor && (
               <Button className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90">
-                <Link to={`/enrollment/${course.id}`}>Enroll Now</Link>
+                <Link to={`/enrollment/${currentCourse.id}`}>Enroll Now</Link>
               </Button>
             )}
 
@@ -464,7 +433,7 @@ export default function CourseDetail() {
               variant="outline"
               className="border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300"
             >
-              <Link to={`/tutor/${course.tutorId}`}>View Tutor</Link>
+              <Link to={`/tutor/${currentCourse.tutorId}`}>View Tutor</Link>
             </Button>
 
             {/* Edit Button - Only for tutors */}
@@ -474,7 +443,7 @@ export default function CourseDetail() {
                 className="border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300"
               >
                 <Link
-                  to={`/tutor/courses/${course.id}/edit`}
+                  to={`/tutor/courses/${currentCourse.id}/edit`}
                   className="flex items-center"
                 >
                   <Edit className="h-4 w-4 mr-2" />
@@ -489,7 +458,8 @@ export default function CourseDetail() {
                 variant="outline"
                 onClick={() => setIsCancelDialogOpen(true)}
                 disabled={
-                  course.status === "canceled" || course.status === "completed"
+                  currentCourse.status === "canceled" ||
+                  currentCourse.status === "completed"
                 }
                 className="border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300"
               >
