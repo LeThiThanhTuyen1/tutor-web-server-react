@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Trash2, Search, BookOpen, XCircle, Eye } from "lucide-react";
+import { Search, BookOpen, XCircle, Eye } from 'lucide-react';
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
-import { Card, CardContent } from "@/ui/card";
 import { Checkbox } from "@/ui/checkbox";
 import {
   Select,
@@ -18,75 +17,45 @@ import { Tabs, TabsContent } from "@/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ToastContainer } from "@/ui/toast";
 import { CancelCourseModal } from "@/ui/modals/cancel-course";
-import {
-  Course,
-  formatRelativeDate,
-  STATUS_STYLES,
-} from "@/components/courses/course-utils";
-import {
-  cancelCourse,
-  getStudentCourseByUserId,
-} from "@/services/courseService";
+import { formatRelativeDate } from "@/components/courses/course-utils";
 import { PaginationFilter } from "@/types/paginated-response";
 import { cn } from "@/components/layout/cn";
 import { Link } from "react-router-dom";
 import { Badge } from "@/ui/badge";
+import { useCourse } from "@/hooks/use-course";
+import { STATUS_STYLES } from "@/components/courses/course-card";
 
 export default function StudentCourseList() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Use our custom hook to access course state and actions
+  const {
+    studentCourses,
+    loading,
+    totalPages,
+    getStudentCourses,
+    cancelCourse,
+  } = useCourse();
+
+  const [filteredCourses, setFilteredCourses] = useState(studentCourses);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedCourses, setSelectedCourses] = useState<number[]>([]);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [courseToCancel, setCourseToCancel] = useState<number | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast, toasts, dismiss } = useToast();
   const [pagination, setPagination] = useState<PaginationFilter>({
     pageNumber: 1,
     pageSize: 9,
   });
-  // Fetch tutor courses
-  // Cập nhật fetchCourses để giữ nguyên pageNumber
-  const fetchCourses = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await getStudentCourseByUserId(pagination);
-      setCourses(response.data || []);
-      setFilteredCourses(response.data || []);
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load courses. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [pagination]); 
 
-  const handlePageChange = (pageNumber: number) => {
-    setPagination((prev) => ({
-      ...prev,
-      pageNumber,
-    }));
-  };
-
-  // Khi pagination thay đổi thì fetchCourses tự động gọi lại
+  // Fetch student courses when component mounts or pagination changes
   useEffect(() => {
-    fetchCourses();
-  }, [fetchCourses]);
+    getStudentCourses(pagination);
+  }, [pagination]);
 
+  // Update filtered courses when studentCourses, searchTerm, or statusFilter changes
   useEffect(() => {
-    fetchCourses();
-  }, [fetchCourses]);
-
-  // Filter courses based on search term and status
-  useEffect(() => {
-    let result = courses;
+    let result = studentCourses;
 
     // Filter by search term
     if (searchTerm) {
@@ -104,7 +73,7 @@ export default function StudentCourseList() {
     }
 
     setFilteredCourses(result);
-  }, [courses, searchTerm, statusFilter]);
+  }, [studentCourses, searchTerm, statusFilter]);
 
   // Toggle course selection
   const toggleCourseSelection = (courseId: number) => {
@@ -115,14 +84,13 @@ export default function StudentCourseList() {
     );
   };
 
-  // Select all courses
-  //   const toggleSelectAll = () => {
-  //     if (selectedCourses.length === filteredCourses.length) {
-  //       setSelectedCourses([]);
-  //     } else {
-  //       setSelectedCourses(filteredCourses.map((course) => course.id));
-  //     }
-  //   };
+  // Handle page change
+  const handlePageChange = (pageNumber: number) => {
+    setPagination((prev) => ({
+      ...prev,
+      pageNumber,
+    }));
+  };
 
   // Open cancel dialog
   const handleCancelCourse = (courseId: number) => {
@@ -136,22 +104,16 @@ export default function StudentCourseList() {
 
     try {
       setIsCancelling(true);
-      const response = await cancelCourse(courseToCancel);
-
-      if (response.succeeded) {
-        toast({
-          title: "Success",
-          description: "Course has been cancelled successfully",
-          variant: "success",
-        });
-        fetchCourses();
-      } else {
-        toast({
-          title: "Error",
-          description: response.message || "Failed to cancel course",
-          variant: "destructive",
-        });
-      }
+      await cancelCourse(courseToCancel);
+      
+      toast({
+        title: "Success",
+        description: "Course has been cancelled successfully",
+        variant: "success",
+      });
+      
+      // Refresh courses after cancellation
+      getStudentCourses(pagination);
     } catch (error) {
       toast({
         title: "Error",
@@ -165,7 +127,6 @@ export default function StudentCourseList() {
     }
   };
 
-  // Delete selected
   return (
     <div className="container mx-auto p-4">
       <div className="flex flex-col space-y-4">
@@ -175,7 +136,6 @@ export default function StudentCourseList() {
         </div>
 
         {/* Search and filters */}
-
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-grow">
@@ -222,7 +182,7 @@ export default function StudentCourseList() {
                   <p className="text-gray-500 dark:text-gray-400 mb-6">
                     {searchTerm || statusFilter !== "all"
                       ? "Try adjusting your search or filters"
-                      : "You haven't created any courses yet"}
+                      : "You haven't enrolled in any courses yet"}
                   </p>
                 </div>
               ) : (
@@ -301,6 +261,26 @@ export default function StudentCourseList() {
                   ))}
                 </ul>
               )}
+              
+              {totalPages > 1 && (
+                <div className="mt-6 p-4">
+                  <div className="flex justify-center">
+                    <div className="flex items-center gap-2">
+                      {Array.from({ length: totalPages }, (_, i) => (
+                        <Button
+                          key={i}
+                          variant={pagination.pageNumber === i + 1 ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handlePageChange(i + 1)}
+                          className={pagination.pageNumber === i + 1 ? "bg-indigo-600" : ""}
+                        >
+                          {i + 1}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
@@ -313,40 +293,6 @@ export default function StudentCourseList() {
         onConfirm={confirmCancelCourse}
         isCancelling={isCancelling}
       />
-
-      {/* Delete Confirmation Modal */}
-      {isDeleteDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <Card className="max-w-md w-full animate-in fade-in-50 zoom-in-95">
-            <CardContent className="pt-6">
-              <div className="mb-4">
-                <h3 className="text-xl font-bold mb-2 flex items-center text-red-600">
-                  <Trash2 className="h-5 w-5 mr-2" />
-                  Delete Courses
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Are you sure you want to delete {selectedCourses.length}{" "}
-                  selected course(s)? This action cannot be undone.
-                </p>
-              </div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsDeleteDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  // onClick={deleteSelectedCourses}
-                >
-                  Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       <ToastContainer
         toasts={toasts.map((toast) => ({ ...toast, onDismiss: dismiss }))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, Suspense, lazy } from "react";
+import { useState, useCallback, useMemo, Suspense, lazy, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   CalendarIcon,
@@ -20,8 +20,12 @@ import { Button } from "@/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { ToastContainer } from "@/ui/toast";
 import React from "react"; // Import React
-import { getStudentCourseByUserId } from "@/services/courseService";
+import {
+  getStudentCourseByUserId,
+  getTutorCourseByUserId,
+} from "@/services/courseService";
 import { cn } from "@/components/layout/cn";
+import { useAuth } from "@/hooks/use-auth";
 
 // Lazy load the calendar view for better performance
 const CalendarView = lazy(() => import("./schedule-calendar-view"));
@@ -279,18 +283,25 @@ const WeeklyListView = React.memo(({ courses }: { courses: Course[] }) => {
 WeeklyListView.displayName = "WeeklyListView";
 
 // Main component
-export default function StudentScheduleView() {
+export default function ScheduleView() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast, toasts, dismiss } = useToast();
-
+  const { user } = useAuth();
+  const role = user?.role;
+  const max = 1000;
   // Fetch student courses
+
   const fetchCourses = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getStudentCourseByUserId({
+
+      const fetchCoursesByRole =
+        role === "Tutor" ? getTutorCourseByUserId : getStudentCourseByUserId;
+
+      const response = await fetchCoursesByRole({
         pageNumber: 1,
-        pageSize: 50, // Get a larger number to ensure we get all courses
+        pageSize: max,
       });
 
       if (response.succeeded) {
@@ -303,7 +314,7 @@ export default function StudentScheduleView() {
         });
       }
     } catch (error) {
-      console.error("Error fetching student courses:", error);
+      console.error("Error fetching courses:", error);
       toast({
         title: "Error",
         description: "Failed to load your schedule. Please try again.",
@@ -312,10 +323,10 @@ export default function StudentScheduleView() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [role]);
 
   // Fetch courses on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     fetchCourses();
   }, [fetchCourses]);
 

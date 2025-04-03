@@ -3,11 +3,10 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
 import Sidebar from "./sidebar";
 import Header from "./header";
-import type { RootState } from "@/store/store";
 import LazyFooter from "./lazy-footer";
+import { useAuth } from "@/hooks/use-auth";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -15,7 +14,7 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated } = useAuth()
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

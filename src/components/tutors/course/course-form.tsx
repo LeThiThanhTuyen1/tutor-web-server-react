@@ -349,50 +349,59 @@ export default function CourseForm({
           }
         }
 
-        const schedulePromises = schedule.map((scheduleItem) => {
-          const scheduleData = {
-            ...scheduleItem,
-            courseId,
-            tutorId: Number(tutorId),
-          };
+        try {
+          const schedulePromises = schedule.map(async (scheduleItem) => {
+            const scheduleData = {
+              ...scheduleItem,
+              courseId,
+              tutorId: Number(tutorId),
+            };
 
-          return isEditing && scheduleItem.id
-            ? updateSchedule(scheduleItem.id, scheduleData)
-            : createSchedule(scheduleData);
-        });
+            return isEditing && scheduleItem.id
+              ? await updateSchedule(scheduleItem.id, scheduleData)
+              : await createSchedule(scheduleData);
+          });
 
-        const scheduleResponses = await Promise.all(schedulePromises);
-        const scheduleFailed = scheduleResponses.some((res) => !res.succeeded);
+          const scheduleResponses = await Promise.all(schedulePromises);
 
-        if (scheduleFailed) {
-          if (!isEditing) await deleteCourses([Number(courseId)]);
+          const scheduleFailed = scheduleResponses.some(
+            (res) => !res.succeeded
+          );
+          if (scheduleFailed) {
+            if (!isEditing) await deleteCourses([Number(courseId)]);
 
+            toast({
+              title: "Error",
+              description:
+                scheduleResponses
+                  .filter((res) => !res.succeeded)
+                  .map((res) => res.message)
+                  .join(", ") || "Failed to save schedule(s).",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Success",
+              description: isEditing
+                ? "Course updated successfully"
+                : "Course created successfully",
+              variant: "success",
+            });
+          }
+        } catch (error) {
+          console.error("Error while saving schedules:", error);
           toast({
             title: "Error",
-            description: "Failed to save schedule(s).",
+            description: "An unexpected error occurred.",
             variant: "destructive",
           });
-        } else {
-          toast({
-            title: "Success",
-            description: isEditing
-              ? "Course updated successfully"
-              : "Course created successfully",
-            variant: "success",
-          });
-
-          setTimeout(() => {
-            navigate("/tutor/courses");
-          }, 1000);
         }
       } catch (error) {
         console.error("Error saving course:", error);
 
-        // Kiểm tra lỗi với TypeScript
         let errorMessage = "An unexpected error occurred.";
 
         if (error instanceof Error) {
-          // Nếu error là một Error object hợp lệ
           errorMessage = error.message;
         } else if (
           typeof error === "object" &&
@@ -400,7 +409,6 @@ export default function CourseForm({
           "response" in error &&
           typeof (error as any).response.data === "object"
         ) {
-          // Lấy lỗi từ response của Axios
           const responseData = (error as any).response.data;
           if (responseData.errors && Array.isArray(responseData.errors)) {
             errorMessage = responseData.errors.join("\n");
@@ -409,7 +417,6 @@ export default function CourseForm({
           }
         }
 
-        // Hiển thị toast với lỗi cụ thể
         toast({
           title: "Error",
           description: errorMessage,

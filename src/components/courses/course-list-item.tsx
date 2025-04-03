@@ -11,6 +11,9 @@ import { cancelCourse } from "@/services/courseService";
 import { useToast } from "@/hooks/use-toast";
 import { CancelCourseModal } from "@/ui/modals/cancel-course";
 import { ToastContainer } from "@/ui/toast";
+import { STATUS_STYLES } from "./course-card";
+import { ContractModal } from "@/ui/modals/contract-modal";
+import { useAuth } from "@/hooks/use-auth";
 
 interface CourseListItemProps {
   course: any;
@@ -19,27 +22,23 @@ interface CourseListItemProps {
   onDelete: (id: number) => void;
   isTutor: boolean;
   onCourseUpdated?: () => void;
+  handleEnrollCourse: () => Promise<void>;
+  isEnrolling: boolean;
 }
-
-// Status styles - moved outside component to prevent recreation on each render
-const STATUS_STYLES: Record<string, string> = {
-  ongoing:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
-  completed: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  canceled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  coming:
-    "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-};
 
 function CourseListItemComponent({
   course,
   isSelected,
   isTutor,
   onCourseUpdated,
+  handleEnrollCourse,
+  isEnrolling,
 }: CourseListItemProps) {
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const { toast, toasts, dismiss } = useToast();
+  const [isContractDialogOpen, setIsContractDialogOpen] = useState(false);
+  const { user } = useAuth();
 
   const handleCancelCourse = async () => {
     try {
@@ -166,15 +165,23 @@ function CourseListItemComponent({
                   variant="default"
                   size="sm"
                   className="flex-1 md:w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
+                  onClick={() => setIsContractDialogOpen(true)}
                 >
-                  <Link
-                    to={`/enrollment/${course.id}`}
-                    className="flex items-center w-full justify-center"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Enroll Now
-                  </Link>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Enroll Now
                 </Button>
+              )}
+              {!isTutor && (
+                <ContractModal
+                  isOpen={isContractDialogOpen}
+                  onClose={() => setIsContractDialogOpen(false)}
+                  onConfirm={handleEnrollCourse}
+                  isProcessing={isEnrolling}
+                  courseTitle={course.courseName}
+                  tutorName={course.tutorName}
+                  studentName={user?.name || "Student"}
+                  fee={course.fee}
+                />
               )}
             </div>
           </div>

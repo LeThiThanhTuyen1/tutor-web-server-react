@@ -312,7 +312,9 @@ export default function TutorList() {
                     <div className="flex items-center mr-4">
                       <Star className="h-4 w-4 text-yellow-500 fill-current mr-1" />
                       <span className="font-medium">
-                        {tutor.rating || "N/A"}
+                        {typeof tutor.rating === "number"
+                          ? tutor.rating.toFixed(1)
+                          : 0}
                       </span>
                     </div>
                     <span className="font-bold text-blue-500">

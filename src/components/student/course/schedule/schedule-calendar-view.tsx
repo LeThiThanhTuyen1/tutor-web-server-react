@@ -14,6 +14,7 @@ import { Button } from "@/ui/button";
 import React from "react";
 import { cn } from "@/components/layout/cn";
 import { CustomTooltip } from "@/ui/custom-tooltip";
+import { STATUS_STYLES } from "@/components/courses/course-card";
 
 // Types
 interface Schedule {
@@ -54,20 +55,6 @@ const DAYS_OF_WEEK = [
   "Saturday",
 ];
 
-// Status styles
-const STATUS_STYLES: Record<string, string> = {
-  ongoing:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
-  completed:
-    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
-  canceled:
-    "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
-  coming:
-    "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800",
-  scheduled:
-    "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800",
-};
-
 // Mode icons
 const MODE_ICONS: Record<string, JSX.Element> = {
   online: <Globe className="h-4 w-4 mr-2 text-indigo-600" />,
@@ -92,7 +79,7 @@ const parseTime = (timeString: string) => {
 // Generate time slots for the calendar
 const generateTimeSlots = () => {
   const slots = [];
-  for (let hour = 7; hour <= 21; hour++) {
+  for (let hour = 7; hour <= 23; hour++) {
     slots.push(`${hour.toString().padStart(2, "0")}:00`);
   }
   return slots;
@@ -135,7 +122,7 @@ const ScheduleEvent = React.memo(
 
     // Tooltip content
     const tooltipContent = (
-      <div className="space-y-4">
+      <div className="space-y-2">
         <div className="font-semibold text-base text-xs">
           {course.courseName}
         </div>
@@ -151,8 +138,10 @@ const ScheduleEvent = React.memo(
             <span className="text-xs">{course.tutorName}</span>
           </div>
           <div className="flex items-center">
-              {/* <Globe className="h-4 w-4 mr-2 text-indigo-600" /> */}
-            {MODE_ICONS[schedule.mode] || <Globe className="h-4 w-4 mr-2 text-indigo-600" />}
+            {/* <Globe className="h-4 w-4 mr-2 text-indigo-600" /> */}
+            {MODE_ICONS[schedule.mode] || (
+              <Globe className="h-4 w-4 mr-2 text-indigo-600" />
+            )}
             <span className="capitalize text-sm"> {schedule.mode}</span>
           </div>
           {schedule.location && (

@@ -1,7 +1,6 @@
 import api from "@/config/axiosInstance";
 import { PaginationFilter } from "@/types/paginated-response";
 
-
 export const getAllSchedules = async (filter: PaginationFilter) => {
   try {
     const response = await api.get("/Schedules", {
@@ -91,12 +90,16 @@ export const createSchedule = async (
   try {
     const response = await api.post("/Schedule", schedule);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating schedule:", error);
+
+    const errorMessage =
+      error.response?.data?.message || "An unexpected error occurred";
+
     return {
       data: null,
       succeeded: false,
-      message: "Failed to create schedule",
+      message: errorMessage,
     };
   }
 };

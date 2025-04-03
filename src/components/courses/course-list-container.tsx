@@ -1,16 +1,13 @@
 "use client";
 
-import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import type { RootState } from "@/store/store";
 import TutorCourseList from "../student/course/student-course-list";
 import CourseList from "./course-list-grid";
 import StudentCourseList from "../student/course/student-course-list";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function CourseListContainer() {
-  const { user, isAuthenticated } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { user, isAuthenticated } = useAuth()
   const [viewType, setViewType] = useState<"public" | "tutor" | "student">(
     "public"
   );

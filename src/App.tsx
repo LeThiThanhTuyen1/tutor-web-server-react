@@ -3,9 +3,7 @@
 import type React from "react";
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate, Outlet } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import { login } from "./store/authSlice";
-import type { RootState } from "./store/store";
 
 // Layouts
 import AppLayout from "./components/layout/app-layout";
@@ -14,7 +12,6 @@ import PublicLayout from "./components/layout/public-layout";
 // Pages
 import AuthPage from "./components/auth/auth-page";
 import HomePage from "./components/home/home-page";
-import Dashboard from "./components/dashboard/admin-dashboard";
 import CourseList from "./components/courses/course-list-grid";
 import TutorList from "./components/tutors/tutor-list";
 import { getProfile } from "./services/authService";
@@ -27,17 +24,22 @@ import EditCoursePage from "./components/tutors/course/edit-course";
 import Forbidden from "./components/error/forbidden";
 import TutorCourseListComponent from "./components/tutors/course/tutor-course-list";
 import StudentCourseList from "./components/student/course/student-course-list";
-import StudentScheduleView from "./components/student/course/schedule/student-schedule-view";
+import ScheduleView from "./components/student/course/schedule/schedule-view";
+import { useAuth } from "./hooks/use-auth";
+import { useDispatch } from "react-redux";
+import EnrollmentPage from "./components/student/course/enrollment-page";
+import { AdminDashboard } from "./components/dashboard/admin-dashboard";
+import { TutorDashboard } from "./components/dashboard/tutor-dashboard";
+import { StudentDashboard } from "./components/dashboard/student-dashboard";
+import SettingsPage from "./components/layout/setting-page";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated } = useAuth();
   return isAuthenticated ? children : <Navigate to="/auth/login" replace />;
 };
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { isAuthenticated, user } = useAuth();
   return isAuthenticated && user?.role === "Admin" ? (
     children
   ) : (
@@ -46,9 +48,8 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const TutorRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { isAuthenticated, user } = useAuth();
+
   return isAuthenticated && user?.role === "Tutor" ? (
     children
   ) : (
@@ -89,17 +90,16 @@ export default function App() {
         path="/admin"
         element={
           <AdminRoute>
-            <AppLayout>
+            <PublicLayout>
               <Outlet />
-            </AppLayout>
+            </PublicLayout>
           </AdminRoute>
         }
       >
-        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="courses" element={<CourseList />} />
         <Route path="tutors" element={<TutorList />} />
         <Route path="students" element={<div>Students Management</div>} />
-        <Route path="settings" element={<div>Admin Settings</div>} />
       </Route>
 
       {/* Tutor Routes */}
@@ -114,12 +114,10 @@ export default function App() {
         }
       >
         <Route path="courses" element={<TutorCourseListComponent />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="schedules" element={<StudentScheduleView />} />
+        <Route path="dashboard" element={<TutorDashboard />} />
         <Route path="courses/new" element={<CourseForm />} />
         <Route path="courses/:id/edit" element={<EditCoursePage />} />
         <Route path="students" element={<div>Students Management</div>} />
-        <Route path="settings" element={<div>Admin Settings</div>} />
       </Route>
 
       {/* User Routes */}
@@ -133,6 +131,7 @@ export default function App() {
       >
         <Route index element={<HomePage />} />
         <Route path="courses" element={<CourseList />} />
+        <Route path="enrollment/:id" element={<EnrollmentPage />} />
         <Route path="tutors" element={<TutorList />} />
         <Route path="tutor/:id" element={<TutorProfile />} />
         <Route path="courses/:id" element={<CourseDetail />} />
@@ -147,15 +146,24 @@ export default function App() {
           }
         />
         <Route
-          path="settings"
+          path="setting"
           element={
             <ProtectedRoute>
-              <div>User Settings</div>
+              <SettingsPage />
             </ProtectedRoute>
           }
         />
       </Route>
-
+      <Route
+        path="schedules"
+        element={
+          <PublicLayout>
+            <ProtectedRoute>
+              <ScheduleView />
+            </ProtectedRoute>
+          </PublicLayout>
+        }
+      />
       <Route
         path="/student"
         element={
@@ -167,8 +175,8 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="courses" element={<StudentCourseList />} />
         <Route path="tutors" element={<TutorList />} />
+        <Route path="dashboard" element={<StudentDashboard />} />
         <Route path="tutor/:id" element={<TutorProfile />} />
-        <Route path="schedules" element={<StudentScheduleView />} />
         <Route path="courses/:id" element={<CourseDetail />} />
 
         {/*  Protected Routes */}
@@ -177,14 +185,6 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="settings"
-          element={
-            <ProtectedRoute>
-              <div>User Settings</div>
             </ProtectedRoute>
           }
         />

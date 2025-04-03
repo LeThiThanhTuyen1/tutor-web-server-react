@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Bell, Menu, Moon, Sun, User } from "lucide-react";
-import { RootState } from "@/store/store";
 import { logout } from "@/store/authSlice";
 import { API_BASE_URL } from "@/config/axiosInstance";
+import { useAuth } from "@/hooks/use-auth";
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -22,9 +22,7 @@ export default function Header({
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { user, isAuthenticated } = useAuth()
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -180,7 +178,7 @@ export default function Header({
                         Your Profile
                       </Link>
                       <Link
-                        to={`/${user?.role}/settings`}
+                        to="/setting"
                         className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
