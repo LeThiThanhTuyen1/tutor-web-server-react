@@ -14,6 +14,7 @@ import { ToastContainer } from "@/ui/toast";
 import { STATUS_STYLES } from "./course-card";
 import { ContractModal } from "@/ui/modals/contract-modal";
 import { useAuth } from "@/hooks/use-auth";
+import { enrollCourse } from "@/services/enrollmentService";
 
 interface CourseListItemProps {
   course: any;
@@ -38,7 +39,8 @@ function CourseListItemComponent({
   const [isCancelling, setIsCancelling] = useState(false);
   const { toast, toasts, dismiss } = useToast();
   const [isContractDialogOpen, setIsContractDialogOpen] = useState(false);
-  const { user } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const [hasSignedContract, setHasSignedContract] = useState(false);
 
   const handleCancelCourse = async () => {
     try {
@@ -162,13 +164,25 @@ function CourseListItemComponent({
               </Button>
               {!isTutor && (
                 <Button
-                  variant="default"
-                  size="sm"
-                  className="flex-1 md:w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
-                  onClick={() => setIsContractDialogOpen(true)}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90 h-12 text-base"
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast({
+                        title: "Error",
+                        description: "You must be logged in to enroll.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    setIsContractDialogOpen(true);
+                  }}
+                  disabled={isEnrolling || hasSignedContract}
                 >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Enroll Now
+                  {isEnrolling
+                    ? "Enrolling..."
+                    : hasSignedContract
+                    ? "Enrolled"
+                    : "Enroll"}
                 </Button>
               )}
               {!isTutor && (

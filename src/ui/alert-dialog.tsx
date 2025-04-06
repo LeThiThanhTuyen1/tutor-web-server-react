@@ -63,7 +63,7 @@ function AlertDialogContent({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div
         className={cn(
-          "w-full max-w-lg rounded-lg border bg-background p-6 shadow-lg",
+          "w-full max-w-lg rounded-lg border bg-white p-6 shadow-lg",
           className
         )}
         {...props}
@@ -147,7 +147,7 @@ function AlertDialogCancel({
   return (
     <button
       className={cn(
-        "mt-2 inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 sm:mt-0",
+        "mt-2 hover:bg-gray-100 inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 sm:mt-0",
         className
       )}
       onClick={() => onOpenChange(false)}
