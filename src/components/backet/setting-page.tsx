@@ -28,12 +28,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/ui/card";
-import { Input } from "@/ui/input";
 import { Label } from "@/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
 import { Switch } from "@/ui/switch";
 import { Separator } from "@/ui/separator";
-import { Textarea } from "@/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/ui/radio-group";
 import {
   Select,
@@ -67,16 +65,6 @@ export default function SettingsPage() {
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  // Form states
-  const [profileData, setProfileData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    phone: "",
-    bio: "",
-    language: "en",
-    timezone: "UTC",
-  });
 
   const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: true,
@@ -140,16 +128,6 @@ export default function SettingsPage() {
       title: newDarkMode ? "Dark mode enabled" : "Light mode enabled",
       description: "Your preference has been saved.",
     });
-  };
-
-  // Handle profile form changes
-  const handleProfileChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({ ...prev, [name]: value }));
   };
 
   // Handle save settings
@@ -276,7 +254,7 @@ export default function SettingsPage() {
           )}
         </TabsList>
 
-        <div className="grid gap-8">
+        <div className="grid gap-8 bg-white dark:bg-gray-800">
           {/* Account Settings */}
           <TabsContent value="account" className="space-y-8">
             <Card>
@@ -414,7 +392,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-end">
+              {/* <CardFooter className="flex justify-end">
                 <Button
                   onClick={handleSaveSettings}
                   disabled={isSaving}
@@ -422,7 +400,7 @@ export default function SettingsPage() {
                 >
                   {isSaving ? "Saving..." : "Save Preferences"}
                 </Button>
-              </CardFooter>
+              </CardFooter> */}
             </Card>
 
             <Card>

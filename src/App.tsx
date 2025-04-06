@@ -23,7 +23,7 @@ import EditCoursePage from "./components/tutors/course/edit-course";
 import Forbidden from "./components/error/forbidden";
 import TutorCourseListComponent from "./components/tutors/course/tutor-course-list";
 import StudentCourseList from "./components/student/course/student-course-list";
-import ScheduleView from "./components/student/course/schedule/schedule-view";
+import ScheduleView from "./components/courses/schedule/schedule-view";
 import { useAuth } from "./hooks/use-auth";
 import { useDispatch } from "react-redux";
 import EnrollmentPage from "./components/student/course/enrollment-page";
@@ -31,6 +31,7 @@ import { AdminDashboard } from "./components/dashboard/admin-dashboard";
 import { TutorDashboard } from "./components/dashboard/tutor-dashboard";
 import { StudentDashboard } from "./components/dashboard/student-dashboard";
 import SettingsPage from "./components/backet/setting-page";
+import NotificationsPage from "./components/backet/notifications-page";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
@@ -149,6 +150,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="notifications"
+          element={
+            <ProtectedRoute>
+              <NotificationsPage />
             </ProtectedRoute>
           }
         />

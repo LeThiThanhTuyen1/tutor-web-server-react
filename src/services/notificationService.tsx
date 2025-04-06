@@ -1,39 +1,90 @@
-// services/NotificationService.js
-import {
-  HubConnection,
-  HubConnectionBuilder,
-  LogLevel,
-} from "@microsoft/signalr";
+import api from "@/config/axiosInstance";
 
-let connection: HubConnection;
-
-export const connectToNotificationHub = async (
-  userId,
-  onReceiveNotification
+// Create a new notification
+export const createNotification = async (
+  userId: number,
+  message: string,
+  type = "info"
 ) => {
   try {
-    connection = new HubConnectionBuilder()
-      .withUrl("http://localhost:5000/notificationHub", {
-        accessTokenFactory: () => localStorage.getItem("accessToken"),
-      })
-      .configureLogging(LogLevel.Information)
-      .build();
-
-    connection.on("ReceiveNotification", (notification) => {
-      console.log("Received Notification:", notification);
-      onReceiveNotification(notification);
+    const response = await api.post("/Notification/create", {
+      userId,
+      message,
+      type,
     });
-
-    await connection.start();
-    console.log("SignalR connected");
-  } catch (error) {
-    console.error("Connection failed: ", error);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error creating notification:", error);
+    const errorMessage =
+      error.response?.data?.message || "An unexpected error occurred";
+    return {
+      data: null,
+      succeeded: false,
+      message: errorMessage,
+    };
   }
 };
 
-export const disconnectFromNotificationHub = async () => {
-  if (connection) {
-    await connection.stop();
-    console.log("SignalR disconnected");
+export const getAllNotifications = async () => {
+  try {
+    const response = await api.get(`/Notifications`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching notifications:", error);
+    const errorMessage =
+      error.response?.data?.message || "An unexpected error occurred";
+    return {
+      data: [],
+      succeeded: false,
+      message: errorMessage,
+    };
+  }
+};
+
+export const getUnreadNotifications = async () => {
+  try {
+    const response = await api.get(`/Notifications/unread`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching unread notifications:", error);
+    const errorMessage =
+      error.response?.data?.message || "An unexpected error occurred";
+    return {
+      data: [],
+      succeeded: false,
+      message: errorMessage,
+    };
+  }
+};
+
+export const getReadNotifications = async () => {
+  try {
+    const response = await api.get(`/Notifications/read`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching read notifications:", error);
+    const errorMessage =
+      error.response?.data?.message || "An unexpected error occurred";
+    return {
+      data: [],
+      succeeded: false,
+      message: errorMessage,
+    };
+  }
+};
+
+export const markAsRead = async (id: number) => {
+  try {
+    const response = await api.post(`/Notification/mark-as-read/${id}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error marking notification as read:", error);
+    const errorMessage =
+      error.response?.data?.message || "An unexpected error occurred";
+    return {
+      data: null,
+      succeeded: false,
+      message: errorMessage,
+    };
   }
 };

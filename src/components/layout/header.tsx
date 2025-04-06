@@ -1,72 +1,64 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { Bell, Menu, Moon, Sun, User } from "lucide-react";
-import { logout } from "@/store/authSlice";
-import { API_BASE_URL } from "@/config/axiosInstance";
-import { useAuth } from "@/hooks/use-auth";
+import { useState, useEffect } from "react"
+import { useDispatch } from "react-redux"
+import { useNavigate, Link, useLocation } from "react-router-dom"
+import { Menu, Moon, Sun, User, Search } from "lucide-react"
+import { useAuth } from "@/hooks/use-auth"
+import { logout } from "@/store/authSlice"
+import { NotificationDropdown } from "@/components/auth/notification/notification-dropdown"
+import { API_BASE_URL } from "@/config/axiosInstance"
 
 interface HeaderProps {
-  toggleSidebar: () => void;
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
+  toggleSidebar: () => void
+  isDarkMode: boolean
+  toggleDarkMode: () => void
 }
 
-export default function Header({
-  toggleSidebar,
-  isDarkMode,
-  toggleDarkMode,
-}: HeaderProps) {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
+export default function Header({ toggleSidebar, isDarkMode, toggleDarkMode }: HeaderProps) {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const location = useLocation()
   const { user, isAuthenticated } = useAuth()
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const isHomePage = location.pathname === "/";
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const isHomePage = location.pathname === "/"
 
   // Handle scroll effect for transparent header on home page
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
-        setIsScrolled(true);
+        setIsScrolled(true)
       } else {
-        setIsScrolled(false);
+        setIsScrolled(false)
       }
-    };
+    }
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logout())
     // Redirect to home page after logout
-    navigate("/");
-    setIsProfileMenuOpen(false);
-  };
+    navigate("/")
+    setIsProfileMenuOpen(false)
+  }
 
   // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isProfileMenuOpen || isNotificationsOpen) {
-        const target = event.target as HTMLElement;
-        if (
-          !target.closest(".profile-menu") &&
-          !target.closest(".notifications-menu")
-        ) {
-          setIsProfileMenuOpen(false);
-          setIsNotificationsOpen(false);
+      if (isProfileMenuOpen) {
+        const target = event.target as HTMLElement
+        if (!target.closest(".profile-menu")) {
+          setIsProfileMenuOpen(false)
         }
       }
-    };
+    }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isProfileMenuOpen, isNotificationsOpen]);
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [isProfileMenuOpen])
 
   return (
     <header
@@ -84,66 +76,53 @@ export default function Header({
           >
             <Menu className="h-6 w-6" />
           </button>
+
+          {isHomePage && (
+            <div className="hidden md:flex ml-4 space-x-6">
+              <Link
+                to="/tutors"
+                className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400"
+              >
+                Find Tutors
+              </Link>
+              <Link
+                to="/courses"
+                className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400"
+              >
+                Browse Courses
+              </Link>
+              <Link
+                to="/about"
+                className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400"
+              >
+                About Us
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center space-x-4">
+          {!isHomePage && (
+            <div className="relative hidden md:block">
+              <input
+                type="text"
+                placeholder="Search..."
+                className="pl-10 pr-4 py-1 w-64 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            </div>
+          )}
+
           <button
             onClick={toggleDarkMode}
             className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
           >
-            {isDarkMode ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
+            {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
 
           {isAuthenticated ? (
             <>
-              <div className="relative notifications-menu">
-                <button
-                  onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                  className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
-                >
-                  <div className="relative">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                      3
-                    </span>
-                  </div>
-                </button>
-
-                {isNotificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10">
-                    <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-                      <h3 className="text-sm font-semibold">Notifications</h3>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto">
-                      {[1, 2, 3].map((item) => (
-                        <div
-                          key={item}
-                          className="p-3 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                        >
-                          <p className="text-sm font-medium">
-                            New student enrolled
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            John Doe enrolled in your course
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1">
-                            2 hours ago
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="p-2 text-center border-t border-gray-200 dark:border-gray-700">
-                      <button className="text-sm text-indigo-600 hover:underline">
-                        View all notifications
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <NotificationDropdown />
 
               <div className="relative profile-menu">
                 <button
@@ -151,7 +130,7 @@ export default function Header({
                   className="flex items-center space-x-2 focus:outline-none"
                 >
                   <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center overflow-hidden">
-                    {user?.image ? (
+                    {user?.profileImage ? (
                       <img
                         src={`${API_BASE_URL}/${user.image}`}
                         alt="User Profile"
@@ -162,23 +141,21 @@ export default function Header({
                     )}
                   </div>
 
-                  <span className="hidden md:inline-block font-medium">
-                    {user?.name}
-                  </span>
+                  <span className="hidden md:inline-block font-medium">{user?.name}</span>
                 </button>
 
                 {isProfileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10">
                     <div className="py-1">
                       <Link
-                        to={`/profile`}
+                        to={`/${user?.role}/profile`}
                         className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
                         Your Profile
                       </Link>
                       <Link
-                        to="/setting"
+                        to={`/${user?.role}/settings`}
                         className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
@@ -204,7 +181,7 @@ export default function Header({
                 Login
               </Link>
               <Link
-                to="/auth/sign-up"
+                to="/auth/signup"
                 className="px-4 py-1.5 text-sm rounded-md border border-indigo-600 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
               >
                 Sign Up
@@ -214,5 +191,6 @@ export default function Header({
         </div>
       </div>
     </header>
-  );
+  )
 }
+
