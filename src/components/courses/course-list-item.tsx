@@ -8,12 +8,12 @@ import { Button } from "@/ui/button";
 import { cn } from "../../ui/cn";
 import { Badge } from "@/ui/badge.tsx";
 import { cancelCourse } from "@/services/courseService";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hook/use-toast";
 import { CancelCourseModal } from "@/ui/modals/cancel-course";
 import { ToastContainer } from "@/ui/toast";
 import { STATUS_STYLES } from "./course-card";
 import { ContractModal } from "@/ui/modals/contract-modal";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hook/use-auth";
 import { enrollCourse } from "@/services/enrollmentService";
 
 interface CourseListItemProps {

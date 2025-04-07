@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { fadeIn } from "../layout/animation";
+import { fadeIn } from "./animation";
 
 interface SectionHeadingProps {
   title: string;

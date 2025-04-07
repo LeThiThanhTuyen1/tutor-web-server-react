@@ -6,7 +6,7 @@ import Sidebar from "./sidebar";
 import Header from "./header";
 import { useLocation } from "react-router-dom";
 import LazyFooter from "./lazy-footer";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hook/use-auth";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -101,9 +101,10 @@ export default function PublicLayout({ children }: AppLayoutProps) {
                     transition={{ duration: 0.3 }}
                     className="fixed md:sticky top-0 z-20 min-h-screen w-64 bg-white dark:bg-gray-800 shadow-md"
                   >
-                    <Sidebar isOpen={isSidebarOpen} 
-                    // isHomePage={isHomePage}
-                     />
+                    <Sidebar
+                      isOpen={isSidebarOpen}
+                      // isHomePage={isHomePage}
+                    />
                   </motion.div>
                 </>
               )}

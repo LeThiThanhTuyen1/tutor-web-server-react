@@ -7,20 +7,19 @@ import {
   Clock,
   BookOpen,
   Calendar,
-  LayoutList,
   ViewIcon as ViewWeek,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Button } from "@/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hook/use-toast";
 import { ToastContainer } from "@/ui/toast";
 import type React from "react";
 import {
   getStudentCourseByUserId,
   getTutorCourseByUserId,
 } from "@/services/courseService";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hook/use-auth";
 import WeeklyTableSchedule from "./weekly-table-schedule";
 import CourseTableSchedule from "./course-table-schedule";
 import { CircleDollarSign, Video, Users } from "lucide-react";

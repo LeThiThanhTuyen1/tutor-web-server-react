@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/ui/button";
@@ -16,7 +15,7 @@ import { Badge } from "@/ui/badge";
 import { ScrollArea } from "@/ui/scroll-area";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { useNotification } from "@/hooks/use-notification";
+import { useNotification } from "@/hook/use-notification";
 
 export function NotificationDropdown() {
   const {
@@ -25,16 +24,17 @@ export function NotificationDropdown() {
     markAsRead,
     unreadCount,
     refreshNotifications,
+    lastFetched,
   } = useNotification();
   const [open, setOpen] = useState(false);
 
-  // Refresh notifications when dropdown opens
+  // Refresh notifications when dropdown opens, but only if stale
   useEffect(() => {
     console.log(unreadCount);
-    if (open) {
+    if (open && (!lastFetched || Date.now() - lastFetched > 60000)) {
       refreshNotifications();
     }
-  }, [open, refreshNotifications]);
+  }, [open, refreshNotifications, lastFetched, unreadCount]);
 
   const handleMarkAsRead = (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -65,22 +65,19 @@ export function NotificationDropdown() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
-        <div className="flex items-center justify-between px-4 py-2 border-b">
-          <h4 className="font-medium">Notifications</h4>
-          <Tabs>
-          <TabsList className="grid grid-cols-2 h-8">
-            
-            <TabsTrigger value="unread" className="text-xs">
-              Unread ({unreadNotifications.length})
-            </TabsTrigger>
-            <TabsTrigger value="read" className="text-xs">
-              Read ({readNotifications.length})
-            </TabsTrigger>
-          </TabsList>
-          </Tabs>
-        </div>
-
         <Tabs defaultValue="unread" className="w-full">
+          <div className="flex items-center justify-between px-4 py-2 border-b">
+            <h4 className="font-medium">Notifications</h4>
+            <TabsList className="grid grid-cols-2 h-8">
+              <TabsTrigger value="unread" className="text-xs">
+                Unread ({unreadNotifications.length})
+              </TabsTrigger>
+              <TabsTrigger value="read" className="text-xs">
+                Read ({readNotifications.length})
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
           <TabsContent value="unread" className="mt-0">
             <ScrollArea className="h-[300px]">
               {unreadNotifications.length === 0 ? (

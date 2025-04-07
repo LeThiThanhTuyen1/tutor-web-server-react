@@ -1,4 +1,4 @@
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hook/use-toast";
 import { changePassword } from "@/services/authService";
 import { ChangePassword } from "@/types/change-password";
 import { Eye, EyeOff, X, KeyRound } from "lucide-react";

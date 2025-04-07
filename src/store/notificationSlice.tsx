@@ -1,13 +1,9 @@
 import {
-  getAllNotifications,
-  markAsRead,
-} from "@/services/notificationService";
-import {
   createSlice,
   createAsyncThunk,
   type PayloadAction,
 } from "@reduxjs/toolkit";
-import { console } from "inspector";
+import { getAllNotifications, markAsRead } from "@/services/notificationService";
 
 export interface Notification {
   id: number;
@@ -64,7 +60,7 @@ export const markNotificationAsRead = createAsyncThunk(
         return rejectWithValue(message || "Failed to mark as read");
       }
 
-      return data.notificationId; // return correct ID from server
+      return data.notificationId; // Return the correct ID from the server
     } catch (error: any) {
       return rejectWithValue(error.message || "An error occurred");
     }
@@ -79,27 +75,22 @@ const notificationSlice = createSlice({
     resetNotificationError: (state) => {
       state.error = null;
     },
-    // Add a new notification directly (for real-time updates)
     addNotification: (state, action: PayloadAction<Notification>) => {
-      // Check if notification already exists to avoid duplicates
       const exists = state.notifications.some(
         (n) => n.id === action.payload.id
       );
       if (!exists) {
         state.notifications.unshift(action.payload);
-        // Update unread count if the notification is unread
         if (!action.payload.isRead) {
           state.unreadCount += 1;
         }
       }
     },
-    // Update unread count manually if needed
     updateUnreadCount: (state) => {
       state.unreadCount = calculateUnreadCount(state.notifications);
     },
   },
   extraReducers: (builder) => {
-    // Fetch all notifications
     builder
       .addCase(fetchAllNotifications.pending, (state) => {
         state.loading = true;
@@ -114,10 +105,7 @@ const notificationSlice = createSlice({
       .addCase(fetchAllNotifications.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
-
-    // Mark notification as read
-    builder
+      })
       .addCase(markNotificationAsRead.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -128,7 +116,6 @@ const notificationSlice = createSlice({
           (notification) => notification.id === action.payload
         );
         if (notificationIndex !== -1) {
-          // Only decrement unread count if it was previously unread
           if (!state.notifications[notificationIndex].isRead) {
             state.unreadCount = Math.max(0, state.unreadCount - 1);
           }

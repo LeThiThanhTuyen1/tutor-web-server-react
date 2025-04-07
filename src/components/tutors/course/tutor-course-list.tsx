@@ -26,14 +26,14 @@ import {
   SelectValue,
 } from "@/ui/select";
 import { Tabs, TabsContent } from "@/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hook/use-toast";
 import { ToastContainer } from "@/ui/toast";
 import { CancelCourseModal } from "@/ui/modals/cancel-course";
 import { PaginationFilter } from "@/types/paginated-response";
 import { cn } from "@/ui/cn";
 import { Badge } from "@/ui/badge";
 import { DeleteConfirmationModal } from "@/ui/modals/delete-confirm";
-import { useCourse } from "@/hooks/use-course";
+import { useCourse } from "@/hook/use-course";
 import { formatRelativeDate } from "@/components/courses/course-utils";
 import { STATUS_STYLES } from "@/components/courses/course-card";
 

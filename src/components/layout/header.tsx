@@ -1,64 +1,68 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useDispatch } from "react-redux"
-import { useNavigate, Link, useLocation } from "react-router-dom"
-import { Menu, Moon, Sun, User, Search } from "lucide-react"
-import { useAuth } from "@/hooks/use-auth"
-import { logout } from "@/store/authSlice"
-import { NotificationDropdown } from "@/components/auth/notification/notification-dropdown"
-import { API_BASE_URL } from "@/config/axiosInstance"
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import { Menu, Moon, Sun, User, Search } from "lucide-react";
+import { useAuth } from "@/hook/use-auth";
+import { logout } from "@/store/authSlice";
+import { NotificationDropdown } from "@/components/notification/notification-dropdown";
+import { API_BASE_URL } from "@/config/axiosInstance";
 
 interface HeaderProps {
-  toggleSidebar: () => void
-  isDarkMode: boolean
-  toggleDarkMode: () => void
+  toggleSidebar: () => void;
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
 }
 
-export default function Header({ toggleSidebar, isDarkMode, toggleDarkMode }: HeaderProps) {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { user, isAuthenticated } = useAuth()
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
-  const isHomePage = location.pathname === "/"
+export default function Header({
+  toggleSidebar,
+  isDarkMode,
+  toggleDarkMode,
+}: HeaderProps) {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, isAuthenticated } = useAuth();
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const isHomePage = location.pathname === "/";
 
   // Handle scroll effect for transparent header on home page
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
-        setIsScrolled(true)
+        setIsScrolled(true);
       } else {
-        setIsScrolled(false)
+        setIsScrolled(false);
       }
-    }
+    };
 
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleLogout = () => {
-    dispatch(logout())
+    dispatch(logout());
     // Redirect to home page after logout
-    navigate("/")
-    setIsProfileMenuOpen(false)
-  }
+    navigate("/");
+    setIsProfileMenuOpen(false);
+  };
 
   // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isProfileMenuOpen) {
-        const target = event.target as HTMLElement
+        const target = event.target as HTMLElement;
         if (!target.closest(".profile-menu")) {
-          setIsProfileMenuOpen(false)
+          setIsProfileMenuOpen(false);
         }
       }
-    }
+    };
 
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [isProfileMenuOpen])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isProfileMenuOpen]);
 
   return (
     <header
@@ -117,7 +121,11 @@ export default function Header({ toggleSidebar, isDarkMode, toggleDarkMode }: He
             onClick={toggleDarkMode}
             className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
           >
-            {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            {isDarkMode ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
           </button>
 
           {isAuthenticated ? (
@@ -141,7 +149,9 @@ export default function Header({ toggleSidebar, isDarkMode, toggleDarkMode }: He
                     )}
                   </div>
 
-                  <span className="hidden md:inline-block font-medium">{user?.name}</span>
+                  <span className="hidden md:inline-block font-medium">
+                    {user?.name}
+                  </span>
                 </button>
 
                 {isProfileMenuOpen && (
@@ -191,6 +201,5 @@ export default function Header({ toggleSidebar, isDarkMode, toggleDarkMode }: He
         </div>
       </div>
     </header>
-  )
+  );
 }
-

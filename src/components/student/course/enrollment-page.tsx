@@ -14,10 +14,10 @@ import {
 import { Button } from "@/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Skeleton } from "@/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hook/use-toast";
+import { useAuth } from "@/hook/use-auth";
 import { ContractModal } from "@/ui/modals/contract-modal";
-import { useCourse } from "@/hooks/use-course";
+import { useCourse } from "@/hook/use-course";
 import { ToastContainer } from "@/ui/toast";
 import { enrollCourse } from "@/services/enrollmentService";
 

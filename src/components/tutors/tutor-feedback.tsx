@@ -22,9 +22,9 @@ import {
   updateFeedback,
 } from "@/services/feedbackService";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hook/use-auth";
 import { ToastContainer } from "@/ui/toast";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hook/use-toast";
 import type React from "react";
 import {
   DropdownMenu,
@@ -42,7 +42,6 @@ interface RatingStarsProps {
   interactive?: boolean;
 }
 
-// Rating star component
 const RatingStars: React.FC<RatingStarsProps> = ({
   rating,
   onRatingChange,
@@ -103,40 +102,56 @@ export default function TutorReviews() {
   const commentRef = useRef<HTMLTextAreaElement>(null);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
 
-  // Fetch data
+  // Fetch data with separate error handling for each API call
   const fetchData = async () => {
+    setLoading(true);
+    let userFeedbackData = null;
+    let allFeedbacksData: any[] = [];
+
     try {
-      setLoading(true);
-
-      // Fetch user feedback and all feedbacks in parallel
-      const [userResponse, allResponse] = await Promise.all([
-        isStudent
-          ? getFeedbackByUser(tutorId)
-          : Promise.resolve({ data: null }),
-        getTutorFeedbacks(tutorId),
-      ]);
-
-      const hasUserFeedback = userResponse.data !== null;
-      setUserFeedback(userResponse.data);
-      setShowFeedbackForm(isStudent && !hasUserFeedback);
-
-      // Filter out user's feedback from all feedbacks
-      const otherFeedbacks =
-        allResponse.data?.filter(
-          (feedback: any) =>
-            !userResponse.data || feedback.id !== userResponse.data.id
-        ) || [];
-
-      setFeedbacks(otherFeedbacks);
+      // Fetch all feedbacks regardless of user feedback status
+      const allResponse = await getTutorFeedbacks(tutorId);
+      allFeedbacksData = allResponse.data || [];
     } catch (err) {
-      console.error("Error fetching feedback:", err);
-      // If there's an error fetching user feedback, show the form anyway
-      if (isStudent) {
+      console.error("Error fetching tutor feedbacks:", err);
+      toast({
+        title: "Error",
+        description: "Failed to load tutor reviews",
+        variant: "destructive",
+      });
+    }
+
+    if (isStudent) {
+      try {
+        const userResponse = await getFeedbackByUser(tutorId);
+        userFeedbackData = userResponse.data;
+      } catch (err) {
+        console.error("Error fetching user feedback:", err);
+        // If user feedback fails (e.g., no feedback exists), still show the form
         setShowFeedbackForm(true);
       }
-    } finally {
-      setLoading(false);
+    } else {
+      setShowFeedbackForm(false);
     }
+
+    // Set user feedback
+    setUserFeedback(userFeedbackData);
+
+    // Filter out user's feedback from all feedbacks
+    const otherFeedbacks = userFeedbackData
+      ? allFeedbacksData.filter(
+          (feedback: any) => feedback.id !== userFeedbackData.id
+        )
+      : allFeedbacksData;
+
+    setFeedbacks(otherFeedbacks);
+
+    // Show feedback form if no user feedback exists and user is a student
+    if (isStudent && !userFeedbackData) {
+      setShowFeedbackForm(true);
+    }
+
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -190,7 +205,6 @@ export default function TutorReviews() {
       setEditComment(userFeedback.comment);
       setIsEditing(true);
 
-      // Focus the comment textarea after state update
       setTimeout(() => {
         if (commentRef.current) {
           commentRef.current.focus();
@@ -218,7 +232,6 @@ export default function TutorReviews() {
     try {
       await updateFeedback(userFeedback.id, editRating, editComment);
 
-      // Update local state
       setUserFeedback({
         ...userFeedback,
         rating: editRating,
@@ -258,7 +271,6 @@ export default function TutorReviews() {
     try {
       await deleteFeedback(userFeedback.id);
 
-      // Update local state
       setUserFeedback(null);
       setShowFeedbackForm(true);
 
@@ -295,7 +307,6 @@ export default function TutorReviews() {
     try {
       const response = await addFeedback(tutorId, newRating, newComment);
 
-      // Update local state with new feedback
       setUserFeedback({
         id: response.id,
         tutorId,
@@ -308,10 +319,7 @@ export default function TutorReviews() {
         updatedAt: new Date().toISOString(),
       });
 
-      // Hide the form
       setShowFeedbackForm(false);
-
-      // Reset form
       setNewRating(0);
       setNewComment("");
 
@@ -321,7 +329,6 @@ export default function TutorReviews() {
         variant: "success",
       });
 
-      // Refresh data to ensure consistency
       fetchData();
     } catch (error) {
       console.error("Error submitting feedback:", error);
@@ -399,7 +406,6 @@ export default function TutorReviews() {
 
           <AnimatePresence mode="wait">
             {userFeedback && !isEditing ? (
-              /* User's existing review */
               <motion.div
                 key="user-review"
                 initial={{ opacity: 0, y: 20 }}
@@ -465,7 +471,6 @@ export default function TutorReviews() {
                 </div>
               </motion.div>
             ) : isEditing ? (
-              /* Edit review form */
               <motion.div
                 key="edit-form"
                 initial={{ opacity: 0, y: 20 }}
@@ -529,7 +534,6 @@ export default function TutorReviews() {
                 </div>
               </motion.div>
             ) : showFeedbackForm ? (
-              /* New review form */
               <motion.div
                 key="new-form"
                 initial={{ opacity: 0, y: 20 }}
