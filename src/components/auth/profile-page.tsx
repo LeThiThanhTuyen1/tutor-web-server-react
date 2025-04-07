@@ -4,10 +4,26 @@ import type React from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Loader2, User, Mail, Phone, MapPin, Calendar, School, Shield, Edit, Key } from 'lucide-react';
-import { getProfile, updateProfile, uploadProfileImage } from "@/services/authService";
+import {
+  Camera,
+  Loader2,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  School,
+  Shield,
+  Edit,
+  Key,
+} from "lucide-react";
+import {
+  getProfile,
+  updateProfile,
+  uploadProfileImage,
+} from "@/services/authService";
 import { updateUser } from "@/store/authSlice";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hook/use-toast";
 import { ToastContainer } from "@/ui/toast";
 import { API_BASE_URL } from "@/config/axiosInstance";
 import { EditProfileModal } from "./edit-profile";
@@ -25,7 +41,8 @@ export default function ProfilePage() {
 
   // State for modal visibility
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
-  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
+    useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [imageHover, setImageHover] = useState(false);
 
@@ -61,11 +78,12 @@ export default function ProfilePage() {
         };
 
         const result = await updateProfile(profileToUpdate);
-        
+
         if (result.succeeded) {
           toast({
             title: "Success",
-            description: result.message.message || "Profile updated successfully",
+            description:
+              result.message.message || "Profile updated successfully",
             variant: "success",
           });
 
@@ -161,7 +179,7 @@ export default function ProfilePage() {
           const updatedProfile = {
             ...profile,
             image: result.profileImage,
-          } ;
+          };
           setProfile(updatedProfile);
 
           const userForRedux: any = {
@@ -206,7 +224,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-indigo-50 to-white dark:from-gray-900 dark:to-gray-800">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
@@ -216,7 +234,9 @@ export default function ProfilePage() {
             <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 opacity-20 blur-lg"></div>
             <Loader2 className="h-12 w-12 animate-spin mx-auto text-indigo-600 dark:text-indigo-400 relative" />
           </div>
-          <p className="mt-4 text-lg font-medium text-gray-700 dark:text-gray-300">Loading your profile...</p>
+          <p className="mt-4 text-lg font-medium text-gray-700 dark:text-gray-300">
+            Loading your profile...
+          </p>
         </motion.div>
       </div>
     );
@@ -225,7 +245,7 @@ export default function ProfilePage() {
   if (error) {
     return (
       <div className="container mx-auto py-12 px-4">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -233,7 +253,7 @@ export default function ProfilePage() {
         >
           <h2 className="text-xl font-semibold mb-2">Error Loading Profile</h2>
           <p>{error}</p>
-          <button 
+          <button
             onClick={fetchProfile}
             className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
           >
@@ -247,7 +267,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white dark:from-gray-900 dark:to-gray-800 py-12 px-4">
       <div className="container mx-auto">
-        <motion.h1 
+        <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -258,7 +278,7 @@ export default function ProfilePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Profile Image Section */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -267,12 +287,12 @@ export default function ProfilePage() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
               <div className="bg-gradient-to-r from-indigo-600 to-purple-600 h-24 relative">
                 <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
-                  <div 
+                  <div
                     className="relative"
                     onMouseEnter={() => setImageHover(true)}
                     onMouseLeave={() => setImageHover(false)}
                   >
-                    <motion.div 
+                    <motion.div
                       initial={{ scale: 1 }}
                       animate={{ scale: imageHover ? 1.05 : 1 }}
                       transition={{ duration: 0.3 }}
@@ -284,7 +304,9 @@ export default function ProfilePage() {
                           key={profile.image}
                           src={
                             profile?.image
-                              ? `${API_BASE_URL}/${profile.image}?t=${new Date().getTime()}`
+                              ? `${API_BASE_URL}/${
+                                  profile.image
+                                }?t=${new Date().getTime()}`
                               : "/placeholder.svg"
                           }
                           alt="Profile"
@@ -302,7 +324,7 @@ export default function ProfilePage() {
 
                       <AnimatePresence>
                         {imageHover && !isUploading && (
-                          <motion.div 
+                          <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -326,8 +348,12 @@ export default function ProfilePage() {
               </div>
 
               <div className="pt-20 pb-6 px-6 text-center">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{profile?.name}</h2>
-                <p className="text-indigo-600 dark:text-indigo-400 font-medium">{profile?.email}</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {profile?.name}
+                </h2>
+                <p className="text-indigo-600 dark:text-indigo-400 font-medium">
+                  {profile?.email}
+                </p>
                 <div className="inline-block px-3 py-1 mt-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-medium capitalize">
                   {profile?.role}
                 </div>
@@ -342,7 +368,7 @@ export default function ProfilePage() {
                     <Edit className="h-4 w-4" />
                     Edit Profile
                   </motion.button>
-                  
+
                   <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
@@ -358,7 +384,7 @@ export default function ProfilePage() {
           </motion.div>
 
           {/* Profile Details Section */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -366,7 +392,9 @@ export default function ProfilePage() {
           >
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden mb-8">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Profile Information</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Profile Information
+                </h2>
               </div>
 
               <div className="p-6">
@@ -487,7 +515,7 @@ export default function ProfilePage() {
                 </div>
 
                 {profile?.tutorInfo && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.3 }}
@@ -503,7 +531,9 @@ export default function ProfilePage() {
                           Experience
                         </h4>
                         <p className="text-gray-900 dark:text-white font-medium">
-                          {profile.tutorInfo.experience ? `${profile.tutorInfo.experience} years` : "Not provided"}
+                          {profile.tutorInfo.experience
+                            ? `${profile.tutorInfo.experience} years`
+                            : "Not provided"}
                         </p>
                       </div>
 

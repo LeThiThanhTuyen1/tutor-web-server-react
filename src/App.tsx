@@ -10,7 +10,7 @@ import PublicLayout from "./components/layout/public-layout";
 
 // Pages
 import AuthPage from "./components/auth/auth-page";
-import HomePage from "./components/backet/home-page";
+import HomePage from "./components/layout/home-page";
 import CourseList from "./components/courses/course-list-grid";
 import TutorList from "./components/tutors/tutor-list";
 import { getProfile } from "./services/authService";
@@ -24,14 +24,14 @@ import Forbidden from "./components/error/forbidden";
 import TutorCourseListComponent from "./components/tutors/course/tutor-course-list";
 import StudentCourseList from "./components/student/course/student-course-list";
 import ScheduleView from "./components/courses/schedule/schedule-view";
-import { useAuth } from "./hooks/use-auth";
+import { useAuth } from "./hook/use-auth";
 import { useDispatch } from "react-redux";
 import EnrollmentPage from "./components/student/course/enrollment-page";
 import { AdminDashboard } from "./components/dashboard/admin-dashboard";
 import { TutorDashboard } from "./components/dashboard/tutor-dashboard";
 import { StudentDashboard } from "./components/dashboard/student-dashboard";
-import SettingsPage from "./components/backet/setting-page";
-import NotificationsPage from "./components/backet/notifications-page";
+import SettingsPage from "./components/layout/setting-page";
+import NotificationsPage from "./components/layout/notifications-page";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();

@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import TutorCourseList from "../student/course/student-course-list";
 import CourseList from "./course-list-grid";
 import StudentCourseList from "../student/course/student-course-list";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hook/use-auth";
 
 export default function CourseListContainer() {
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated } = useAuth();
   const [viewType, setViewType] = useState<"public" | "tutor" | "student">(
     "public"
   );

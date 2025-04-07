@@ -41,18 +41,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/ui/table";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hook/use-toast";
+import { useAuth } from "@/hook/use-auth";
 import { CancelCourseModal } from "@/ui/modals/cancel-course";
 import { Badge } from "@/ui/badge";
 import { STATUS_STYLES } from "./course-card";
-import { useCourse } from "@/hooks/use-course";
+import { useCourse } from "@/hook/use-course";
 import { Input } from "@/ui/input";
 import { API_BASE_URL } from "@/config/axiosInstance";
 import { ContractModal } from "@/ui/modals/contract-modal";
 import { enrollCourse } from "@/services/enrollmentService";
 import { Separator } from "@/ui/separator";
-import LazyImage from "../backet/lazy-image";
+import LazyImage from "../layout/lazy-image";
 import { ToastContainer } from "@/ui/toast";
 
 // Day of week mapping

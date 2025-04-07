@@ -8,7 +8,7 @@ import { Mail, Lock, LogIn } from "lucide-react";
 import { login as loginAction } from "@/store/authSlice";
 import { validateEmail, validatePassword } from "@/utils/validation";
 import { login } from "@/services/authService";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hook/use-toast";
 import { ToastContainer } from "@/ui/toast";
 
 interface LoginFormProps {

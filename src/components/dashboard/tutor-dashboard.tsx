@@ -1,16 +1,34 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts"
-import { Users, BookOpen, Calendar, Star, ArrowUp, Clock, MessageSquare } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card"
-import { Button } from "@/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/ui/avatar"
-import { Badge } from "@/ui/badge"
-import { useAuth } from "@/hooks/use-auth"
-import { Link } from "react-router-dom"
-import { fadeIn, staggerContainer } from "../layout/animation"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from "recharts";
+import {
+  Users,
+  BookOpen,
+  Calendar,
+  Star,
+  ArrowUp,
+  Clock,
+  MessageSquare,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
+import { Button } from "@/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/ui/avatar";
+import { Badge } from "@/ui/badge";
+import { useAuth } from "@/hook/use-auth";
+import { Link } from "react-router-dom";
+import { fadeIn, staggerContainer } from "../layout/animation";
 
 // Mock data for the dashboard
 const mockStats = {
@@ -18,7 +36,7 @@ const mockStats = {
   students: 42,
   hours: 128,
   rating: 4.8,
-}
+};
 
 const mockBarData = [
   { name: "Jan", students: 5, hours: 20 },
@@ -27,7 +45,7 @@ const mockBarData = [
   { name: "Apr", students: 10, hours: 40 },
   { name: "May", students: 15, hours: 60 },
   { name: "Jun", students: 18, hours: 72 },
-]
+];
 
 const mockUpcomingClasses = [
   {
@@ -51,7 +69,7 @@ const mockUpcomingClasses = [
     students: 6,
     mode: "hybrid",
   },
-]
+];
 
 const mockRecentMessages = [
   {
@@ -70,20 +88,20 @@ const mockRecentMessages = [
     time: "2 hours ago",
     unread: false,
   },
-]
+];
 
 export function TutorDashboard() {
-  const { user } = useAuth()
-  const [greeting, setGreeting] = useState("")
+  const { user } = useAuth();
+  const [greeting, setGreeting] = useState("");
 
   useEffect(() => {
-    const hour = new Date().getHours()
-    if (hour < 12) setGreeting("Good morning")
-    else if (hour < 18) setGreeting("Good afternoon")
-    else setGreeting("Good evening")
-  }, [])
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good morning");
+    else if (hour < 18) setGreeting("Good afternoon");
+    else setGreeting("Good evening");
+  }, []);
 
-  const container = staggerContainer(0.1)
+  const container = staggerContainer(0.1);
 
   return (
     <div className="p-6">
@@ -92,11 +110,18 @@ export function TutorDashboard() {
           <h1 className="text-3xl font-bold mb-2">
             {greeting}, {user?.name}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">Here's what's happening with your teaching today.</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Here's what's happening with your teaching today.
+          </p>
         </div>
       </motion.div>
 
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="space-y-6"
+      >
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <motion.div variants={fadeIn("up", 0.1)}>
@@ -104,13 +129,19 @@ export function TutorDashboard() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Courses</p>
-                    <h3 className="text-2xl font-bold mt-1">{mockStats.courses}</h3>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Active Courses
+                    </p>
+                    <h3 className="text-2xl font-bold mt-1">
+                      {mockStats.courses}
+                    </h3>
                     <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
                         <ArrowUp className="h-3 w-3 mr-1" />2
                       </span>
-                      <span className="text-gray-500 dark:text-gray-400 ml-1">vs last month</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-1">
+                        vs last month
+                      </span>
                     </div>
                   </div>
                   <div className="bg-indigo-100 dark:bg-indigo-900/30 p-3 rounded-lg">
@@ -126,13 +157,19 @@ export function TutorDashboard() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Students</p>
-                    <h3 className="text-2xl font-bold mt-1">{mockStats.students}</h3>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Total Students
+                    </p>
+                    <h3 className="text-2xl font-bold mt-1">
+                      {mockStats.students}
+                    </h3>
                     <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
                         <ArrowUp className="h-3 w-3 mr-1" />5
                       </span>
-                      <span className="text-gray-500 dark:text-gray-400 ml-1">vs last month</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-1">
+                        vs last month
+                      </span>
                     </div>
                   </div>
                   <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg">
@@ -148,14 +185,20 @@ export function TutorDashboard() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Teaching Hours</p>
-                    <h3 className="text-2xl font-bold mt-1">{mockStats.hours}</h3>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Teaching Hours
+                    </p>
+                    <h3 className="text-2xl font-bold mt-1">
+                      {mockStats.hours}
+                    </h3>
                     <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
                         <ArrowUp className="h-3 w-3 mr-1" />
                         12
                       </span>
-                      <span className="text-gray-500 dark:text-gray-400 ml-1">vs last month</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-1">
+                        vs last month
+                      </span>
                     </div>
                   </div>
                   <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
@@ -171,14 +214,20 @@ export function TutorDashboard() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Average Rating</p>
-                    <h3 className="text-2xl font-bold mt-1">{mockStats.rating}</h3>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Average Rating
+                    </p>
+                    <h3 className="text-2xl font-bold mt-1">
+                      {mockStats.rating}
+                    </h3>
                     <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
                         <ArrowUp className="h-3 w-3 mr-1" />
                         0.2
                       </span>
-                      <span className="text-gray-500 dark:text-gray-400 ml-1">vs last month</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-1">
+                        vs last month
+                      </span>
                     </div>
                   </div>
                   <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-lg">
@@ -195,17 +244,26 @@ export function TutorDashboard() {
           <motion.div variants={fadeIn("up", 0.5)}>
             <Card className="border-indigo-100 dark:border-indigo-900">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold">Student Enrollment</CardTitle>
+                <CardTitle className="text-xl font-semibold">
+                  Student Enrollment
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={mockBarData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <BarChart
+                      data={mockBarData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                    >
                       <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                       <XAxis dataKey="name" />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="students" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                      <Bar
+                        dataKey="students"
+                        fill="#4f46e5"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -216,17 +274,28 @@ export function TutorDashboard() {
           <motion.div variants={fadeIn("up", 0.6)}>
             <Card className="border-indigo-100 dark:border-indigo-900">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold">Teaching Hours</CardTitle>
+                <CardTitle className="text-xl font-semibold">
+                  Teaching Hours
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={mockBarData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <LineChart
+                      data={mockBarData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                    >
                       <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                       <XAxis dataKey="name" />
                       <YAxis />
                       <Tooltip />
-                      <Line type="monotone" dataKey="hours" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 4 }} />
+                      <Line
+                        type="monotone"
+                        dataKey="hours"
+                        stroke="#8b5cf6"
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                      />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -240,7 +309,9 @@ export function TutorDashboard() {
           <motion.div variants={fadeIn("up", 0.7)}>
             <Card className="border-indigo-100 dark:border-indigo-900">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-xl font-semibold">Upcoming Classes</CardTitle>
+                <CardTitle className="text-xl font-semibold">
+                  Upcoming Classes
+                </CardTitle>
                 <Button variant="outline" size="sm" asChild>
                   <Link to="/schedule/tutor">View All</Link>
                 </Button>
@@ -260,8 +331,8 @@ export function TutorDashboard() {
                             classItem.mode === "online"
                               ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
                               : classItem.mode === "in-person"
-                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                                : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                              : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
                           }
                         >
                           {classItem.mode}
@@ -285,7 +356,9 @@ export function TutorDashboard() {
           <motion.div variants={fadeIn("up", 0.8)}>
             <Card className="border-indigo-100 dark:border-indigo-900">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-xl font-semibold">Recent Messages</CardTitle>
+                <CardTitle className="text-xl font-semibold">
+                  Recent Messages
+                </CardTitle>
                 <Button variant="outline" size="sm" asChild>
                   <Link to="/messages">View All</Link>
                 </Button>
@@ -296,11 +369,16 @@ export function TutorDashboard() {
                     <div
                       key={message.id}
                       className={`flex items-start p-4 border border-gray-200 dark:border-gray-700 rounded-lg ${
-                        message.unread ? "bg-indigo-50 dark:bg-indigo-900/20" : ""
+                        message.unread
+                          ? "bg-indigo-50 dark:bg-indigo-900/20"
+                          : ""
                       }`}
                     >
                       <Avatar className="h-10 w-10 mr-3">
-                        <AvatarImage src={message.avatar} alt={message.student} />
+                        <AvatarImage
+                          src={message.avatar}
+                          alt={message.student}
+                        />
                         <AvatarFallback className="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
                           {message.student.charAt(0)}
                         </AvatarFallback>
@@ -308,11 +386,17 @@ export function TutorDashboard() {
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start">
                           <h4 className="font-medium">{message.student}</h4>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">{message.time}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {message.time}
+                          </span>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 truncate">{message.message}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 truncate">
+                          {message.message}
+                        </p>
                       </div>
-                      {message.unread && <div className="h-2 w-2 bg-indigo-600 rounded-full flex-shrink-0 mt-2"></div>}
+                      {message.unread && (
+                        <div className="h-2 w-2 bg-indigo-600 rounded-full flex-shrink-0 mt-2"></div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -325,7 +409,9 @@ export function TutorDashboard() {
         <motion.div variants={fadeIn("up", 0.9)}>
           <Card className="border-indigo-100 dark:border-indigo-900">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold">Quick Actions</CardTitle>
+              <CardTitle className="text-xl font-semibold">
+                Quick Actions
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -347,7 +433,10 @@ export function TutorDashboard() {
                     Manage Schedule
                   </Link>
                 </Button>
-                <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600/90 dark:hover:bg-blue-700/90" asChild>
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600/90 dark:hover:bg-blue-700/90"
+                  asChild
+                >
                   <Link to="/messages">
                     <MessageSquare className="h-4 w-4 mr-2" />
                     View Messages
@@ -359,6 +448,5 @@ export function TutorDashboard() {
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }
-

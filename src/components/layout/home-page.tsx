@@ -26,7 +26,7 @@ import SectionHeading from "./section-heading";
 import LazyImage from "./lazy-image";
 import { getAllTutors } from "@/services/tutorService";
 import { API_BASE_URL } from "@/config/axiosInstance";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hook/use-auth";
 
 const testimonials = [
   {

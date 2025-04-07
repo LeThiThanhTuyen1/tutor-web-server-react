@@ -14,8 +14,8 @@ import {
 } from "../../ui/card.tsx";
 import { cn } from "@/ui/cn.ts";
 import { Badge } from "@/ui/badge.tsx";
-import { useAuth } from "@/hooks/use-auth.tsx";
-import { useToast } from "@/hooks/use-toast.tsx";
+import { useAuth } from "@/hook/use-auth.tsx";
+import { useToast } from "@/hook/use-toast.tsx";
 import { ToastContainer } from "@/ui/toast.tsx";
 import { enrollCourse } from "@/services/enrollmentService.tsx";
 import { ContractModal } from "@/ui/modals/contract-modal.tsx";
@@ -165,7 +165,7 @@ function CourseCardComponent({ course, isTutor }: CourseCardProps) {
                   View
                 </Link>
               </Button>
-              {!isTutor && (
+              {!isTutor && course.status !== "completed" && course.status !== "canceled" &&(
                 <Button
                   className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90 h-12 text-base"
                   onClick={() => {

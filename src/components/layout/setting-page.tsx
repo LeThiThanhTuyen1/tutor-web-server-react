@@ -34,13 +34,6 @@ import { Switch } from "@/ui/switch";
 import { Separator } from "@/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/ui/radio-group";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/ui/select";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -50,8 +43,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hook/use-toast";
+import { useAuth } from "@/hook/use-auth";
 import { fadeIn } from "../layout/animation";
 import { useNavigate } from "react-router-dom";
 
@@ -432,23 +425,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch />
                 </div>
-
                 <Separator />
-
-                <div className="space-y-2">
-                  <Label htmlFor="font-size">Font Size</Label>
-                  <Select defaultValue="medium">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select font size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="small">Small</SelectItem>
-                      <SelectItem value="medium">Medium (Default)</SelectItem>
-                      <SelectItem value="large">Large</SelectItem>
-                      <SelectItem value="x-large">Extra Large</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
               </CardContent>
               <CardFooter className="flex justify-end">
                 <Button

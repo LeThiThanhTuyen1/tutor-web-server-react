@@ -8,7 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, Bell, Check, CheckCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/ui/skeleton";
-import { useNotification } from "@/hooks/use-notification";
+import { useNotification } from "@/hook/use-notification";
 
 export default function NotificationsPage() {
   const {
@@ -22,7 +22,7 @@ export default function NotificationsPage() {
 
   const handleMarkAsRead = (id: number) => {
     markAsRead(id);
-    console.log(id)
+    console.log(id);
   };
 
   if (loading) {
