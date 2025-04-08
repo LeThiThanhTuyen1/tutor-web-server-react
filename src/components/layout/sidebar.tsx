@@ -8,6 +8,7 @@ import {
   LogIn,
   SettingsIcon,
   Bell,
+  FileText,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hook/use-auth";
@@ -50,6 +51,11 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       //   path: "/notifications",
       //   icon: <Bell className="h-5 w-5" />,
       // },
+      {
+        name: "Manage Contracts",
+        path: "/admin/contracts/manage",
+        icon: <FileText className="h-5 w-5" />,
+      },
       {
         name: "Settings",
         path: "/setting",

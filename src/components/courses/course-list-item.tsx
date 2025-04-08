@@ -14,7 +14,6 @@ import { ToastContainer } from "@/ui/toast";
 import { STATUS_STYLES } from "./course-card";
 import { ContractModal } from "@/ui/modals/contract-modal";
 import { useAuth } from "@/hook/use-auth";
-import { enrollCourse } from "@/services/enrollmentService";
 
 interface CourseListItemProps {
   course: any;
@@ -162,7 +161,7 @@ function CourseListItemComponent({
                   View Details
                 </Link>
               </Button>
-              {!isTutor && (
+              {!isTutor && course.status !== "completed" && course.status !== "canceled" &&(
                 <Button
                   className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90 h-12 text-base"
                   onClick={() => {

@@ -106,7 +106,7 @@ export default function Header({
         </div>
 
         <div className="flex items-center space-x-4">
-          {!isHomePage && (
+          {/* {!isHomePage && (
             <div className="relative hidden md:block">
               <input
                 type="text"
@@ -115,7 +115,7 @@ export default function Header({
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             </div>
-          )}
+          )} */}
 
           <button
             onClick={toggleDarkMode}

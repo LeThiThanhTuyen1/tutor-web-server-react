@@ -16,7 +16,6 @@ import {
   Mail,
   FileText,
   AlertTriangle,
-  DollarSign,
 } from "lucide-react";
 
 import { Button } from "@/ui/button";
@@ -945,36 +944,26 @@ export default function SettingsPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Payment Settings</CardTitle>
-                  <CardDescription>
-                    Manage your payment methods and payout preferences
-                  </CardDescription>
+                  <CardTitle>Contracts Manage</CardTitle>
+                  <CardDescription>Manage your contracts</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                     <div className="flex items-center">
-                      <CreditCard className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
+                      <FileText className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
                       <div>
-                        <h4 className="font-medium">Payment Method</h4>
+                        <h4 className="font-medium">Contracts History</h4>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Manage your payment methods
+                          View your contracts history
                         </p>
                       </div>
                     </div>
-                    <Button variant="outline">Manage</Button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <div className="flex items-center">
-                      <DollarSign className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
-                      <div>
-                        <h4 className="font-medium">Payout Settings</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Manage your payout preferences
-                        </p>
-                      </div>
-                    </div>
-                    <Button variant="outline">Manage</Button>
+                    <Button
+                      onClick={() => navigation("/contracts")}
+                      variant="outline"
+                    >
+                      View
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -1062,6 +1051,31 @@ export default function SettingsPage() {
                     {isSaving ? "Saving..." : "Save Preferences"}
                   </Button>
                 </CardFooter>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Contracts Manage</CardTitle>
+                  <CardDescription>Manage your contracts</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div className="flex items-center">
+                      <FileText className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
+                      <div>
+                        <h4 className="font-medium">Contracts History</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          View your contracts history
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => navigation("/contracts")}
+                      variant="outline"
+                    >
+                      View
+                    </Button>
+                  </div>
+                </CardContent>
               </Card>
 
               <Card>
