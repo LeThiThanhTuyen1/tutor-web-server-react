@@ -13,6 +13,16 @@ export const searchTutors = async (searchCriteria: any, pagination: any) => {
   }
 };
 
+export const TutorDashboard = async () => {
+  try {
+    const response = await api.get("/Tutor/dashboard");
+    return response.data;
+  } catch (error) {
+    console.error("Error searching tutors:", error);
+    throw error;
+  }
+};
+
 // **Get All Tutors**
 export const getAllTutors = async (pagination: any) => {
   try {

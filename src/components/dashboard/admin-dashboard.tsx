@@ -26,7 +26,6 @@ import {
   DollarSign,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
-import { Button } from "@/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
 import { useAuth } from "@/hook/use-auth";
 import { fadeIn, staggerContainer } from "../layout/animation";
@@ -445,33 +444,6 @@ export function AdminDashboard() {
               </Card>
             </TabsContent>
           </Tabs>
-        </motion.div>
-
-        {/* Quick Actions */}
-        <motion.div variants={fadeIn("up", 0.6)}>
-          <Card className="border-indigo-100 dark:border-indigo-900">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold">
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90">
-                  <Users className="h-4 w-4 mr-2" />
-                  Add New Student
-                </Button>
-                <Button className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-600/90 dark:hover:bg-purple-700/90">
-                  <GraduationCap className="h-4 w-4 mr-2" />
-                  Add New Tutor
-                </Button>
-                <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600/90 dark:hover:bg-blue-700/90">
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Create New Course
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </motion.div>
       </motion.div>
     </div>

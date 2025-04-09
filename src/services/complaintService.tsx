@@ -21,7 +21,7 @@ export const getAllComplaints = async (filter: PaginationFilter) => {
   try {
     const response = await api.get("/Complaints", {
       params: {
-        page: filter.pageNumber,
+        pageNumber: filter.pageNumber,
         pageSize: filter.pageSize,
       },
     });

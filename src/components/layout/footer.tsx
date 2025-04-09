@@ -139,15 +139,6 @@ function Footer() {
                   <span>Browse Courses</span>
                 </Link>
               </li>
-              <li>
-                <Link
-                  to="/blog"
-                  className="text-indigo-100 hover:text-white flex items-center gap-1 transition-colors"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  <span>Blog</span>
-                </Link>
-              </li>
             </ul>
           </motion.div>
 
@@ -160,7 +151,7 @@ function Footer() {
           >
             <h3 className="text-xl font-bold mb-4">Support</h3>
             <ul className="space-y-2">
-              <li>
+              {/* <li>
                 <Link
                   to="/help"
                   className="text-indigo-100 hover:text-white flex items-center gap-1 transition-colors"
@@ -168,7 +159,7 @@ function Footer() {
                   <ExternalLink className="h-3.5 w-3.5" />
                   <span>Help Center</span>
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link
                   to="/faq"

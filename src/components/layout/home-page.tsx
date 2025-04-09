@@ -918,7 +918,7 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to={isAuthenticated ? "/dashboard" : "/auth/sign-up"}
+              to={isAuthenticated ? `/${user.role}/dashboard` : "/auth/sign-up"}
               className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-4 rounded-full font-medium inline-block transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
               {isAuthenticated ? "Go to Dashboard" : "Sign Up Now"}

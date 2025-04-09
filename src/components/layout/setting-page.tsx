@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   User,
   Bell,
@@ -16,7 +16,6 @@ import {
   Mail,
   FileText,
   AlertTriangle,
-  DollarSign,
 } from "lucide-react";
 
 import { Button } from "@/ui/button";
@@ -47,17 +46,21 @@ import { useToast } from "@/hook/use-toast";
 import { useAuth } from "@/hook/use-auth";
 import { fadeIn } from "../layout/animation";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer } from "@/ui/toast";
+import { ChangePasswordModal } from "../auth/change-password";
 
 export default function SettingsPage() {
   const { user } = useAuth();
   //   const router = useRouter()
   const navigation = useNavigate();
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("account");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
+    useState(false);
+  const { toast, toasts, dismiss } = useToast();
 
   const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: true,
@@ -258,7 +261,10 @@ export default function SettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardFooter className="flex justify-between">
-                <Button className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90">
+                <Button
+                  onClick={() => setIsChangePasswordModalOpen(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
+                >
                   Update Password
                 </Button>
               </CardFooter>
@@ -945,36 +951,26 @@ export default function SettingsPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Payment Settings</CardTitle>
-                  <CardDescription>
-                    Manage your payment methods and payout preferences
-                  </CardDescription>
+                  <CardTitle>Contracts Manage</CardTitle>
+                  <CardDescription>Manage your contracts</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                     <div className="flex items-center">
-                      <CreditCard className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
+                      <FileText className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
                       <div>
-                        <h4 className="font-medium">Payment Method</h4>
+                        <h4 className="font-medium">Contracts History</h4>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Manage your payment methods
+                          View your contracts history
                         </p>
                       </div>
                     </div>
-                    <Button variant="outline">Manage</Button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <div className="flex items-center">
-                      <DollarSign className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
-                      <div>
-                        <h4 className="font-medium">Payout Settings</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Manage your payout preferences
-                        </p>
-                      </div>
-                    </div>
-                    <Button variant="outline">Manage</Button>
+                    <Button
+                      onClick={() => navigation("/contracts")}
+                      variant="outline"
+                    >
+                      View
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -1062,6 +1058,31 @@ export default function SettingsPage() {
                     {isSaving ? "Saving..." : "Save Preferences"}
                   </Button>
                 </CardFooter>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Contracts Manage</CardTitle>
+                  <CardDescription>Manage your contracts</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div className="flex items-center">
+                      <FileText className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
+                      <div>
+                        <h4 className="font-medium">Contracts History</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          View your contracts history
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => navigation("/contracts")}
+                      variant="outline"
+                    >
+                      View
+                    </Button>
+                  </div>
+                </CardContent>
               </Card>
 
               <Card>
@@ -1253,7 +1274,18 @@ export default function SettingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AnimatePresence>
+        {isChangePasswordModalOpen && (
+          <ChangePasswordModal
+            onClose={() => setIsChangePasswordModalOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
+      <ToastContainer
+        toasts={toasts.map((toast) => ({ ...toast, onDismiss: dismiss }))}
+        dismiss={dismiss}
+      />
       {/* Logout Dialog */}
       <AlertDialog
         open={isLogoutDialogOpen}

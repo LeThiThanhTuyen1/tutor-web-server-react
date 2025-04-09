@@ -13,15 +13,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import {
-  Users,
-  BookOpen,
-  Calendar,
-  Star,
-  ArrowUp,
-  Clock,
-  MessageSquare,
-} from "lucide-react";
+import { Users, BookOpen, Star, ArrowUp, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Button } from "@/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/ui/avatar";
@@ -125,12 +117,12 @@ export function TutorDashboard() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <motion.div variants={fadeIn("up", 0.1)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Active Courses
+                    <p className="text-sm font-medium text-blue-500 dark:text-blue-400">
+                      <strong>Active Courses</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
                       {mockStats.courses}
@@ -153,12 +145,12 @@ export function TutorDashboard() {
           </motion.div>
 
           <motion.div variants={fadeIn("up", 0.2)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Total Students
+                    <p className="text-sm font-medium text-purple-500 dark:text-purple-400">
+                      <strong>Total Students</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
                       {mockStats.students}
@@ -181,12 +173,12 @@ export function TutorDashboard() {
           </motion.div>
 
           <motion.div variants={fadeIn("up", 0.3)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Teaching Hours
+                    <p className="text-sm font-medium text-red-500 dark:text-red-400">
+                      <strong>Teaching Hours</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
                       {mockStats.hours}
@@ -202,7 +194,7 @@ export function TutorDashboard() {
                     </div>
                   </div>
                   <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
-                    <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    <Clock className="h-6 w-6 text-red-600 dark:text-red-400" />
                   </div>
                 </div>
               </CardContent>
@@ -210,12 +202,12 @@ export function TutorDashboard() {
           </motion.div>
 
           <motion.div variants={fadeIn("up", 0.4)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Average Rating
+                    <p className="text-sm font-medium text-amber-500 dark:text-amber-400">
+                      <strong>Average Rating</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
                       {mockStats.rating}
@@ -242,7 +234,7 @@ export function TutorDashboard() {
         {/* Charts and Upcoming Classes */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <motion.div variants={fadeIn("up", 0.5)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold">
                   Student Enrollment
@@ -272,7 +264,7 @@ export function TutorDashboard() {
           </motion.div>
 
           <motion.div variants={fadeIn("up", 0.6)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold">
                   Teaching Hours
@@ -307,13 +299,13 @@ export function TutorDashboard() {
         {/* Upcoming Classes and Recent Messages */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <motion.div variants={fadeIn("up", 0.7)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-xl font-semibold">
                   Upcoming Classes
                 </CardTitle>
                 <Button variant="outline" size="sm" asChild>
-                  <Link to="/schedule/tutor">View All</Link>
+                  <Link to="/schedules">View All</Link>
                 </Button>
               </CardHeader>
               <CardContent>
@@ -354,7 +346,7 @@ export function TutorDashboard() {
           </motion.div>
 
           <motion.div variants={fadeIn("up", 0.8)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-xl font-semibold">
                   Recent Messages
@@ -407,7 +399,7 @@ export function TutorDashboard() {
 
         {/* Quick Actions */}
         <motion.div variants={fadeIn("up", 0.9)}>
-          <Card className="border-indigo-100 dark:border-indigo-900">
+          <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">
                 Quick Actions
@@ -419,8 +411,8 @@ export function TutorDashboard() {
                   className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
                   asChild
                 >
-                  <Link to="/courses/new">
-                    <BookOpen className="h-4 w-4 mr-2" />
+                  <Link to="/tutor/courses/new">
+                    {/* <BookOpen className="h-4 w-4 mr-2" /> */}
                     Create New Course
                   </Link>
                 </Button>
@@ -428,8 +420,8 @@ export function TutorDashboard() {
                   className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-600/90 dark:hover:bg-purple-700/90"
                   asChild
                 >
-                  <Link to="/schedule/tutor">
-                    <Calendar className="h-4 w-4 mr-2" />
+                  <Link to="/schedules">
+                    {/* <Calendar className="h-4 w-4 mr-2" /> */}
                     Manage Schedule
                   </Link>
                 </Button>
@@ -437,9 +429,9 @@ export function TutorDashboard() {
                   className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600/90 dark:hover:bg-blue-700/90"
                   asChild
                 >
-                  <Link to="/messages">
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    View Messages
+                  <Link to="/notifications">
+                    {/* <MessageSquare className="h-4 w-4 mr-2" /> */}
+                    View Notifications
                   </Link>
                 </Button>
               </div>

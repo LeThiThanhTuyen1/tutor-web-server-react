@@ -968,7 +968,7 @@ function renderStudentList(students: any[]) {
   if (students.length === 0) {
     return (
       <div className="text-center py-6 text-gray-500 dark:text-gray-400">
-        <p>Không có học viên phù hợp với bộ lọc.</p>
+        <p>Course not found.</p>
       </div>
     );
   }
@@ -1029,7 +1029,7 @@ function renderStudentList(students: any[]) {
               <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 <span className="flex items-center">
                   <Calendar className="h-3 w-3 mr-1" />
-                  Đăng ký vào{" "}
+                  Enrolled at {" "}
                   {new Date(student.enrolledAt).toLocaleDateString()}
                 </span>
               </div>

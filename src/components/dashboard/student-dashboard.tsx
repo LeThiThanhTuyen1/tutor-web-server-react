@@ -10,7 +10,6 @@ import {
   Star,
   ArrowUp,
   Calendar,
-  Search,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Button } from "@/ui/button";
@@ -20,83 +19,117 @@ import { useAuth } from "@/hook/use-auth";
 import { Link } from "react-router-dom";
 import { fadeIn, staggerContainer } from "../layout/animation";
 import { Progress } from "@/ui/progess";
-
-// Mock data for the dashboard
-const mockStats = {
-  courses: 4,
-  completedCourses: 2,
-  hoursLearned: 48,
-  averageScore: 92,
-};
-
-const mockPieData = [
-  { name: "Mathematics", value: 35, color: "#4f46e5" },
-  { name: "Science", value: 25, color: "#0ea5e9" },
-  { name: "Languages", value: 20, color: "#8b5cf6" },
-  { name: "Arts", value: 10, color: "#ec4899" },
-  { name: "Other", value: 10, color: "#f97316" },
-];
-
-const mockCourses = [
-  {
-    id: 1,
-    name: "Advanced Mathematics",
-    tutor: "David Kim",
-    progress: 75,
-    nextLesson: "Today, 4:00 PM",
-  },
-  {
-    id: 2,
-    name: "Introduction to Physics",
-    tutor: "Sarah Johnson",
-    progress: 45,
-    nextLesson: "Tomorrow, 10:00 AM",
-  },
-  {
-    id: 3,
-    name: "Data Structures",
-    tutor: "Michael Chen",
-    progress: 60,
-    nextLesson: "Friday, 4:00 PM",
-  },
-];
-
-const mockTutors = [
-  {
-    id: 1,
-    name: "David Kim",
-    subject: "Mathematics",
-    avatar: "/placeholder.svg?height=40&width=40",
-    rating: 4.9,
-  },
-  {
-    id: 2,
-    name: "Sarah Johnson",
-    subject: "Physics",
-    avatar: "/placeholder.svg?height=40&width=40",
-    rating: 4.8,
-  },
-  {
-    id: 3,
-    name: "Michael Chen",
-    subject: "Computer Science",
-    avatar: "/placeholder.svg?height=40&width=40",
-    rating: 4.7,
-  },
-];
+import {
+  getStudentCourses,
+  getStudentStats,
+  getStudentSubjects,
+  getStudentTutors,
+  StudentCourse,
+  Tutor,
+} from "@/services/studentService";
+import { API_BASE_URL } from "@/config/axiosInstance";
 
 export function StudentDashboard() {
   const { user } = useAuth();
   const [greeting, setGreeting] = useState("");
+  const [stats, setStats] = useState<any>(null);
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [courses, setCourses] = useState<StudentCourse[]>([]);
+  const [tutors, setTutors] = useState<Tutor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Set greeting based on time
     const hour = new Date().getHours();
     if (hour < 12) setGreeting("Good morning");
     else if (hour < 18) setGreeting("Good afternoon");
     else setGreeting("Good evening");
+
+    // Fetch data from API
+    const fetchData = async () => {
+      setLoading(true);
+
+      const statsResponse = await getStudentStats();
+      if (statsResponse.succeeded) {
+        setStats(statsResponse.data);
+      } else {
+        setError(statsResponse.message);
+      }
+
+      const subjectsResponse = await getStudentSubjects();
+      if (subjectsResponse.succeeded) {
+        setSubjects(subjectsResponse.data);
+      } else {
+        setError(subjectsResponse.message);
+      }
+
+      const coursesResponse = await getStudentCourses();
+      if (coursesResponse.succeeded) {
+        setCourses(coursesResponse.data);
+      } else {
+        setError(coursesResponse.message);
+      }
+
+      const tutorsResponse = await getStudentTutors();
+      if (tutorsResponse.succeeded) {
+        setTutors(tutorsResponse.data);
+      } else {
+        setError(tutorsResponse.message);
+      }
+
+      setLoading(false);
+    };
+
+    fetchData();
   }, []);
 
   const container = staggerContainer(0.1);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {[...Array(3)].map((_, i) => (
+          <div
+            key={i}
+            className="bg-white dark:bg-gray-700 rounded-xl shadow-md overflow-hidden animate-pulse"
+          >
+            <div className="w-full h-48 bg-gray-300 dark:bg-gray-600"></div>
+            <div className="p-6">
+              <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-3/4 mb-4"></div>
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-full mb-2"></div>
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-full mb-4"></div>
+              <div className="flex justify-between items-center">
+                <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/3"></div>
+                <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <motion.div
+          variants={fadeIn("up", 0.1)}
+          initial="hidden"
+          animate="show"
+        >
+          <h1 className="text-3xl font-bold mb-2">Error</h1>
+          <p className="text-red-600 dark:text-red-400">{error}</p>
+          <Button
+            className="mt-4 bg-indigo-600 hover:bg-indigo-700"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </Button>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -118,18 +151,16 @@ export function StudentDashboard() {
         className="space-y-6"
       >
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <motion.div variants={fadeIn("up", 0.1)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Enrolled Courses
+                    <p className="text-sm font-medium text-blue-500 dark:text-blue-400">
+                      <strong>Enrolled Courses</strong>
                     </p>
-                    <h3 className="text-2xl font-bold mt-1">
-                      {mockStats.courses}
-                    </h3>
+                    <h3 className="text-2xl font-bold mt-1">{stats.courses}</h3>
                     <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
                         <ArrowUp className="h-3 w-3 mr-1" />1
@@ -148,15 +179,15 @@ export function StudentDashboard() {
           </motion.div>
 
           <motion.div variants={fadeIn("up", 0.2)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Completed Courses
+                    <p className="text-sm font-medium text-purple-500 dark:text-purple-400">
+                      <strong>Completed Courses</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
-                      {mockStats.completedCourses}
+                      {stats.completedCourses}
                     </h3>
                     <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
@@ -176,15 +207,15 @@ export function StudentDashboard() {
           </motion.div>
 
           <motion.div variants={fadeIn("up", 0.3)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Hours Learned
+                    <p className="text-sm font-medium text-red-500 dark:text-red-400">
+                      <strong>Hours Learned</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
-                      {mockStats.hoursLearned}
+                      {stats.hoursLearned}
                     </h3>
                     <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
@@ -196,36 +227,7 @@ export function StudentDashboard() {
                     </div>
                   </div>
                   <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
-                    <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div variants={fadeIn("up", 0.4)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Average Score
-                    </p>
-                    <h3 className="text-2xl font-bold mt-1">
-                      {mockStats.averageScore}%
-                    </h3>
-                    <div className="flex items-center mt-1 text-sm">
-                      <span className="flex items-center text-emerald-600 dark:text-emerald-400">
-                        <ArrowUp className="h-3 w-3 mr-1" />
-                        3%
-                      </span>
-                      <span className="text-gray-500 dark:text-gray-400 ml-1">
-                        vs last month
-                      </span>
-                    </div>
-                  </div>
-                  <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-lg">
-                    <Star className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                    <Clock className="h-6 w-6 text-red-600 dark:text-red-400" />
                   </div>
                 </div>
               </CardContent>
@@ -233,31 +235,48 @@ export function StudentDashboard() {
           </motion.div>
         </div>
 
-        {/* Course Progress and Learning Distribution */}
+        {/* Tutor and Learning Distribution */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <motion.div variants={fadeIn("up", 0.5)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
-              <CardHeader>
+          <motion.div variants={fadeIn("up", 0.7)}>
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-xl font-semibold">
-                  Course Progress
+                  My Tutors
                 </CardTitle>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/tutors">View All</Link>
+                </Button>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  {mockCourses.map((course) => (
-                    <div key={course.id} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-medium">{course.name}</h3>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          {course.progress}%
-                        </span>
+                <div className="space-y-4">
+                  {tutors.map((tutor) => (
+                    <div
+                      key={tutor.id}
+                      className="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    >
+                      <Avatar className="h-10 w-10 mr-3">
+                        <AvatarImage
+                          src={`${API_BASE_URL}/${tutor.profileImage}`}
+                          alt={tutor.tutorName}
+                        />
+                        <AvatarFallback className="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
+                          {tutor.tutorName.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium truncate">
+                          {tutor.tutorName}
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          {tutor.subjects}
+                        </p>
                       </div>
-                      <Progress value={course.progress} className="h-2" />
-                      <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
-                        <span>Tutor: {course.tutor}</span>
-                        <span className="flex items-center">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          {course.nextLesson}
+                      <div className="flex items-center">
+                        <Star className="h-4 w-4 text-amber-500 fill-current" />
+                        <span className="ml-1 text-sm font-medium">
+                          {typeof tutor.rating === "number"
+                            ? tutor.rating.toFixed(1)
+                            : 0}
                         </span>
                       </div>
                     </div>
@@ -268,7 +287,7 @@ export function StudentDashboard() {
           </motion.div>
 
           <motion.div variants={fadeIn("up", 0.6)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold">
                   Learning Distribution
@@ -279,7 +298,7 @@ export function StudentDashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={mockPieData}
+                        data={subjects}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
@@ -290,7 +309,7 @@ export function StudentDashboard() {
                           `${name} ${(percent * 100).toFixed(0)}%`
                         }
                       >
-                        {mockPieData.map((entry, index) => (
+                        {subjects.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
@@ -303,41 +322,31 @@ export function StudentDashboard() {
           </motion.div>
         </div>
 
-        {/* My Tutors and Recommended Courses */}
+        {/*Courses Progress and Recommended Courses */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <motion.div variants={fadeIn("up", 0.7)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
-              <CardHeader className="flex flex-row items-center justify-between">
+          <motion.div variants={fadeIn("up", 0.5)}>
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
+              <CardHeader>
                 <CardTitle className="text-xl font-semibold">
-                  My Tutors
+                  Course Progress
                 </CardTitle>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/tutors">View All</Link>
-                </Button>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {mockTutors.map((tutor) => (
-                    <div
-                      key={tutor.id}
-                      className="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                    >
-                      <Avatar className="h-10 w-10 mr-3">
-                        <AvatarImage src={tutor.avatar} alt={tutor.name} />
-                        <AvatarFallback className="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
-                          {tutor.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium truncate">{tutor.name}</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                          {tutor.subject}
-                        </p>
+                <div className="space-y-6">
+                  {courses.map((course) => (
+                    <div key={course.id} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-medium">{course.name}</h3>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {course.progress}%
+                        </span>
                       </div>
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-amber-500 fill-current" />
-                        <span className="ml-1 text-sm font-medium">
-                          {tutor.rating}
+                      <Progress value={course.progress} className="h-2" />
+                      <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
+                        <span>Tutor: {course.tutor}</span>
+                        <span className="flex items-center">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          {course.nextLesson.substring(0, 5)}
                         </span>
                       </div>
                     </div>
@@ -348,7 +357,7 @@ export function StudentDashboard() {
           </motion.div>
 
           <motion.div variants={fadeIn("up", 0.8)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-xl font-semibold">
                   Recommended Courses
@@ -359,7 +368,7 @@ export function StudentDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockCourses.map((course) => (
+                  {courses.map((course) => (
                     <div
                       key={course.id}
                       className="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
@@ -389,7 +398,7 @@ export function StudentDashboard() {
 
         {/* Quick Actions */}
         <motion.div variants={fadeIn("up", 0.9)}>
-          <Card className="border-indigo-100 dark:border-indigo-900">
+          <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800 rounded-lg">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">
                 Quick Actions
@@ -401,28 +410,19 @@ export function StudentDashboard() {
                   className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
                   asChild
                 >
-                  <Link to="/courses">
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Browse Courses
-                  </Link>
+                  <Link to="/courses">Browse Courses</Link>
                 </Button>
                 <Button
                   className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-600/90 dark:hover:bg-purple-700/90"
                   asChild
                 >
-                  <Link to="/tutors">
-                    <Search className="h-4 w-4 mr-2" />
-                    Find Tutors
-                  </Link>
+                  <Link to="/tutors">Find Tutors</Link>
                 </Button>
                 <Button
                   className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600/90 dark:hover:bg-blue-700/90"
                   asChild
                 >
-                  <Link to="/schedule/student">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    View Schedule
-                  </Link>
+                  <Link to="/schedules">View Schedule</Link>
                 </Button>
               </div>
             </CardContent>
