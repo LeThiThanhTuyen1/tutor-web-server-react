@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   User,
   Bell,
@@ -46,17 +46,21 @@ import { useToast } from "@/hook/use-toast";
 import { useAuth } from "@/hook/use-auth";
 import { fadeIn } from "../layout/animation";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer } from "@/ui/toast";
+import { ChangePasswordModal } from "../auth/change-password";
 
 export default function SettingsPage() {
   const { user } = useAuth();
   //   const router = useRouter()
   const navigation = useNavigate();
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("account");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
+    useState(false);
+  const { toast, toasts, dismiss } = useToast();
 
   const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: true,
@@ -257,7 +261,10 @@ export default function SettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardFooter className="flex justify-between">
-                <Button className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90">
+                <Button
+                  onClick={() => setIsChangePasswordModalOpen(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
+                >
                   Update Password
                 </Button>
               </CardFooter>
@@ -1267,7 +1274,18 @@ export default function SettingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AnimatePresence>
+        {isChangePasswordModalOpen && (
+          <ChangePasswordModal
+            onClose={() => setIsChangePasswordModalOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
+      <ToastContainer
+        toasts={toasts.map((toast) => ({ ...toast, onDismiss: dismiss }))}
+        dismiss={dismiss}
+      />
       {/* Logout Dialog */}
       <AlertDialog
         open={isLogoutDialogOpen}

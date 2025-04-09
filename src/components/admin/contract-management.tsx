@@ -194,7 +194,7 @@ export default function ContractManagement() {
           setContracts((prevContracts) =>
             prevContracts.map((contract) =>
               contract.id === selectedComplaint.contractId
-                ? { ...contract, status: "Canceled" }
+                ? { ...contract, status: "canceled" }
                 : contract
             )
           );
@@ -230,13 +230,25 @@ export default function ContractManagement() {
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case "pending":
-        return <Badge className="bg-yellow-500">Pending</Badge>;
+        return (
+          <Badge className="bg-yellow-500 hover:bg-yellow-600">Pending</Badge>
+        );
       case "canceled":
-        return <Badge className="bg-red-500">Cancelled/Rejected</Badge>;
+        return (
+          <Badge className="bg-red-500 hover:bg-red-600">
+            Cancelled/Rejected
+          </Badge>
+        );
       case "approved":
-        return <Badge className="bg-green-500">Approved</Badge>;
+        return (
+          <Badge className="bg-green-500 hover:bg-green-600">Approved</Badge>
+        );
       case "rejected":
-        return <Badge className="bg-red-500">Rejected</Badge>;
+        return <Badge className="bg-red-500 hover:bg-red-600">Rejected</Badge>;
+      case "completed":
+        return <Badge className="bg-green-500 hover:bg-green-600">Completed</Badge>;
+      case "active":
+        return <Badge className="bg-blue-500 hover:bg-blue-600">Active</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }

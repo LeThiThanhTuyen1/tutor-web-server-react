@@ -9,6 +9,7 @@ export const initializeSignalRConnection = (
   token: string,
   onReceiveNotification?: (message: any) => void
 ) => {
+
   if (connection && connection.state === signalR.HubConnectionState.Connected) {
     return connection;
   }
@@ -31,26 +32,24 @@ export const initializeSignalRConnection = (
     .configureLogging(signalR.LogLevel.Information)
     .build();
 
-  connection.on("ReceiveNotification", (message) => {
-    console.log("📬 Received notification via SignalR:", message);
-    if (message) {
-      const existingNotifications =
-        store.getState().notifications.notifications;
-      const isNotificationExists = existingNotifications.some(
-        (notification) => notification.id === message.id
-      );
-
-      if (!isNotificationExists) {
-        console.log("Adding notification to store");
-        store.dispatch(addNotification(message));
+    connection.on("ReceiveNotification", (message) => {
+      console.log("📬 Received notification via SignalR:", message);
+      console.log("Received message ID:", message.id);
+      if (message && typeof message === "object" && message.id) {
+          const existingNotifications = store.getState().notifications.notifications;
+          console.log("Current notifications in store:", existingNotifications);
+          const isNotificationExists = existingNotifications.some(
+              (notification) => notification.id === message.id
+          );
+          if (!isNotificationExists) {
+              console.log("Adding notification to store");
+              store.dispatch(addNotification(message));
+          } else {
+              console.log("Notification already exists in store. Skipping.");
+          }
       } else {
-        console.log("Notification already exists in store. Skipping.");
+          console.warn("Invalid notification format:", message);
       }
-
-      if (onReceiveNotification) {
-        onReceiveNotification(message); // Callback for additional handling if needed
-      }
-    }
   });
 
   connection.onreconnecting((error) => {

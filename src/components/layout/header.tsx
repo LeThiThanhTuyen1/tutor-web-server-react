@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { Menu, Moon, Sun, User, Search } from "lucide-react";
+import { Menu, Moon, Sun, User } from "lucide-react";
 import { useAuth } from "@/hook/use-auth";
 import { logout } from "@/store/authSlice";
 import { NotificationDropdown } from "@/components/notification/notification-dropdown";
@@ -157,15 +157,18 @@ export default function Header({
                 {isProfileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10">
                     <div className="py-1">
+                      {user?.role !== "Admin" && (
+                        <Link
+                          to={`/${user?.role}/profile`}
+                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                        >
+                          Your Profile
+                        </Link>
+                      )}
+
                       <Link
-                        to={`/${user?.role}/profile`}
-                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        onClick={() => setIsProfileMenuOpen(false)}
-                      >
-                        Your Profile
-                      </Link>
-                      <Link
-                        to={`/${user?.role}/settings`}
+                        to={`/setting`}
                         className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
