@@ -34,6 +34,8 @@ import SettingsPage from "./components/layout/setting-page";
 import NotificationsPage from "./components/notification/notifications-page";
 import ContractList from "./components/contracts/contract-list";
 import ContractManagement from "./components/admin/contract-management";
+import { UserTable } from "./components/admin/user-management";
+import { CourseTable } from "./components/admin/course-management";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
@@ -99,10 +101,9 @@ export default function App() {
         }
       >
         <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="courses" element={<CourseList />} />
         <Route path="contracts/manage" element={<ContractManagement />} />
-        <Route path="tutors" element={<TutorList />} />
-        <Route path="students" element={<div>Students Management</div>} />
+        <Route path="users" element={<UserTable />} />
+        <Route path="courses" element={<CourseTable />} />
       </Route>
 
       {/* Tutor Routes */}

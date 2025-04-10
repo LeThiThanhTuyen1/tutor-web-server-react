@@ -74,6 +74,7 @@ export default function CourseList() {
 
   // Memoize the isTutor value to prevent unnecessary re-renders
   const isTutor = useMemo(() => user?.role === "Tutor", [user?.role]);
+  const isAdmin = useMemo(() => user?.role === "Admin", [user?.role]);
 
   // State
   const [courses, setCourses] = useState<any[]>([]);
@@ -304,7 +305,7 @@ export default function CourseList() {
           transition={{ duration: 0.3, delay: index * 0.05 }}
         >
           <Suspense fallback={<CardSkeleton />}>
-            <CourseCard course={course} isTutor={isTutor} />
+            <CourseCard course={course} isAdmin={isAdmin} isTutor={isTutor} />
           </Suspense>
         </motion.div>
       ))}
@@ -331,6 +332,7 @@ export default function CourseList() {
               onSelect={toggleCourseSelection}
               onDelete={handleDeleteModalOpen}
               isTutor={isTutor}
+              isAdmin={isAdmin}
               onCourseUpdated={fetchCourses}
               handleEnrollCourse={() => handleEnrollCourse(course.id)}
               isEnrolling={isEnrolling[course.id] || false}

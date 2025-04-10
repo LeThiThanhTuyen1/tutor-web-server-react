@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, BookOpen, XCircle, Eye } from "lucide-react";
+import {
+  Search,
+  BookOpen,
+  XCircle,
+  Eye,
+  DollarSign,
+  Calendar,
+  User,
+} from "lucide-react";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Checkbox } from "@/ui/checkbox";
@@ -19,22 +27,15 @@ import { ToastContainer } from "@/ui/toast";
 import { CancelCourseModal } from "@/ui/modals/cancel-course";
 import { PaginationFilter } from "@/types/paginated-response";
 import { cn } from "@/ui/cn";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom"; // Thêm useSearchParams
 import { Badge } from "@/ui/badge";
 import { useCourse } from "@/hook/use-course";
 import { formatRelativeDate } from "@/components/courses/course-utils";
 import { STATUS_STYLES } from "@/components/courses/course-card";
+import { initiatePayment, unenrollStudent } from "@/services/enrollmentService";
 
 export default function StudentCourseList() {
-  // Use our custom hook to access course state and actions
-  const {
-    studentCourses,
-    loading,
-    totalPages,
-    getStudentCourses,
-    cancelCourse,
-  } = useCourse();
-
+  const { studentCourses, loading, totalPages, getStudentCourses } = useCourse();
   const [filteredCourses, setFilteredCourses] = useState(studentCourses);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -47,17 +48,35 @@ export default function StudentCourseList() {
     pageNumber: 1,
     pageSize: 9,
   });
+  const searchParams = useSearchParams()[0]; // Lấy query parameters
 
-  // Fetch student courses when component mounts or pagination changes
   useEffect(() => {
     getStudentCourses(pagination);
-  }, [pagination]);
 
-  // Update filtered courses when studentCourses, searchTerm, or statusFilter changes
+    // Xử lý query parameters từ redirect sau thanh toán
+    const success = searchParams.get("success");
+    const enrollmentId = searchParams.get("enrollmentId");
+    const code = searchParams.get("code");
+
+    if (success === "true" && enrollmentId) {
+      toast({
+        title: "Payment Successful",
+        description: "Your payment was completed successfully!",
+        variant: "success",
+      });
+      getStudentCourses(pagination); // Làm mới danh sách để cập nhật trạng thái
+    } else if (success === "false") {
+      toast({
+        title: "Payment Failed",
+        description: `Payment failed with code: ${code || "Unknown error"}`,
+        variant: "destructive",
+      });
+    }
+  }, [pagination, searchParams]);
+
   useEffect(() => {
     let result = studentCourses;
 
-    // Filter by search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       result = result.filter(
@@ -67,7 +86,6 @@ export default function StudentCourseList() {
       );
     }
 
-    // Filter by status
     if (statusFilter !== "all") {
       result = result.filter((course) => course.status === statusFilter);
     }
@@ -75,7 +93,19 @@ export default function StudentCourseList() {
     setFilteredCourses(result);
   }, [studentCourses, searchTerm, statusFilter]);
 
-  // Toggle course selection
+  const handlePayment = async (enrollmentId: number) => {
+    try {
+      const paymentUrl = await initiatePayment(enrollmentId);
+      window.location.href = paymentUrl;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to initiate payment",
+        variant: "destructive",
+      });
+    }
+  };
+
   const toggleCourseSelection = (courseId: number) => {
     setSelectedCourses((prev) =>
       prev.includes(courseId)
@@ -84,7 +114,6 @@ export default function StudentCourseList() {
     );
   };
 
-  // Handle page change
   const handlePageChange = (pageNumber: number) => {
     setPagination((prev) => ({
       ...prev,
@@ -92,27 +121,22 @@ export default function StudentCourseList() {
     }));
   };
 
-  // Open cancel dialog
   const handleCancelCourse = (courseId: number) => {
     setCourseToCancel(courseId);
     setIsCancelDialogOpen(true);
   };
 
-  // Confirm course cancellation
   const confirmCancelCourse = async () => {
     if (!courseToCancel) return;
 
     try {
       setIsCancelling(true);
-      await cancelCourse(courseToCancel);
-
+      await unenrollStudent(courseToCancel);
       toast({
         title: "Success",
         description: "Course has been cancelled successfully",
         variant: "success",
       });
-
-      // Refresh courses after cancellation
       getStudentCourses(pagination);
     } catch (error) {
       toast({
@@ -130,12 +154,10 @@ export default function StudentCourseList() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex flex-col space-y-4">
-        {/* Header with actions */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <h1 className="text-2xl font-bold">My Courses</h1>
         </div>
 
-        {/* Search and filters */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-grow">
@@ -155,17 +177,14 @@ export default function StudentCourseList() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="coming">Coming</SelectItem>
-                  <SelectItem value="ongoing">Ongoing</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="canceled">Canceled</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
         </div>
 
-        {/* Course list */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
           <Tabs defaultValue="list" className="w-full">
             <TabsContent value="list" className="p-0">
@@ -198,12 +217,9 @@ export default function StudentCourseList() {
                       <div className="flex items-start gap-4">
                         <Checkbox
                           checked={selectedCourses.includes(course.id)}
-                          onCheckedChange={() =>
-                            toggleCourseSelection(course.id)
-                          }
+                          onCheckedChange={() => toggleCourseSelection(course.id)}
                           className="mt-1 h-5 w-5"
                         />
-
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <div>
@@ -219,40 +235,62 @@ export default function StudentCourseList() {
                                       "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
                                   )}
                                 >
-                                  {course.status.charAt(0).toUpperCase() +
-                                    course.status.slice(1)}
+                                  {course.status.charAt(0).toUpperCase() + course.status.slice(1)}
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                Created {formatRelativeDate(course.createdAt)}
+                                Enroll {formatRelativeDate(course.enrolledAt)}
                               </p>
                             </div>
-
                             <div className="flex flex-wrap gap-2">
-                              {course.status === "coming" && (
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() => handleCancelCourse(course.id)}
-                                  className="flex-1 text-white md:w-full bg-red-600 hover:bg-red-700 dark:bg-red-600/90 dark:hover:bg-red-700/90"
-                                >
-                                  <XCircle className="h-3.5 w-3.5 mr-1" />
-                                  Cancel
-                                </Button>
+                              {course.status === "pending" && (
+                                <>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => handleCancelCourse(course.id)}
+                                    className="flex-1 text-white md:w-full bg-red-600 hover:bg-red-700 dark:bg-red-600/90 dark:hover:bg-red-700/90"
+                                  >
+                                    <XCircle className="h-3.5 w-3.5 mr-1" />
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    onClick={() => handlePayment(course.id)}
+                                  >
+                                    <DollarSign className="h-4 w-4 mr-1" />
+                                    Pay
+                                  </Button>
+                                </>
                               )}
                               <Button
                                 variant="default"
                                 size="sm"
                                 className="flex-1 md:w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
                               >
-                                <Link
-                                  to={`/courses/${course.id}`}
-                                  className="flex items-center"
-                                >
+                                <Link to={`/courses/${course.id}`} className="flex items-center">
                                   <Eye className="h-3.5 w-3.5 mr-1" />
                                   View
                                 </Link>
                               </Button>
+                            </div>
+                          </div>
+                          <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-y-2 gap-x-4 text-sm">
+                            <div className="flex items-center text-gray-600 dark:text-gray-400">
+                              <User className="h-4 w-4 mr-1 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+                              <span>Tutor: {course.tutorName}</span>
+                            </div>
+                            <div className="flex items-center text-gray-600 dark:text-gray-400">
+                              <DollarSign className="h-4 w-4 mr-1 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+                              <span>${course.fee}</span>
+                            </div>
+                            <div className="flex items-center text-gray-600 dark:text-gray-400">
+                              <Calendar className="h-4 w-4 mr-1 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+                              <span className="truncate">
+                                {new Date(course.startDate).toLocaleDateString()} -{" "}
+                                {new Date(course.endDate).toLocaleDateString()}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -261,47 +299,35 @@ export default function StudentCourseList() {
                   ))}
                 </ul>
               )}
-
-              {totalPages > 1 && (
-                <div className="mt-6 p-4">
-                  <div className="flex justify-center">
-                    <div className="flex items-center gap-2">
-                      {Array.from({ length: totalPages }, (_, i) => (
-                        <Button
-                          key={i}
-                          variant={
-                            pagination.pageNumber === i + 1
-                              ? "default"
-                              : "outline"
-                          }
-                          size="sm"
-                          onClick={() => handlePageChange(i + 1)}
-                          className={
-                            pagination.pageNumber === i + 1
-                              ? "bg-indigo-600"
-                              : ""
-                          }
-                        >
-                          {i + 1}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
             </TabsContent>
           </Tabs>
         </div>
       </div>
-
-      {/* Cancel Course Modal */}
+      {totalPages > 1 && (
+        <div className="mt-6 p-4">
+          <div className="flex justify-center">
+            <div className="flex items-center gap-2">
+              {Array.from({ length: totalPages }, (_, i) => (
+                <Button
+                  key={i}
+                  variant={pagination.pageNumber === i + 1 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePageChange(i + 1)}
+                  className={pagination.pageNumber === i + 1 ? "bg-indigo-600" : ""}
+                >
+                  {i + 1}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       <CancelCourseModal
         isOpen={isCancelDialogOpen}
         onCancel={() => setIsCancelDialogOpen(false)}
         onConfirm={confirmCancelCourse}
         isCancelling={isCancelling}
       />
-
       <ToastContainer
         toasts={toasts.map((toast) => ({ ...toast, onDismiss: dismiss }))}
         dismiss={dismiss}

@@ -45,7 +45,7 @@ import {
 import { useToast } from "@/hook/use-toast";
 import { useAuth } from "@/hook/use-auth";
 import { fadeIn } from "../layout/animation";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer } from "@/ui/toast";
 import { ChangePasswordModal } from "../auth/change-password";
 
@@ -250,10 +250,10 @@ export default function SettingsPage() {
           )}
         </TabsList>
 
-        <div className="grid gap-8 bg-white dark:bg-gray-800">
+        <div className="grid gap-8 rounded-lg">
           {/* Account Settings */}
           <TabsContent value="account" className="space-y-8">
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 ">
               <CardHeader>
                 <CardTitle>Password</CardTitle>
                 <CardDescription>
@@ -270,7 +270,7 @@ export default function SettingsPage() {
               </CardFooter>
             </Card>
 
-            <Card className="border-red-200 dark:border-red-900">
+            <Card className="border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 ">
               <CardHeader>
                 <CardTitle className="text-red-600 dark:text-red-400">
                   Danger Zone
@@ -319,7 +319,7 @@ export default function SettingsPage() {
 
           {/* Appearance Settings */}
           <TabsContent value="appearance" className="space-y-8">
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 ">
               <CardHeader>
                 <CardTitle>Theme</CardTitle>
                 <CardDescription>
@@ -402,7 +402,7 @@ export default function SettingsPage() {
               </CardFooter> */}
             </Card>
 
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 ">
               <CardHeader>
                 <CardTitle>Accessibility</CardTitle>
                 <CardDescription>
@@ -447,7 +447,7 @@ export default function SettingsPage() {
 
           {/* Notification Settings */}
           <TabsContent value="notifications" className="space-y-8">
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 ">
               <CardHeader>
                 <CardTitle>Notification Preferences</CardTitle>
                 <CardDescription>
@@ -641,7 +641,7 @@ export default function SettingsPage() {
 
           {/* Privacy Settings */}
           <TabsContent value="privacy" className="space-y-8">
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 ">
               <CardHeader>
                 <CardTitle>Privacy Settings</CardTitle>
                 <CardDescription>
@@ -794,7 +794,7 @@ export default function SettingsPage() {
               </CardFooter>
             </Card>
 
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 ">
               <CardHeader>
                 <CardTitle>Data & Cookies</CardTitle>
                 <CardDescription>
@@ -850,7 +850,7 @@ export default function SettingsPage() {
           {/* Tutor Settings */}
           {user?.role === "Tutor" && (
             <TabsContent value="tutor" className="space-y-8">
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 ">
                 <CardHeader>
                   <CardTitle>Tutor Settings</CardTitle>
                   <CardDescription>
@@ -949,7 +949,7 @@ export default function SettingsPage() {
                 </CardFooter>
               </Card>
 
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 ">
                 <CardHeader>
                   <CardTitle>Contracts Manage</CardTitle>
                   <CardDescription>Manage your contracts</CardDescription>
@@ -980,7 +980,7 @@ export default function SettingsPage() {
           {/* Student Settings */}
           {user?.role === "Student" && (
             <TabsContent value="student" className="space-y-8">
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 ">
                 <CardHeader>
                   <CardTitle>Student Settings</CardTitle>
                   <CardDescription>
@@ -1059,7 +1059,7 @@ export default function SettingsPage() {
                   </Button>
                 </CardFooter>
               </Card>
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 ">
                 <CardHeader>
                   <CardTitle>Contracts Manage</CardTitle>
                   <CardDescription>Manage your contracts</CardDescription>
@@ -1085,7 +1085,7 @@ export default function SettingsPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 ">
                 <CardHeader>
                   <CardTitle>Payment Methods</CardTitle>
                   <CardDescription>Manage your payment methods</CardDescription>
@@ -1124,7 +1124,7 @@ export default function SettingsPage() {
           {/* Admin Settings */}
           {user?.role === "Admin" && (
             <TabsContent value="admin" className="space-y-8">
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 ">
                 <CardHeader>
                   <CardTitle>Admin Settings</CardTitle>
                   <CardDescription>Manage system-wide settings</CardDescription>
@@ -1199,7 +1199,7 @@ export default function SettingsPage() {
                 </CardFooter>
               </Card>
 
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 ">
                 <CardHeader>
                   <CardTitle>System Management</CardTitle>
                   <CardDescription>
@@ -1213,7 +1213,9 @@ export default function SettingsPage() {
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                         Manage users, roles, and permissions
                       </p>
-                      <Button variant="outline">Manage Users</Button>
+                      <Button variant="outline">
+                        <Link to={"/admin/users"}>Manage Users</Link>
+                      </Button>
                     </div>
 
                     <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -1221,24 +1223,26 @@ export default function SettingsPage() {
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                         Manage courses and categories
                       </p>
-                      <Button variant="outline">Manage Courses</Button>
+                      <Button variant="outline">
+                        <Link to={"/admin/courses"}>Manage Courses</Link>
+                      </Button>
                     </div>
 
-                    <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    {/* <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                       <h4 className="font-medium mb-2">Payment Management</h4>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                         Manage payment settings and transactions
                       </p>
                       <Button variant="outline">Manage Payments</Button>
-                    </div>
+                    </div> */}
 
-                    <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    {/* <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                       <h4 className="font-medium mb-2">System Logs</h4>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                         View system logs and activity
                       </p>
                       <Button variant="outline">View Logs</Button>
-                    </div>
+                    </div> */}
                   </div>
                 </CardContent>
               </Card>

@@ -213,7 +213,7 @@ export default function ContractList() {
         <div className="grid gap-4">
           {contracts.map((contract) => (
             <motion.div
-              className="bg-white dark:bg-gray-800"
+              className="bg-white dark:bg-gray-800 rounded-lg"
               key={contract.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

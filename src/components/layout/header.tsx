@@ -80,29 +80,6 @@ export default function Header({
           >
             <Menu className="h-6 w-6" />
           </button>
-
-          {isHomePage && (
-            <div className="hidden md:flex ml-4 space-x-6">
-              <Link
-                to="/tutors"
-                className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400"
-              >
-                Find Tutors
-              </Link>
-              <Link
-                to="/courses"
-                className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400"
-              >
-                Browse Courses
-              </Link>
-              <Link
-                to="/about"
-                className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400"
-              >
-                About Us
-              </Link>
-            </div>
-          )}
         </div>
 
         <div className="flex items-center space-x-4">
@@ -156,11 +133,11 @@ export default function Header({
 
                 {isProfileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10">
-                    <div className="py-1">
+                    <div>
                       {user?.role !== "Admin" && (
                         <Link
                           to={`/${user?.role}/profile`}
-                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          className="block px-4 p-2 text-sm text-gray-700 dark:text-gray-200 hover:rounded-tl-md hover:rounded-tr-md hover:bg-gray-100 dark:hover:bg-gray-700"
                           onClick={() => setIsProfileMenuOpen(false)}
                         >
                           Your Profile
@@ -176,7 +153,7 @@ export default function Header({
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:rounded-bl-md hover:rounded-br-md dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         Sign out
                       </button>

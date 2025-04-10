@@ -30,6 +30,22 @@ export interface Tutor {
   rating: number;
 }
 
+export interface StudentDTO {
+  id: number;
+  fullName: string;
+  email: string;
+  profileImage: string;
+  role: string;
+  location: string;
+  school: string;
+}
+
+export interface ListResponse<T> {
+  succeeded: boolean;
+  message?: string;
+  data?: T;
+}
+
 export const getStudentStats = async () => {
   try {
     const response = await api.get("/student/stats");

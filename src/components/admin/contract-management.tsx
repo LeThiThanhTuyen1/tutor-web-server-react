@@ -290,7 +290,7 @@ export default function ContractManagement() {
   };
 
   const handleViewComplaintDetails = (complaint: Complaint) => {
-    fetchComplaintById(complaint.id); // Fetch full details
+    fetchComplaintById(complaint.id); 
   };
 
   return (

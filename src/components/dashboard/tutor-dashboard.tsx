@@ -21,79 +21,82 @@ import { Badge } from "@/ui/badge";
 import { useAuth } from "@/hook/use-auth";
 import { Link } from "react-router-dom";
 import { fadeIn, staggerContainer } from "../layout/animation";
-
-// Mock data for the dashboard
-const mockStats = {
-  courses: 8,
-  students: 42,
-  hours: 128,
-  rating: 4.8,
-};
-
-const mockBarData = [
-  { name: "Jan", students: 5, hours: 20 },
-  { name: "Feb", students: 8, hours: 32 },
-  { name: "Mar", students: 12, hours: 48 },
-  { name: "Apr", students: 10, hours: 40 },
-  { name: "May", students: 15, hours: 60 },
-  { name: "Jun", students: 18, hours: 72 },
-];
-
-const mockUpcomingClasses = [
-  {
-    id: 1,
-    courseName: "Advanced Mathematics",
-    time: "Today, 2:00 PM - 3:30 PM",
-    students: 8,
-    mode: "online",
-  },
-  {
-    id: 2,
-    courseName: "Introduction to Physics",
-    time: "Tomorrow, 10:00 AM - 11:30 AM",
-    students: 12,
-    mode: "in-person",
-  },
-  {
-    id: 3,
-    courseName: "Data Structures",
-    time: "Friday, 4:00 PM - 5:30 PM",
-    students: 6,
-    mode: "hybrid",
-  },
-];
-
-const mockRecentMessages = [
-  {
-    id: 1,
-    student: "John Doe",
-    avatar: "/placeholder.svg?height=40&width=40",
-    message: "Hello, I have a question about the upcoming class...",
-    time: "10 minutes ago",
-    unread: true,
-  },
-  {
-    id: 2,
-    student: "Sarah Johnson",
-    avatar: "/placeholder.svg?height=40&width=40",
-    message: "Thank you for the feedback on my assignment!",
-    time: "2 hours ago",
-    unread: false,
-  },
-];
+import {
+  getTutorDashboard,
+  TutorDashboardData,
+} from "@/services/tutorService";
+import { API_BASE_URL } from "@/config/axiosInstance";
 
 export function TutorDashboard() {
   const { user } = useAuth();
   const [greeting, setGreeting] = useState("");
+  const [dashboardData, setDashboardData] = useState<TutorDashboardData | null>(
+    null
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Set greeting based on time
     const hour = new Date().getHours();
     if (hour < 12) setGreeting("Good morning");
     else if (hour < 18) setGreeting("Good afternoon");
     else setGreeting("Good evening");
+
+    // Fetch data from API
+    const fetchData = async () => {
+      setLoading(true);
+      const response = await getTutorDashboard();
+      if (response.succeeded) {
+        setDashboardData(response.data);
+      } else {
+        setError(response.message);
+      }
+      setLoading(false);
+    };
+
+    fetchData();
   }, []);
 
   const container = staggerContainer(0.1);
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <motion.div
+          variants={fadeIn("up", 0.1)}
+          initial="hidden"
+          animate="show"
+        >
+          <h1 className="text-3xl font-bold mb-2">Loading...</h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Fetching your dashboard data...
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <motion.div
+          variants={fadeIn("up", 0.1)}
+          initial="hidden"
+          animate="show"
+        >
+          <h1 className="text-3xl font-bold mb-2">Error</h1>
+          <p className="text-red-600 dark:text-red-400">{error}</p>
+          <Button
+            className="mt-4 bg-indigo-600 hover:bg-indigo-700"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </Button>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -125,11 +128,12 @@ export function TutorDashboard() {
                       <strong>Active Courses</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
-                      {mockStats.courses}
+                      {dashboardData?.stats.courses || 0}
                     </h3>
                     <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
-                        <ArrowUp className="h-3 w-3 mr-1" />2
+                        <ArrowUp className="h-3 w-3 mr-1" />
+                        {dashboardData?.stats.coursesChange || 0}
                       </span>
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
@@ -153,11 +157,12 @@ export function TutorDashboard() {
                       <strong>Total Students</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
-                      {mockStats.students}
+                      {dashboardData?.stats.students || 0}
                     </h3>
                     <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
-                        <ArrowUp className="h-3 w-3 mr-1" />5
+                        <ArrowUp className="h-3 w-3 mr-1" />
+                        {dashboardData?.stats.studentsChange || 0}
                       </span>
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
@@ -181,12 +186,12 @@ export function TutorDashboard() {
                       <strong>Teaching Hours</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
-                      {mockStats.hours}
+                      {dashboardData?.stats.hours || 0}
                     </h3>
                     <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
                         <ArrowUp className="h-3 w-3 mr-1" />
-                        12
+                        {dashboardData?.stats.hoursChange || 0}
                       </span>
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
@@ -210,7 +215,7 @@ export function TutorDashboard() {
                       <strong>Average Rating</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
-                      {mockStats.rating}
+                      {dashboardData?.stats.rating.toFixed(1) || 0}
                     </h3>
                     <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
@@ -244,7 +249,7 @@ export function TutorDashboard() {
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
-                      data={mockBarData}
+                      data={dashboardData?.barData || []}
                       margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
@@ -274,7 +279,7 @@ export function TutorDashboard() {
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
-                      data={mockBarData}
+                      data={dashboardData?.barData || []}
                       margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
@@ -296,7 +301,7 @@ export function TutorDashboard() {
           </motion.div>
         </div>
 
-        {/* Upcoming Classes and Recent Messages */}
+        {/* Upcoming Classes and Recent Contracts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <motion.div variants={fadeIn("up", 0.7)}>
             <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
@@ -310,7 +315,7 @@ export function TutorDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockUpcomingClasses.map((classItem) => (
+                  {dashboardData?.upcomingClasses.map((classItem) => (
                     <div
                       key={classItem.id}
                       className="flex flex-col p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
@@ -349,46 +354,41 @@ export function TutorDashboard() {
             <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-xl font-semibold">
-                  Recent Messages
+                  Recent Contracts
                 </CardTitle>
                 <Button variant="outline" size="sm" asChild>
-                  <Link to="/messages">View All</Link>
+                  <Link to="/contracts">View All</Link>
                 </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockRecentMessages.map((message) => (
+                  {dashboardData?.recentContracts.map((contract) => (
                     <div
-                      key={message.id}
-                      className={`flex items-start p-4 border border-gray-200 dark:border-gray-700 rounded-lg ${
-                        message.unread
-                          ? "bg-indigo-50 dark:bg-indigo-900/20"
-                          : ""
-                      }`}
+                      key={contract.id}
+                      className="flex items-start p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
                     >
                       <Avatar className="h-10 w-10 mr-3">
                         <AvatarImage
-                          src={message.avatar}
-                          alt={message.student}
+                          src={`${API_BASE_URL}/${contract.studentProfile}`}
+                          alt={contract.student}
                         />
                         <AvatarFallback className="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
-                          {message.student.charAt(0)}
+                          {contract.student?.charAt(0) || "N/A"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start">
-                          <h4 className="font-medium">{message.student}</h4>
+                          <h4 className="font-medium">
+                            {contract.student || "Unknown"}
+                          </h4>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {message.time}
+                            {contract.lastUpdated}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 truncate">
-                          {message.message}
+                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          {contract.status}
                         </p>
                       </div>
-                      {message.unread && (
-                        <div className="h-2 w-2 bg-indigo-600 rounded-full flex-shrink-0 mt-2"></div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -411,28 +411,19 @@ export function TutorDashboard() {
                   className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
                   asChild
                 >
-                  <Link to="/tutor/courses/new">
-                    {/* <BookOpen className="h-4 w-4 mr-2" /> */}
-                    Create New Course
-                  </Link>
+                  <Link to="/tutor/courses/new">Create New Course</Link>
                 </Button>
                 <Button
                   className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-600/90 dark:hover:bg-purple-700/90"
                   asChild
                 >
-                  <Link to="/schedules">
-                    {/* <Calendar className="h-4 w-4 mr-2" /> */}
-                    Manage Schedule
-                  </Link>
+                  <Link to="/schedules">Manage Schedule</Link>
                 </Button>
                 <Button
                   className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600/90 dark:hover:bg-blue-700/90"
                   asChild
                 >
-                  <Link to="/notifications">
-                    {/* <MessageSquare className="h-4 w-4 mr-2" /> */}
-                    View Notifications
-                  </Link>
+                  <Link to="/notifications">View Notifications</Link>
                 </Button>
               </div>
             </CardContent>

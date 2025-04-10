@@ -37,14 +37,14 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         icon: <Home className="h-5 w-5" />,
       },
       {
-        name: "Manage Tutors",
-        path: "/admin/tutors",
+        name: "Manage Users",
+        path: "/admin/users",
         icon: <User className="h-5 w-5" />,
       },
       {
         name: "Manage Courses",
         path: "/admin/courses",
-        icon: <BookOpen className="h-5 w-5" />,
+        icon: <User className="h-5 w-5" />,
       },
       // {
       //   name: "Notifications",
@@ -124,7 +124,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     <aside
       className={`bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ${
         isOpen ? "w-64" : "w-20"
-      } flex flex-col h-full shadow-lg p-4 rounded-tr-lg rounded-br-lg overflow-hidden relative`}
+      } flex flex-col h-full shadow-lg p-4 overflow-hidden relative`}
     >
       {" "}
       <div className="p-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">

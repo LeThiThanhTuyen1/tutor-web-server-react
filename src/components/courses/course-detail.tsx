@@ -199,14 +199,13 @@ export default function CourseDetail() {
   const studentCounts = students
     ? {
         all: students.length,
-        active: students.filter((s) => s.status?.toLowerCase() === "active")
-          .length,
-        inactive: students.filter((s) => s.status?.toLowerCase() === "inactive")
-          .length,
+        completed: students.filter(
+          (s) => s.status?.toLowerCase() === "completed"
+        ).length,
         pending: students.filter((s) => s.status?.toLowerCase() === "pending")
           .length,
       }
-    : { all: 0, active: 0, inactive: 0, pending: 0 };
+    : { all: 0, completed: 0, pending: 0};
 
   // Check if course can be cancelled (only coming or ongoing courses)
   const canCancel =
@@ -675,7 +674,7 @@ export default function CourseDetail() {
                               <div className="relative flex-grow max-w-md">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                                 <Input
-                                  placeholder="Tìm kiếm học viên..."
+                                  placeholder="Search student..."
                                   value={studentSearchTerm}
                                   onChange={(e) =>
                                     setStudentSearchTerm(e.target.value)
@@ -693,11 +692,8 @@ export default function CourseDetail() {
                                 <TabsTrigger value="all">
                                   All ({studentCounts.all})
                                 </TabsTrigger>
-                                <TabsTrigger value="active">
-                                  Active ({studentCounts.active})
-                                </TabsTrigger>
-                                <TabsTrigger value="inactive">
-                                  Completed ({studentCounts.inactive})
+                                <TabsTrigger value="completed">
+                                  Completed ({studentCounts.completed})
                                 </TabsTrigger>
                                 <TabsTrigger value="pending">
                                   Pending ({studentCounts.pending})
@@ -712,7 +708,7 @@ export default function CourseDetail() {
                                 {renderStudentList(filteredStudents)}
                               </TabsContent>
 
-                              <TabsContent value="inactive" className="mt-0">
+                              <TabsContent value="completed" className="mt-0">
                                 {renderStudentList(filteredStudents)}
                               </TabsContent>
 
@@ -791,7 +787,7 @@ export default function CourseDetail() {
               <Card className="border border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800 sticky top-6">
                 <CardContent className="p-0">
                   {/* Course Preview Image */}
-                  <div className="aspect-video w-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
+                  <div className="rounded-tl-lg rounded-tr-lg aspect-video w-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
                     <Video className="h-12 w-12 text-white" />
                   </div>
 
@@ -805,32 +801,33 @@ export default function CourseDetail() {
                       </div>
                     </div>
 
-                    {/* Enrollment Status */}
-                    {hasSignedContract ? (
-                      <div className="bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-3 flex items-center">
-                        <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-2 flex-shrink-0" />
-                        <div>
-                          <p className="font-medium text-green-800 dark:text-green-300">
-                            Enrolled successful
-                          </p>
-                          <p className="text-sm text-green-700 dark:text-green-400">
-                            You enrolled at {new Date().toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                        <Info className="h-4 w-4 mr-1 text-indigo-500" />
-                        <span>
-                          {" "}
-                          Please read the contract carefully before registering.
-                        </span>
-                      </div>
-                    )}
-
                     {/* Enrollment Buttons */}
                     {!isTutor && (
                       <>
+                        {/* Enrollment Status */}
+                        {hasSignedContract ? (
+                          <div className="bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-3 flex items-center">
+                            <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-2 flex-shrink-0" />
+                            <div>
+                              <p className="font-medium text-green-800 dark:text-green-300">
+                                Enrolled successful
+                              </p>
+                              <p className="text-sm text-green-700 dark:text-green-400">
+                                You enrolled at{" "}
+                                {new Date().toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                            <Info className="h-4 w-4 mr-1 text-indigo-500" />
+                            <span>
+                              {" "}
+                              Please read the contract carefully before
+                              registering.
+                            </span>
+                          </div>
+                        )}
                         <Button
                           className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90 h-12 text-base"
                           onClick={() => {
@@ -852,10 +849,10 @@ export default function CourseDetail() {
                             ? "Enrolled"
                             : "Enroll"}
                         </Button>
+
+                        <Separator className="my-4" />
                       </>
                     )}
-
-                    <Separator className="my-4" />
 
                     {/* Course Includes */}
                     <div>
@@ -880,7 +877,7 @@ export default function CourseDetail() {
                     <Separator className="my-4" />
 
                     {/* Payment Information */}
-                    <div>
+                    {/* <div>
                       <h4 className="font-medium text-indigo-950 dark:text-indigo-50 mb-3">
                         Payment infomation:
                       </h4>
@@ -897,10 +894,10 @@ export default function CourseDetail() {
                           <span>${(currentCourse.fee * 1.1).toFixed(2)}</span>
                         </li>
                       </ul>
-                    </div>
+                    </div> */}
 
                     {/* Payment Methods */}
-                    <div>
+                    {/* <div>
                       <h4 className="font-medium text-indigo-950 dark:text-indigo-50 mb-2">
                         Payment methods:
                       </h4>
@@ -915,16 +912,16 @@ export default function CourseDetail() {
                           MOMO
                         </div>
                       </div>
-                    </div>
+                    </div> */}
 
                     {/* Refund Policy */}
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-4">
+                    {/* <div className="text-xs text-gray-500 dark:text-gray-400 mt-4">
                       <p>
                         <strong>Refund Policy:</strong> You may request a refund
                         within 30 days of enrollment if you have not completed
                         more than 30% of the course.
                       </p>
-                    </div>
+                    </div> */}
                   </div>
                 </CardContent>
               </Card>
@@ -955,7 +952,7 @@ export default function CourseDetail() {
           isProcessing={isEnrolling}
           courseTitle={currentCourse.courseName}
           tutorName={currentCourse.tutorName}
-          studentName={user?.name || "Học viên"}
+          studentName={user?.name || "Student"}
           fee={currentCourse.fee}
         />
       )}
@@ -1014,9 +1011,9 @@ function renderStudentList(students: any[]) {
                     variant="outline"
                     className={cn(
                       "text-xs font-medium",
-                      student.status?.toLowerCase() === "active"
+                      student.status?.toLowerCase() === "completed"
                         ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
-                        : student.status?.toLowerCase() === "inactive"
+                        : student.status?.toLowerCase() === "pending"
                         ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                         : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
                     )}
@@ -1029,7 +1026,7 @@ function renderStudentList(students: any[]) {
               <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 <span className="flex items-center">
                   <Calendar className="h-3 w-3 mr-1" />
-                  Enrolled at {" "}
+                  Enrolled at{" "}
                   {new Date(student.enrolledAt).toLocaleDateString()}
                 </span>
               </div>
