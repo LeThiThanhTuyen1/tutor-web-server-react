@@ -109,3 +109,19 @@ export const getStudentTutors = async () => {
     };
   }
 };
+
+export const getStatsPublic = async () => {
+  try {
+    const response = await api.get("/student/stats/public");
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching student tutors:", error);
+    const errorMessage =
+      error.response?.data?.message || "An unexpected error occurred";
+    return {
+      data: null,
+      succeeded: false,
+      message: errorMessage,
+    };
+  }
+};

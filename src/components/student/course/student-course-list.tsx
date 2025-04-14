@@ -1,15 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import {
   Search,
   BookOpen,
   XCircle,
   Eye,
   DollarSign,
-  Calendar,
-  User,
+  MoreHorizontal,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
@@ -21,21 +20,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/ui/select";
-import { Tabs, TabsContent } from "@/ui/tabs";
 import { useToast } from "@/hook/use-toast";
 import { ToastContainer } from "@/ui/toast";
 import { CancelCourseModal } from "@/ui/modals/cancel-course";
-import { PaginationFilter } from "@/types/paginated-response";
+import type { PaginationFilter } from "@/types/paginated-response";
 import { cn } from "@/ui/cn";
-import { Link, useSearchParams } from "react-router-dom"; // Thêm useSearchParams
+import { Link, useSearchParams } from "react-router-dom";
 import { Badge } from "@/ui/badge";
 import { useCourse } from "@/hook/use-course";
-import { formatRelativeDate } from "@/components/courses/course-utils";
 import { STATUS_STYLES } from "@/components/courses/course-card";
 import { initiatePayment, unenrollStudent } from "@/services/enrollmentService";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/ui/dropdown-menu";
+import { Skeleton } from "@/ui/skeleton";
 
-export default function StudentCourseList() {
-  const { studentCourses, loading, totalPages, getStudentCourses } = useCourse();
+export default function StudentCourseTable() {
+  const { studentCourses, loading, totalPages, getStudentCourses } =
+    useCourse();
   const [filteredCourses, setFilteredCourses] = useState(studentCourses);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -43,17 +56,18 @@ export default function StudentCourseList() {
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [courseToCancel, setCourseToCancel] = useState<number | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast, toasts, dismiss } = useToast();
   const [pagination, setPagination] = useState<PaginationFilter>({
     pageNumber: 1,
-    pageSize: 9,
+    pageSize: 10, // Increased page size for table view
   });
-  const searchParams = useSearchParams()[0]; // Lấy query parameters
+  const searchParams = useSearchParams()[0];
 
   useEffect(() => {
     getStudentCourses(pagination);
 
-    // Xử lý query parameters từ redirect sau thanh toán
+    // Handle payment redirect
     const success = searchParams.get("success");
     const enrollmentId = searchParams.get("enrollmentId");
     const code = searchParams.get("code");
@@ -64,7 +78,7 @@ export default function StudentCourseList() {
         description: "Your payment was completed successfully!",
         variant: "success",
       });
-      getStudentCourses(pagination); // Làm mới danh sách để cập nhật trạng thái
+      getStudentCourses(pagination);
     } else if (success === "false") {
       toast({
         title: "Payment Failed",
@@ -82,7 +96,7 @@ export default function StudentCourseList() {
       result = result.filter(
         (course) =>
           course.courseName.toLowerCase().includes(term) ||
-          course.description.toLowerCase().includes(term)
+          course.tutorName?.toLowerCase().includes(term)
       );
     }
 
@@ -112,6 +126,14 @@ export default function StudentCourseList() {
         ? prev.filter((id) => id !== courseId)
         : [...prev, courseId]
     );
+  };
+
+  const toggleAllCourses = (checked: boolean) => {
+    if (checked) {
+      setSelectedCourses(filteredCourses.map((course) => course.id));
+    } else {
+      setSelectedCourses([]);
+    }
   };
 
   const handlePageChange = (pageNumber: number) => {
@@ -151,11 +173,39 @@ export default function StudentCourseList() {
     }
   };
 
+  const refreshCourses = async () => {
+    setIsRefreshing(true);
+    await getStudentCourses(pagination);
+    setIsRefreshing(false);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <h1 className="text-2xl font-bold">My Courses</h1>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={refreshCourses}
+              disabled={isRefreshing}
+              className="h-9"
+            >
+              <RefreshCw
+                className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")}
+              />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
@@ -163,7 +213,7 @@ export default function StudentCourseList() {
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search courses..."
+                placeholder="Search by course or tutor..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -172,137 +222,161 @@ export default function StudentCourseList() {
 
             <div className="w-full md:w-48">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="h-9">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="canceled">Canceled</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-          <Tabs defaultValue="list" className="w-full">
-            <TabsContent value="list" className="p-0">
-              {loading ? (
-                <div className="flex justify-center p-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
-                </div>
-              ) : filteredCourses.length === 0 ? (
-                <div className="text-center py-12">
-                  <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                    No courses found
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400 mb-6">
-                    {searchTerm || statusFilter !== "all"
-                      ? "Try adjusting your search or filters"
-                      : "You haven't enrolled in any courses yet"}
-                  </p>
-                </div>
-              ) : (
-                <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+          {loading ? (
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <Skeleton className="h-8 w-32" />
+                <Skeleton className="h-8 w-24" />
+              </div>
+              <div className="space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            </div>
+          ) : filteredCourses.length === 0 ? (
+            <div className="text-center py-12">
+              <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                No courses found
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-6">
+                {searchTerm || statusFilter !== "all"
+                  ? "Try adjusting your search or filters"
+                  : "You haven't enrolled in any courses yet"}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[50px]">
+                      <Checkbox
+                        onCheckedChange={(checked) =>
+                          toggleAllCourses(checked as boolean)
+                        }
+                        checked={
+                          filteredCourses.length > 0 &&
+                          selectedCourses.length === filteredCourses.length
+                        }
+                        className="ml-2"
+                      />
+                    </TableHead>
+                    <TableHead>Course</TableHead>
+                    <TableHead>Tutor</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Dates</TableHead>
+                    <TableHead>Fee</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {filteredCourses.map((course) => (
-                    <motion.li
-                      key={course.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="p-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
-                    >
-                      <div className="flex items-start gap-4">
+                    <TableRow key={course.id}>
+                      <TableCell>
                         <Checkbox
                           checked={selectedCourses.includes(course.id)}
-                          onCheckedChange={() => toggleCourseSelection(course.id)}
-                          className="mt-1 h-5 w-5"
+                          onCheckedChange={() =>
+                            toggleCourseSelection(course.id)
+                          }
+                          className="ml-2"
                         />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                                  {course.courseName}
-                                </h3>
-                                <Badge
-                                  variant="outline"
-                                  className={cn(
-                                    "text-xs font-medium",
-                                    STATUS_STYLES[course.status] ||
-                                      "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-                                  )}
-                                >
-                                  {course.status.charAt(0).toUpperCase() + course.status.slice(1)}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                Enroll {formatRelativeDate(course.enrolledAt)}
-                              </p>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <div className="max-w-[200px] truncate">
+                          {course.courseName}
+                        </div>
+                      </TableCell>
+                      <TableCell>{course.tutorName}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-xs font-medium",
+                            STATUS_STYLES[course.status] ||
+                              "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                          )}
+                        >
+                          {course.status.charAt(0).toUpperCase() +
+                            course.status.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-xs">
+                          <div>{formatDate(course.startDate)}</div>
+                          <div>{formatDate(course.endDate)}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>${course.fee}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem asChild>
+                                <Link to={`/courses/${course.id}`}>
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Details
+                                </Link>
+                              </DropdownMenuItem>
                               {course.status === "pending" && (
                                 <>
-                                  <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => handleCancelCourse(course.id)}
-                                    className="flex-1 text-white md:w-full bg-red-600 hover:bg-red-700 dark:bg-red-600/90 dark:hover:bg-red-700/90"
-                                  >
-                                    <XCircle className="h-3.5 w-3.5 mr-1" />
-                                    Cancel
-                                  </Button>
-                                  <Button
-                                    variant="default"
-                                    size="sm"
+                                  <DropdownMenuItem
                                     onClick={() => handlePayment(course.id)}
+                                    className="text-yellow-500"
                                   >
-                                    <DollarSign className="h-4 w-4 mr-1" />
-                                    Pay
-                                  </Button>
+                                    <DollarSign className="h-4 w-4 mr-2" />
+                                    Make Payment
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleCancelCourse(course.id)
+                                    }
+                                    className="text-red-600"
+                                  >
+                                    <XCircle className="h-4 w-4 mr-2" />
+                                    Cancel Enrollment
+                                  </DropdownMenuItem>
                                 </>
                               )}
-                              <Button
-                                variant="default"
-                                size="sm"
-                                className="flex-1 md:w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
-                              >
-                                <Link to={`/courses/${course.id}`} className="flex items-center">
-                                  <Eye className="h-3.5 w-3.5 mr-1" />
-                                  View
-                                </Link>
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-y-2 gap-x-4 text-sm">
-                            <div className="flex items-center text-gray-600 dark:text-gray-400">
-                              <User className="h-4 w-4 mr-1 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
-                              <span>Tutor: {course.tutorName}</span>
-                            </div>
-                            <div className="flex items-center text-gray-600 dark:text-gray-400">
-                              <DollarSign className="h-4 w-4 mr-1 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
-                              <span>${course.fee}</span>
-                            </div>
-                            <div className="flex items-center text-gray-600 dark:text-gray-400">
-                              <Calendar className="h-4 w-4 mr-1 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
-                              <span className="truncate">
-                                {new Date(course.startDate).toLocaleDateString()} -{" "}
-                                {new Date(course.endDate).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
-                      </div>
-                    </motion.li>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </ul>
-              )}
-            </TabsContent>
-          </Tabs>
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </div>
       </div>
+
       {totalPages > 1 && (
         <div className="mt-6 p-4">
           <div className="flex justify-center">
@@ -310,10 +384,14 @@ export default function StudentCourseList() {
               {Array.from({ length: totalPages }, (_, i) => (
                 <Button
                   key={i}
-                  variant={pagination.pageNumber === i + 1 ? "default" : "outline"}
+                  variant={
+                    pagination.pageNumber === i + 1 ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => handlePageChange(i + 1)}
-                  className={pagination.pageNumber === i + 1 ? "bg-indigo-600" : ""}
+                  className={
+                    pagination.pageNumber === i + 1 ? "bg-indigo-600" : ""
+                  }
                 >
                   {i + 1}
                 </Button>
@@ -322,12 +400,14 @@ export default function StudentCourseList() {
           </div>
         </div>
       )}
+
       <CancelCourseModal
         isOpen={isCancelDialogOpen}
         onCancel={() => setIsCancelDialogOpen(false)}
         onConfirm={confirmCancelCourse}
         isCancelling={isCancelling}
       />
+
       <ToastContainer
         toasts={toasts.map((toast) => ({ ...toast, onDismiss: dismiss }))}
         dismiss={dismiss}

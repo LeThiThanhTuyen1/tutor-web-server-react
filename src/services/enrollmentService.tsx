@@ -1,5 +1,20 @@
 import api from "@/config/axiosInstance";
-import { Response } from "./adminService";
+import { PagedResponse, Response } from "./adminService";
+import { PaginationFilter } from "@/types/paginated-response";
+
+export interface BillHistoryModel {
+  paymentId: number;
+  enrollmentId: number;
+  courseId: number;
+  courseName: string;
+  amount: number;
+  paymentMethod: string;
+  transactionId: string;
+  orderId: string;
+  status: string;
+  createdAt: string;
+  vnPayResponseCode: string;
+}
 
 export const enrollCourse = async (courseId: number) => {
   try {
@@ -43,6 +58,35 @@ export const unenrollStudent = async (
   }
 };
 
+export const getBillHistory = async (filter: PaginationFilter): Promise<PagedResponse<BillHistoryModel[]>> => {
+  try {
+    const response = await api.get<PagedResponse<BillHistoryModel[]>>("/Payment/billhistory", {
+      params: {
+        pageNumber: filter.pageNumber,
+        pageSize: filter.pageSize,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching bill history:", error);
+    const errorMessage =
+      error.response?.data?.message || "Failed to fetch bill history";
+    return {
+      data: [],
+      pageNumber: filter.pageNumber,
+      pageSize: filter.pageSize,
+      totalPages: 0,
+      totalRecords: 0,
+      succeeded: false,
+      message: errorMessage,
+      firstPage: null,
+      lastPage: null,
+      nextPage: null,
+      previousPage: null,
+    };
+  }
+};
+
 export const initiatePayment = async (enrollmentId: number) => {
   try {
     const response = await api.post(
@@ -50,7 +94,10 @@ export const initiatePayment = async (enrollmentId: number) => {
     );
     return response.data.paymentUrl;
   } catch (error) {
-    console.error(`Error initiating payment for enrollment ${enrollmentId}:`, error);
+    console.error(
+      `Error initiating payment for enrollment ${enrollmentId}:`,
+      error
+    );
     throw error;
   }
 };

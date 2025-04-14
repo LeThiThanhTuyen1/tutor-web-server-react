@@ -29,6 +29,11 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         path: "/courses",
         icon: <BookOpen className="h-5 w-5" />,
       },
+      {
+        name: "Settings",
+        path: "/setting",
+        icon: <SettingsIcon className="h-5 w-5" />,
+      },
     ],
     Admin: [
       {
@@ -56,11 +61,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         path: "/admin/contracts/manage",
         icon: <FileText className="h-5 w-5" />,
       },
-      {
-        name: "Settings",
-        path: "/setting",
-        icon: <SettingsIcon className="h-5 w-5" />,
-      },
     ],
     Tutor: [
       {
@@ -82,11 +82,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         name: "Notifications",
         path: "/notifications",
         icon: <Bell className="h-5 w-5" />,
-      },
-      {
-        name: "Settings",
-        path: "/setting",
-        icon: <SettingsIcon className="h-5 w-5" />,
       },
     ],
     Student: [
@@ -110,11 +105,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         path: "/notifications",
         icon: <Bell className="h-5 w-5" />,
       },
-      {
-        name: "Settings",
-        path: "/setting",
-        icon: <SettingsIcon className="h-5 w-5" />,
-      },
     ],
   };
 
@@ -126,9 +116,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         isOpen ? "w-64" : "w-20"
       } flex flex-col h-full shadow-lg p-4 overflow-hidden relative`}
     >
-      {" "}
       <div className="p-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
-        {" "}
         <div
           className={`flex items-center ${
             isOpen ? "" : "justify-center w-full"

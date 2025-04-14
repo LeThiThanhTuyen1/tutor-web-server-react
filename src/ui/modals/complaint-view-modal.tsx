@@ -27,13 +27,15 @@ export function ComplaintViewModal({
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case "pending":
-        return <Badge className="bg-yellow-500">Pending</Badge>;
+        return <Badge className="bg-yellow-500 hover:bg-yellow-500">Pending</Badge>;
       case "canceled":
-        return <Badge className="bg-red-500">Cancelled/Rejected</Badge>;
+        return <Badge className="bg-red-500 hover:bg-red-500">Cancelled/Rejected</Badge>;
       case "approved":
-        return <Badge className="bg-green-500">Approved</Badge>;
+        return <Badge className="bg-green-500 hover:bg-green-500">Approved</Badge>;
       case "rejected":
-        return <Badge className="bg-red-500">Rejected</Badge>;
+        return <Badge className="bg-red-500 hover:bg-red-500">Rejected</Badge>;
+      case "completed":
+        return <Badge className="bg-gray-400 hover:bg-gray-500">Completed</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }

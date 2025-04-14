@@ -43,6 +43,7 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  role: string;
   profileImage: string;
   location: string;
   school: string;
@@ -56,6 +57,10 @@ export interface PagedResponse<T> {
   totalPages: number;
   nextPage: string | null;
   previousPage: string | null;
+  succeeded: false,
+  message: string,
+  firstPage: null,
+  lastPage: null,
 }
 
 export interface Response<T> {

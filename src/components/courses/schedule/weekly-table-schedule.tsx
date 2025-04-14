@@ -162,21 +162,23 @@ const WeeklyTableSchedule = ({ courses }: { courses: Course[] }) => {
     courses.forEach((course) => {
       // Skip canceled courses
       if (course.status === "canceled") return
-
+    
       // Store course in map
       courseMap[course.id] = course
-
-      // Process each schedule
-      course.schedule.forEach((schedule) => {
-        const scheduleWithCourse: ScheduleWithCourse = {
-          ...schedule,
-          courseId: course.id,
-          hasConflict: false,
-          course,
-        }
-
-        allSchedules.push(scheduleWithCourse)
-      })
+    
+      // Process each schedule, if it exists
+      if (Array.isArray(course.schedule)) {
+        course.schedule.forEach((schedule) => {
+          const scheduleWithCourse: ScheduleWithCourse = {
+            ...schedule,
+            courseId: course.id,
+            hasConflict: false,
+            course,
+          }
+    
+          allSchedules.push(scheduleWithCourse)
+        })
+      }
     })
 
     // Check for conflicts

@@ -134,7 +134,7 @@ export function UserTable() {
   );
 
   return (
-    <div className="container mx-auto py-8 px-12">
+    <div className="container mx-auto py-8 px-12 flex flex-col min-h-screen relative">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">User Management</h1>
       </div>
@@ -146,7 +146,7 @@ export function UserTable() {
             placeholder="Search users..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-white dark:bg-gray-800 "
+            className="pl-10 bg-white dark:bg-gray-800"
           />
         </div>
         <div className="flex gap-2 w-full md:w-auto">
@@ -174,7 +174,7 @@ export function UserTable() {
         </div>
       </div>
 
-      <div className="border rounded-md bg-white dark:bg-gray-800">
+      <div className="border rounded-md bg-white dark:bg-gray-800 flex-grow">
         <Table>
           <TableHeader>
             <TableRow>
@@ -246,7 +246,7 @@ export function UserTable() {
       </div>
 
       {totalPages > 1 && (
-        <div className="mt-4 flex justify-center">
+        <div className=" bottom-0 left-0 right-0 py-4 flex justify-center">
           <Pagination
             totalPages={totalPages}
             currentPage={page}

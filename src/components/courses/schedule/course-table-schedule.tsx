@@ -188,10 +188,10 @@ const CourseTableSchedule = ({ courses }: { courses: Course[] }) => {
           <Table className="w-full border-collapse">
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs p-1 w-[25%]">Course</TableHead>
-                <TableHead className="text-xs p-1 w-[15%]">Tutor</TableHead>
-                <TableHead className="text-xs p-1 w-[15%]">Status</TableHead>
-                <TableHead className="text-xs p-1 w-[45%]">Schedule</TableHead>
+                <TableHead className="text-md p-1 w-[25%]">Course</TableHead>
+                <TableHead className="text-md p-1 w-[15%]">Tutor</TableHead>
+                <TableHead className="text-md p-1 w-[15%]">Status</TableHead>
+                <TableHead className="text-md p-1 w-[45%]">Schedule</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

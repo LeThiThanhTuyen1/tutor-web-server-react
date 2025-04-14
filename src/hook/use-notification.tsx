@@ -40,7 +40,6 @@ export const useNotification = () => {
   // Fetch notifications on mount if not already fetched
   useEffect(() => {
     if (user && !lastFetched) {
-      console.log("Fetching notifications for user:", user);
       dispatch(fetchAllNotifications());
     }
   }, [dispatch, user, lastFetched]);

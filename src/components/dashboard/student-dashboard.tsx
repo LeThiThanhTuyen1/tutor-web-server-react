@@ -10,6 +10,7 @@ import {
   Star,
   ArrowUp,
   Calendar,
+  ArrowDown,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Button } from "@/ui/button";
@@ -38,7 +39,7 @@ export function StudentDashboard() {
   const [tutors, setTutors] = useState<Tutor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  
   useEffect(() => {
     // Set greeting based on time
     const hour = new Date().getHours();
@@ -85,6 +86,10 @@ export function StudentDashboard() {
   }, []);
 
   const container = staggerContainer(0.1);
+
+  // const courseDiff = ;
+  // const completedDiff = ;
+  // const hoursDiff = ;
 
   if (loading) {
     return (
@@ -160,10 +165,23 @@ export function StudentDashboard() {
                     <p className="text-sm font-medium text-blue-500 dark:text-blue-400">
                       <strong>Enrolled Courses</strong>
                     </p>
-                    <h3 className="text-2xl font-bold mt-1">{stats.courses}</h3>
+                    <h3 className="text-2xl font-bold mt-1">
+                      {stats!.courses}
+                    </h3>
                     <div className="flex items-center mt-1 text-sm">
-                      <span className="flex items-center text-emerald-600 dark:text-emerald-400">
-                        <ArrowUp className="h-3 w-3 mr-1" />1
+                      <span
+                        className={`flex items-center ${
+                          stats!.courses - stats!.coursesLastMonth >= 0
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-600 dark:text-red-400"
+                        }`}
+                      >
+                        {stats!.courses - stats!.coursesLastMonth >= 0 ? (
+                          <ArrowUp className="h-3 w-3 mr-1" />
+                        ) : (
+                          <ArrowDown className="h-3 w-3 mr-1" />
+                        )}
+                        {Math.abs(stats!.courses - stats!.coursesLastMonth)}
                       </span>
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
@@ -187,11 +205,22 @@ export function StudentDashboard() {
                       <strong>Completed Courses</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
-                      {stats.completedCourses}
+                      {stats!.completedCourses}
                     </h3>
                     <div className="flex items-center mt-1 text-sm">
-                      <span className="flex items-center text-emerald-600 dark:text-emerald-400">
-                        <ArrowUp className="h-3 w-3 mr-1" />1
+                      <span
+                        className={`flex items-center ${
+                          stats!.completedCourses - stats!.completedCoursesLastMonth >= 0
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-600 dark:text-red-400"
+                        }`}
+                      >
+                        {stats!.completedCourses - stats!.completedCoursesLastMonth >= 0 ? (
+                          <ArrowUp className="h-3 w-3 mr-1" />
+                        ) : (
+                          <ArrowDown className="h-3 w-3 mr-1" />
+                        )}
+                        {Math.abs(stats!.completedCourses - stats!.completedCoursesLastMonth)}
                       </span>
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
@@ -215,11 +244,22 @@ export function StudentDashboard() {
                       <strong>Hours Learned</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
-                      {stats.hoursLearned}
+                      {stats!.hoursLearned}
                     </h3>
                     <div className="flex items-center mt-1 text-sm">
-                      <span className="flex items-center text-emerald-600 dark:text-emerald-400">
-                        <ArrowUp className="h-3 w-3 mr-1" />8
+                      <span
+                        className={`flex items-center ${
+                          stats!.hoursLearned - stats!.hoursLearnedLastMonth >= 0
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-600 dark:text-red-400"
+                        }`}
+                      >
+                        {stats!.hoursLearned - stats!.hoursLearnedLastMonth >= 0 ? (
+                          <ArrowUp className="h-3 w-3 mr-1" />
+                        ) : (
+                          <ArrowDown className="h-3 w-3 mr-1" />
+                        )}
+                        {Math.abs(stats!.hoursLearned - stats!.hoursLearnedLastMonth)}
                       </span>
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month

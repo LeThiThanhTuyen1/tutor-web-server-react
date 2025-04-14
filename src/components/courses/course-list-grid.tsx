@@ -33,11 +33,10 @@ import { PaginationFilter } from "@/types/paginated-response";
 import CourseCard, { STATUS_STYLES } from "./course-card";
 import { enrollCourse } from "@/services/enrollmentService";
 
-// Lazy load components for better performance
-// const CourseCard = lazy(() => import("@/components/courses/course-card"));
+// Lazy load components
 const CourseListItem = lazy(() => import("./course-list-item"));
 
-// Fallback components for lazy loading
+// Fallback components
 const CardSkeleton = () => (
   <div className="rounded-lg border border-indigo-100 dark:border-indigo-900 p-4">
     <Skeleton className="h-40 w-full rounded-md mb-4" />
@@ -64,15 +63,13 @@ const ListItemSkeleton = () => (
 
 const statusOptions = ["All", ...Object.keys(STATUS_STYLES)];
 
-// Animation variants - moved outside component
+// Animation variants
 const container = staggerContainer(0.05);
 
 export default function CourseList() {
-  // Use context hooks with memoization
   const { user } = useAuth();
   const { toast, toasts, dismiss } = useToast();
 
-  // Memoize the isTutor value to prevent unnecessary re-renders
   const isTutor = useMemo(() => user?.role === "Tutor", [user?.role]);
   const isAdmin = useMemo(() => user?.role === "Admin", [user?.role]);
 
@@ -101,53 +98,70 @@ export default function CourseList() {
   const lastCourseElementRef = useRef<HTMLDivElement | null>(null);
   const prevViewModeRef = useRef(viewMode);
 
-  // Debounce search term to reduce API calls
+  // Debounce search term
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
+      setPagination((prev) => ({ ...prev, pageNumber: 1 })); // Reset to page 1 on search
     }, 300);
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Fetch courses - optimized with useCallback and proper dependencies
-  const fetchCourses = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await getAllCourses(pagination);
+  // Fetch courses
+  // Inside CourseList component
+const fetchCourses = useCallback(async () => {
+  try {
+    setLoading(true);
+    const response = await getAllCourses(
+      {
+        pageNumber: pagination.pageNumber,
+        pageSize: pagination.pageSize,
+      },
+      debouncedSearchTerm,
+      selectedStatus === "All" ? undefined : selectedStatus.toLowerCase()
+    );
 
-      setCourses(response.data || []);
+    if (response.succeeded && response.data) {
+      setCourses(response.data);
       setTotalPages(response.totalPages);
       setError(null);
-    } catch (err) {
-      setError("Failed to load courses. Please try again later.");
+    } else {
+      setError(response.message || "Failed to load courses.");
       toast({
         title: "Error",
-        description: "Failed to load courses",
+        description: response.message || "Failed to load courses",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
-  }, [pagination, debouncedSearchTerm, selectedStatus]);
+  } catch (err) {
+    setError("Failed to load courses. Please try again later.");
+    toast({
+      title: "Error",
+      description: "Failed to load courses",
+      variant: "destructive",
+    });
+  } finally {
+    setLoading(false);
+  }
+}, [pagination, debouncedSearchTerm, selectedStatus]);
 
   // Fetch courses when dependencies change
   useEffect(() => {
     fetchCourses();
   }, [fetchCourses]);
 
-  // Prefetch the other view mode components when idle
+  // Prefetch view mode components
   useEffect(() => {
     if (prevViewModeRef.current !== viewMode) {
       prevViewModeRef.current = viewMode;
-      setKey((prev) => prev + 1); // Force re-render when view mode changes
+      setKey((prev) => prev + 1);
 
-      // Use requestIdleCallback to prefetch the other view mode during idle time
       const prefetchOtherView = () => {
         if (viewMode === "grid") {
-          import("@/components/courses/course-card");
-        } else {
           import("./course-list-item");
+        } else {
+          import("./course-card");
         }
       };
 
@@ -159,21 +173,13 @@ export default function CourseList() {
     }
   }, [viewMode]);
 
-  // Filter courses - memoized to prevent recalculation on every render
-  const filteredCourses = useMemo(() => {
-    // We're now handling filtering on the server side through the API call
-    // This is just a backup client-side filter
-    return courses;
-  }, [courses]);
-
-  // Course selection - optimized to use functional updates
+  // Course selection
   const toggleCourseSelection = useCallback((courseId: number) => {
-    setSelectedCourses((prev) => {
-      const isSelected = prev.includes(courseId);
-      return isSelected
+    setSelectedCourses((prev) =>
+      prev.includes(courseId)
         ? prev.filter((id) => id !== courseId)
-        : [...prev, courseId];
-    });
+        : [...prev, courseId]
+    );
   }, []);
 
   // Handle course enrollment
@@ -190,7 +196,6 @@ export default function CourseList() {
 
       try {
         setIsEnrolling((prev) => ({ ...prev, [courseId]: true }));
-
         const response = await enrollCourse(courseId);
 
         if (response.succeeded) {
@@ -199,7 +204,6 @@ export default function CourseList() {
             description: "You have successfully enrolled in this course",
             variant: "success",
           });
-          // Refresh the course list to update enrollment status
           fetchCourses();
         } else {
           toast({
@@ -218,11 +222,10 @@ export default function CourseList() {
         setIsEnrolling((prev) => ({ ...prev, [courseId]: false }));
       }
     },
-    [user, fetchCourses, toast]
+    [user, fetchCourses]
   );
 
-  // Delete courses - wrapped in useCallback to prevent recreation
-  // Removed toast from dependencies to prevent infinite loop
+  // Delete courses
   const handleDeleteSelected = useCallback(async () => {
     if (selectedCourses.length === 0) return;
 
@@ -235,10 +238,7 @@ export default function CourseList() {
           variant: "success",
         });
         setSelectedCourses([]);
-        setTimeout(() => {
-          fetchCourses();
-        }, 500);
-        setPagination({ ...pagination, pageNumber: 1 });
+        fetchCourses();
       } else {
         toast({
           title: "Error",
@@ -255,9 +255,9 @@ export default function CourseList() {
     } finally {
       setIsDeleteModalOpen(false);
     }
-  }, [selectedCourses, fetchCourses, pagination]);
+  }, [selectedCourses, fetchCourses]);
 
-  // Memoize handlers to prevent recreation on each render
+  // Handlers
   const handleViewModeChange = useCallback((mode: "grid" | "list") => {
     setViewMode(mode);
   }, []);
@@ -290,16 +290,14 @@ export default function CourseList() {
     setPagination((prev) => ({ ...prev, pageNumber: 1 }));
   }, []);
 
-  // Render functions for grid and list views
+  // Render views
   const renderGridView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {filteredCourses.map((course, index) => (
+      {courses.map((course, index) => (
         <motion.div
           key={course.id}
-          variants={fadeIn("up", Math.min(index * 0.05, 0.5))} // Cap the delay to prevent too long animations
-          ref={
-            index === filteredCourses.length - 1 ? lastCourseElementRef : null
-          }
+          variants={fadeIn("up", Math.min(index * 0.05, 0.5))}
+          ref={index === courses.length - 1 ? lastCourseElementRef : null}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -314,13 +312,11 @@ export default function CourseList() {
 
   const renderListView = () => (
     <div className="space-y-4">
-      {filteredCourses.map((course, index) => (
+      {courses.map((course, index) => (
         <motion.div
           key={course.id}
           variants={fadeIn("up", Math.min(index * 0.05, 0.5))}
-          ref={
-            index === filteredCourses.length - 1 ? lastCourseElementRef : null
-          }
+          ref={index === courses.length - 1 ? lastCourseElementRef : null}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -343,7 +339,7 @@ export default function CourseList() {
     </div>
   );
 
-  // Memoize the loading skeletons
+  // Memoized components
   const LoadingSkeletons = useMemo(
     () => (
       <div className="space-y-4">
@@ -365,7 +361,6 @@ export default function CourseList() {
     [viewMode]
   );
 
-  // Memoize the empty state
   const EmptyState = useMemo(
     () => (
       <div className="text-center py-12">
@@ -448,7 +443,7 @@ export default function CourseList() {
           </Button>
         </div>
       </motion.div>
-
+{/* 
       {error && (
         <motion.div
           variants={fadeIn("up", 0.2)}
@@ -459,7 +454,7 @@ export default function CourseList() {
           <AlertTriangle className="h-5 w-5 mr-2" />
           {error}
         </motion.div>
-      )}
+      )} */}
 
       <div className="flex flex-col md:flex-row gap-6">
         {/* Filter Sidebar */}
@@ -520,81 +515,6 @@ export default function CourseList() {
                   </div>
                 </AccordionContent>
               </AccordionItem>
-
-              <AccordionItem
-                value="date"
-                className="border-b-indigo-200 dark:border-b-indigo-800"
-              >
-                <AccordionTrigger className="text-indigo-950 dark:text-indigo-50 hover:text-indigo-700 dark:hover:text-indigo-300">
-                  Date
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm text-gray-600 dark:text-gray-400 mb-1 block">
-                        From
-                      </label>
-                      <Input
-                        type="date"
-                        className="bg-white dark:bg-gray-800 border-indigo-200 dark:border-indigo-800 focus-visible:ring-indigo-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-gray-600 dark:text-gray-400 mb-1 block">
-                        To
-                      </label>
-                      <Input
-                        type="date"
-                        className="bg-white dark:bg-gray-800 border-indigo-200 dark:border-indigo-800 focus-visible:ring-indigo-500"
-                      />
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem
-                value="price"
-                className="border-b-indigo-200 dark:border-b-indigo-800"
-              >
-                <AccordionTrigger className="text-indigo-950 dark:text-indigo-50 hover:text-indigo-700 dark:hover:text-indigo-300">
-                  Price Range
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-3">
-                    <div className="flex gap-2">
-                      <div className="w-1/2">
-                        <label className="text-sm text-gray-600 dark:text-gray-400 mb-1 block">
-                          Min
-                        </label>
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          className="bg-white dark:bg-gray-800 border-indigo-200 dark:border-indigo-800 focus-visible:ring-indigo-500"
-                        />
-                      </div>
-                      <div className="w-1/2">
-                        <label className="text-sm text-gray-600 dark:text-gray-400 mb-1 block">
-                          Max
-                        </label>
-                        <Input
-                          type="number"
-                          placeholder="10000"
-                          className="bg-white dark:bg-gray-800 border-indigo-200 dark:border-indigo-800 focus-visible:ring-indigo-500"
-                        />
-                      </div>
-                    </div>
-                    <div className="px-1">
-                      <div className="h-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-full mt-4 mb-1">
-                        <div className="h-full w-3/4 bg-indigo-600 dark:bg-indigo-500 rounded-full"></div>
-                      </div>
-                      <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                        <span>0</span>
-                        <span>10000</span>
-                      </div>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
             </Accordion>
 
             <div className="mt-4 flex gap-2">
@@ -606,13 +526,6 @@ export default function CourseList() {
               >
                 Reset
               </Button>
-              {/* <Button
-                variant="default"
-                size="sm"
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
-              >
-                Apply
-              </Button> */}
             </div>
           </div>
         </motion.div>
@@ -627,17 +540,14 @@ export default function CourseList() {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-indigo-100 dark:border-indigo-900 p-4 md:p-6">
             {loading ? (
               LoadingSkeletons
-            ) : filteredCourses.length > 0 ? (
+            ) : courses.length > 0 ? (
               <motion.div
                 variants={container}
                 initial="hidden"
                 animate="show"
-                key={key} // Add key to force re-render
+                key={key}
               >
-                {/* Direct rendering instead of using AnimatePresence for immediate UI updates */}
                 {viewMode === "grid" ? renderGridView() : renderListView()}
-
-                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="mt-6">
                     <Pagination
@@ -655,7 +565,6 @@ export default function CourseList() {
         </motion.div>
       </div>
 
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onCancel={handleDeleteModalClose}

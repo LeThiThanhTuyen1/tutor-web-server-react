@@ -28,6 +28,7 @@ import { getAllCourses, deleteCourses } from "@/services/courseService";
 import { useToast } from "@/hook/use-toast";
 import Pagination from "../layout/pagination";
 import { cn } from "@/ui/cn";
+import { ToastContainer } from "@/ui/toast";
 
 // Status styles
 const STATUS_STYLES: Record<string, string> = {
@@ -49,7 +50,7 @@ export function CourseTable() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-  const { toast } = useToast();
+  const { toast, toasts, dismiss } = useToast();
 
   const fetchCourses = async () => {
     setLoading(true);
@@ -280,8 +281,13 @@ export function CourseTable() {
         </Table>
       </div>
 
+      <ToastContainer
+        toasts={toasts.map((toast) => ({ ...toast, onDismiss: dismiss }))}
+        dismiss={dismiss}
+      />
+
       {totalPages > 1 && (
-        <div className="mt-4 flex justify-center">
+        <div className=" bottom-0 left-0 right-0 py-4 flex justify-center">
           <Pagination
             totalPages={totalPages}
             currentPage={page}

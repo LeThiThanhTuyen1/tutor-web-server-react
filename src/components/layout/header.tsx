@@ -107,7 +107,7 @@ export default function Header({
 
           {isAuthenticated ? (
             <>
-              <NotificationDropdown />
+              {user?.role !== "Admin" && <NotificationDropdown />}
 
               <div className="relative profile-menu">
                 <button
@@ -115,7 +115,7 @@ export default function Header({
                   className="flex items-center space-x-2 focus:outline-none"
                 >
                   <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center overflow-hidden">
-                    {user?.profileImage ? (
+                    {user?.image ? (
                       <img
                         src={`${API_BASE_URL}/${user.image}`}
                         alt="User Profile"
@@ -136,7 +136,7 @@ export default function Header({
                     <div>
                       {user?.role !== "Admin" && (
                         <Link
-                          to={`/${user?.role}/profile`}
+                          to={`/profile`}
                           className="block px-4 p-2 text-sm text-gray-700 dark:text-gray-200 hover:rounded-tl-md hover:rounded-tr-md hover:bg-gray-100 dark:hover:bg-gray-700"
                           onClick={() => setIsProfileMenuOpen(false)}
                         >
