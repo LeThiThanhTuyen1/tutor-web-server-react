@@ -24,6 +24,7 @@ interface CourseListItemProps {
   onCourseUpdated?: () => void;
   handleEnrollCourse: () => Promise<void>;
   isEnrolling: boolean;
+  isAdmin: boolean;
 }
 
 function CourseListItemComponent({
@@ -32,6 +33,7 @@ function CourseListItemComponent({
   isTutor,
   onCourseUpdated,
   handleEnrollCourse,
+  isAdmin,
   isEnrolling,
 }: CourseListItemProps) {
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
@@ -39,7 +41,7 @@ function CourseListItemComponent({
   const { toast, toasts, dismiss } = useToast();
   const [isContractDialogOpen, setIsContractDialogOpen] = useState(false);
   const { isAuthenticated, user } = useAuth();
-  const [hasSignedContract, setHasSignedContract] = useState(false);
+  const [hasSignedContract] = useState(false);
 
   const handleCancelCourse = async () => {
     try {
@@ -161,7 +163,7 @@ function CourseListItemComponent({
                   View Details
                 </Link>
               </Button>
-              {!isTutor && course.status !== "completed" && course.status !== "canceled" &&(
+              {!isTutor && !isAdmin && course.status !== "completed" && course.status !== "canceled" &&(
                 <Button
                   className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90 h-12 text-base"
                   onClick={() => {

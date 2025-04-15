@@ -42,8 +42,8 @@ export function ContractDialog({
   isOpen,
   onClose,
   contract,
-  onFileComplaint,
-  canFileComplaint = false,
+  // onFileComplaint,
+  // canFileComplaint = false,
   isRegistrationMode = false,
   onSignContract,
   isSigningContract = false,
@@ -236,7 +236,7 @@ export function ContractDialog({
               )}
 
               {/* Show File Complaint button only in normal viewing mode */}
-              {!isRegistrationMode && canFileComplaint && onFileComplaint && (
+              {/* {!isRegistrationMode && canFileComplaint && onFileComplaint && (
                 <Button
                   variant="outline"
                   onClick={onFileComplaint}
@@ -244,7 +244,7 @@ export function ContractDialog({
                 >
                   File a Complaint
                 </Button>
-              )}
+              )} */}
             </div>
           </motion.div>
         </div>

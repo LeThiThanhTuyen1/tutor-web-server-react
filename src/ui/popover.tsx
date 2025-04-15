@@ -1,117 +1,31 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { cn } from "@/ui/cn";
+import * as React from "react"
+import * as PopoverPrimitive from "@radix-ui/react-popover"
 
-interface PopoverProps {
-  children: React.ReactNode;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-}
+import { cn } from "./cn"
 
-const PopoverContext = React.createContext<{
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}>({
-  open: false,
-  onOpenChange: () => {},
-});
+const Popover = PopoverPrimitive.Root
 
-export function Popover({ children, open, onOpenChange }: PopoverProps) {
-  const [internalOpen, setInternalOpen] = React.useState(false);
+const PopoverTrigger = PopoverPrimitive.Trigger
 
-  const isControlled = open !== undefined;
-  const isOpen = isControlled ? open : internalOpen;
-
-  const handleOpenChange = React.useCallback(
-    (value: boolean) => {
-      if (!isControlled) {
-        setInternalOpen(value);
-      }
-      onOpenChange?.(value);
-    },
-    [isControlled, onOpenChange]
-  );
-
-  return (
-    <PopoverContext.Provider
-      value={{ open: isOpen, onOpenChange: handleOpenChange }}
-    >
-      <div className="relative inline-block">{children}</div>
-    </PopoverContext.Provider>
-  );
-}
-
-interface PopoverTriggerProps {
-  asChild?: boolean;
-  children: React.ReactNode;
-}
-
-export function PopoverTrigger({ asChild, children }: PopoverTriggerProps) {
-  const { open, onOpenChange } = React.useContext(PopoverContext);
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    onOpenChange(!open);
-  };
-
-  if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children, {
-      // @ts-expect-error - onClick may not exist on the child component props
-      onClick: (e: React.MouseEvent) => {
-        handleClick(e);
-        children.props.onClick?.(e);
-      },
-    });
-  }
-
-  return <div onClick={handleClick}>{children}</div>;
-}
-
-interface PopoverContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  align?: "start" | "center" | "end";
-  children: React.ReactNode;
-}
-
-export function PopoverContent({
-  align = "center",
-  children,
-  className,
-  ...props
-}: PopoverContentProps) {
-  const { open, onOpenChange } = React.useContext(PopoverContext);
-
-  // Always call hooks at the top level
-  React.useEffect(() => {
-    if (!open) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest("[data-popover-content]")) {
-        onOpenChange(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open, onOpenChange]);
-
-  if (!open) return null;
-
-  return (
-    <div
-      data-popover-content
+const PopoverContent = React.forwardRef<
+  React.ElementRef<typeof PopoverPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
+>(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
+  <PopoverPrimitive.Portal>
+    <PopoverPrimitive.Content
+      ref={ref}
+      align={align}
+      sideOffset={sideOffset}
       className={cn(
-        "absolute z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
-        "top-full mt-2",
-        align === "start" && "left-0",
-        align === "center" && "left-1/2 -translate-x-1/2",
-        align === "end" && "right-0",
-        className
+        "z-50 w-72 rounded-md border border-gray-200 bg-white p-4 text-gray-950 shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50",
+        className,
       )}
       {...props}
-    >
-      {children}
-    </div>
-  );
-}
+    />
+  </PopoverPrimitive.Portal>
+))
+PopoverContent.displayName = PopoverPrimitive.Content.displayName
+
+export { Popover, PopoverTrigger, PopoverContent }

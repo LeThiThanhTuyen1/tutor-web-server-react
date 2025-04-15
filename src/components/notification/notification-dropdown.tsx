@@ -30,7 +30,6 @@ export function NotificationDropdown() {
 
   // Refresh notifications when dropdown opens, but only if stale
   useEffect(() => {
-    console.log(unreadCount);
     if (open && (!lastFetched || Date.now() - lastFetched > 60000)) {
       refreshNotifications();
     }

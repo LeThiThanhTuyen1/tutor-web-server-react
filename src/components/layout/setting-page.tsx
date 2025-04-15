@@ -2,17 +2,10 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  User,
   Bell,
-  Moon,
-  Sun,
-  Shield,
-  CreditCard,
-  LogOut,
-  Trash2,
   Mail,
   FileText,
   AlertTriangle,
@@ -28,7 +21,7 @@ import {
   CardTitle,
 } from "@/ui/card";
 import { Label } from "@/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
+import { Tabs, TabsContent } from "@/ui/tabs";
 import { Switch } from "@/ui/switch";
 import { Separator } from "@/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/ui/radio-group";
@@ -45,9 +38,10 @@ import {
 import { useToast } from "@/hook/use-toast";
 import { useAuth } from "@/hook/use-auth";
 import { fadeIn } from "../layout/animation";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer } from "@/ui/toast";
 import { ChangePasswordModal } from "../auth/change-password";
+import { deleteAccount } from "@/services/authService";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -56,7 +50,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("account");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  // const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
     useState(false);
@@ -82,49 +76,50 @@ export default function SettingsPage() {
   });
 
   // Role-specific settings
-  const [tutorSettings, setTutorSettings] = useState({
-    autoAcceptBookings: false,
-    displayRating: true,
-    displayReviews: true,
-    availableForNewStudents: true,
-  });
+  // const [tutorSettings, setTutorSettings] = useState({
+  //   autoAcceptBookings: false,
+  //   displayRating: true,
+  //   displayReviews: true,
+  //   availableForNewStudents: true,
+  // });
 
-  const [studentSettings, setStudentSettings] = useState({
-    shareProgressWithTutors: true,
-    receiveRecommendations: true,
-    allowTutorsToContact: true,
-  });
+  // const [studentSettings, setStudentSettings] = useState({
+  //   shareProgressWithTutors: true,
+  //   receiveRecommendations: true,
+  //   allowTutorsToContact: true,
+  // });
 
-  const [adminSettings, setAdminSettings] = useState({
-    enableSystemNotifications: true,
-    enableSystemMaintenance: false,
-    enableBetaFeatures: false,
-  });
+  // const [adminSettings, setAdminSettings] = useState({
+  //   enableSystemNotifications: true,
+  //   enableSystemMaintenance: false,
+  //   enableBetaFeatures: false,
+  // });
 
   // Check if dark mode is enabled on mount
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark");
-    setIsDarkMode(isDark);
-  }, []);
+  // useEffect(() => {
+  //   const isDark = document.documentElement.classList.contains("dark");
+  //   setIsDarkMode(isDark);
+  // }, []);
 
   // Toggle dark mode
-  const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
+  // const toggleDarkMode = () => {
+  //   const newDarkMode = !isDarkMode;
+  //   setIsDarkMode(newDarkMode);
 
-    if (newDarkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("darkMode", "true");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("darkMode", "false");
-    }
+  //   if (newDarkMode) {
+  //     document.documentElement.classList.add("dark");
+  //     localStorage.setItem("darkMode", "true");
+  //   } else {
+  //     document.documentElement.classList.remove("dark");
+  //     localStorage.setItem("darkMode", "false");
+  //   }
 
-    toast({
-      title: newDarkMode ? "Dark mode enabled" : "Light mode enabled",
-      description: "Your preference has been saved.",
-    });
-  };
+  //   toast({
+  //     title: newDarkMode ? "Dark mode enabled" : "Light mode enabled",
+  //     description: "Your preference has been saved.",
+  //     variant: "success",
+  //   });
+  // };
 
   // Handle save settings
   const handleSaveSettings = async () => {
@@ -145,18 +140,17 @@ export default function SettingsPage() {
   // Handle account deletion
   const handleDeleteAccount = async () => {
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const response = await deleteAccount();
+    if (response.succeed) {
+      toast({
+        title: "Account deleted",
+        description: "Your account has been permanently deleted.",
+        variant: "success",
+      });
 
-    toast({
-      title: "Account deleted",
-      description: "Your account has been permanently deleted.",
-      variant: "destructive",
-    });
-
-    setIsDeleteDialogOpen(false);
-    // In a real app, you would redirect to the login page or home page
-    // router.push("/");
-    navigation("/");
+      setIsDeleteDialogOpen(false);
+      navigation("/");
+    }
   };
 
   // Handle logout
@@ -165,6 +159,7 @@ export default function SettingsPage() {
     toast({
       title: "Logged out",
       description: "You have been logged out successfully.",
+      variant: "success",
     });
 
     setIsLogoutDialogOpen(false);
@@ -192,7 +187,7 @@ export default function SettingsPage() {
         onValueChange={setActiveTab}
         className="w-full"
       >
-        <TabsList className="mb-8 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+        {/* <TabsList className="mb-8 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
           <TabsTrigger
             value="account"
             className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700"
@@ -248,78 +243,12 @@ export default function SettingsPage() {
               Admin Settings
             </TabsTrigger>
           )}
-        </TabsList>
+        </TabsList> */}
 
-        <div className="grid gap-8 bg-white dark:bg-gray-800">
+        <div className="grid gap-8 rounded-lg">
           {/* Account Settings */}
           <TabsContent value="account" className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Password</CardTitle>
-                <CardDescription>
-                  Update your password to keep your account secure
-                </CardDescription>
-              </CardHeader>
-              <CardFooter className="flex justify-between">
-                <Button
-                  onClick={() => setIsChangePasswordModalOpen(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
-                >
-                  Update Password
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card className="border-red-200 dark:border-red-900">
-              <CardHeader>
-                <CardTitle className="text-red-600 dark:text-red-400">
-                  Danger Zone
-                </CardTitle>
-                <CardDescription>
-                  Irreversible and destructive actions
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border border-red-200 dark:border-red-900 rounded-lg">
-                  <div>
-                    <h4 className="font-medium">Log out from all devices</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      This will log you out from all devices except this one
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    className="mt-2 md:mt-0 border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
-                    onClick={() => setIsLogoutDialogOpen(true)}
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Log out from all devices
-                  </Button>
-                </div>
-
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border border-red-200 dark:border-red-900 rounded-lg">
-                  <div>
-                    <h4 className="font-medium">Delete account</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Permanently delete your account and all of your content
-                    </p>
-                  </div>
-                  <Button
-                    variant="destructive"
-                    className="mt-2 md:mt-0"
-                    onClick={() => setIsDeleteDialogOpen(true)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Account
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Appearance Settings */}
-          <TabsContent value="appearance" className="space-y-8">
-            <Card>
+            {/* <Card className="bg-white dark:bg-gray-800 ">
               <CardHeader>
                 <CardTitle>Theme</CardTitle>
                 <CardDescription>
@@ -391,7 +320,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </CardContent>
-              {/* <CardFooter className="flex justify-end">
+              <CardFooter className="flex justify-end">
                 <Button
                   onClick={handleSaveSettings}
                   disabled={isSaving}
@@ -399,10 +328,479 @@ export default function SettingsPage() {
                 >
                   {isSaving ? "Saving..." : "Save Preferences"}
                 </Button>
-              </CardFooter> */}
+              </CardFooter> 
+            </Card> */}
+
+            <Card className="bg-white dark:bg-gray-800 ">
+              <CardHeader>
+                <CardTitle>Password</CardTitle>
+                <CardDescription>
+                  Update your password to keep your account secure
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="flex justify-between">
+                <Button
+                  onClick={() => setIsChangePasswordModalOpen(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
+                >
+                  Update Password
+                </Button>
+              </CardFooter>
             </Card>
 
-            <Card>
+            {user?.role === "Tutor" && (
+              <>
+                {" "}
+                {/* <Card className="bg-white dark:bg-gray-800 ">
+                <CardHeader>
+                  <CardTitle>Tutor Settings</CardTitle>
+                  <CardDescription>
+                    Manage your tutor-specific settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Auto-Accept Bookings</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Automatically accept booking requests from students
+                      </p>
+                    </div>
+                    <Switch
+                      checked={tutorSettings.autoAcceptBookings}
+                      onCheckedChange={(checked) =>
+                        setTutorSettings((prev) => ({
+                          ...prev,
+                          autoAcceptBookings: checked,
+                        }))
+                      }
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Display Rating</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Show your rating on your profile
+                      </p>
+                    </div>
+                    <Switch
+                      checked={tutorSettings.displayRating}
+                      onCheckedChange={(checked) =>
+                        setTutorSettings((prev) => ({
+                          ...prev,
+                          displayRating: checked,
+                        }))
+                      }
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Display Reviews</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Show student reviews on your profile
+                      </p>
+                    </div>
+                    <Switch
+                      checked={tutorSettings.displayReviews}
+                      onCheckedChange={(checked) =>
+                        setTutorSettings((prev) => ({
+                          ...prev,
+                          displayReviews: checked,
+                        }))
+                      }
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">
+                        Available for New Students
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Show as available for new students
+                      </p>
+                    </div>
+                    <Switch
+                      checked={tutorSettings.availableForNewStudents}
+                      onCheckedChange={(checked) =>
+                        setTutorSettings((prev) => ({
+                          ...prev,
+                          availableForNewStudents: checked,
+                        }))
+                      }
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button
+                    onClick={handleSaveSettings}
+                    disabled={isSaving}
+                    className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
+                  >
+                    {isSaving ? "Saving..." : "Save Preferences"}
+                  </Button>
+                </CardFooter>
+              </Card> */}
+                <Card className="bg-white dark:bg-gray-800 ">
+                  <CardHeader>
+                    <CardTitle>Contracts Manage</CardTitle>
+                    <CardDescription>Manage your contracts</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                      <div className="flex items-center">
+                        <FileText className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
+                        <div>
+                          <h4 className="font-medium">Contracts History</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            View your contracts history
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => navigation("/contracts")}
+                        variant="outline"
+                      >
+                        View
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
+            {/* Student Settings */}
+            {user?.role === "Student" && (
+              <>
+                {/* <Card className="bg-white dark:bg-gray-800 ">
+                <CardHeader>
+                  <CardTitle>Student Settings</CardTitle>
+                  <CardDescription>
+                    Manage your student-specific settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">
+                        Share Progress with Tutors
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Allow tutors to see your progress in courses
+                      </p>
+                    </div>
+                    <Switch
+                      checked={studentSettings.shareProgressWithTutors}
+                      onCheckedChange={(checked) =>
+                        setStudentSettings((prev) => ({
+                          ...prev,
+                          shareProgressWithTutors: checked,
+                        }))
+                      }
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Receive Recommendations</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Receive course and tutor recommendations based on your
+                        interests
+                      </p>
+                    </div>
+                    <Switch
+                      checked={studentSettings.receiveRecommendations}
+                      onCheckedChange={(checked) =>
+                        setStudentSettings((prev) => ({
+                          ...prev,
+                          receiveRecommendations: checked,
+                        }))
+                      }
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Allow Tutors to Contact</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Allow tutors to contact you directly
+                      </p>
+                    </div>
+                    <Switch
+                      checked={studentSettings.allowTutorsToContact}
+                      onCheckedChange={(checked) =>
+                        setStudentSettings((prev) => ({
+                          ...prev,
+                          allowTutorsToContact: checked,
+                        }))
+                      }
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button
+                    onClick={handleSaveSettings}
+                    disabled={isSaving}
+                    className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
+                  >
+                    {isSaving ? "Saving..." : "Save Preferences"}
+                  </Button>
+                </CardFooter>
+              </Card> */}
+                <Card className="bg-white dark:bg-gray-800 ">
+                  <CardHeader>
+                    <CardTitle>Contracts Manage</CardTitle>
+                    <CardDescription>Manage your contracts</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                      <div className="flex items-center">
+                        <FileText className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
+                        <div>
+                          <h4 className="font-medium">Contracts History</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            View your contracts history
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => navigation("/contracts")}
+                        variant="outline"
+                      >
+                        View
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white dark:bg-gray-800 ">
+                  <CardHeader>
+                    <CardTitle>Payment Methods</CardTitle>
+                    <CardDescription>
+                      Manage your payment methods
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div className="flex items-center">
+                      <CreditCard className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
+                      <div>
+                        <h4 className="font-medium">Payment Methods</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          Manage your payment methods
+                        </p>
+                      </div>
+                    </div>
+                    <Button variant="outline">Manage</Button>
+                  </div> */}
+
+                    <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                      <div className="flex items-center">
+                        <FileText className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
+                        <div>
+                          <h4 className="font-medium">Billing History</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            View your billing history
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="outline">
+                        <Link to={"/student/bill-history"}>View</Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
+            {/* Admin Settings */}
+            {user?.role === "Admin" && (
+              <>
+                {/* <Card className="bg-white dark:bg-gray-800 ">
+            <CardHeader>
+              <CardTitle>Admin Settings</CardTitle>
+              <CardDescription>Manage system-wide settings</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">System Notifications</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Enable system-wide notifications
+                  </p>
+                </div>
+                <Switch
+                  checked={adminSettings.enableSystemNotifications}
+                  onCheckedChange={(checked) =>
+                    setAdminSettings((prev) => ({
+                      ...prev,
+                      enableSystemNotifications: checked,
+                    }))
+                  }
+                />
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Maintenance Mode</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Put the system in maintenance mode
+                  </p>
+                </div>
+                <Switch
+                  checked={adminSettings.enableSystemMaintenance}
+                  onCheckedChange={(checked) =>
+                    setAdminSettings((prev) => ({
+                      ...prev,
+                      enableSystemMaintenance: checked,
+                    }))
+                  }
+                />
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Beta Features</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Enable beta features for all users
+                  </p>
+                </div>
+                <Switch
+                  checked={adminSettings.enableBetaFeatures}
+                  onCheckedChange={(checked) =>
+                    setAdminSettings((prev) => ({
+                      ...prev,
+                      enableBetaFeatures: checked,
+                    }))
+                  }
+                />
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button
+                onClick={handleSaveSettings}
+                disabled={isSaving}
+                className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
+              >
+                {isSaving ? "Saving..." : "Save Preferences"}
+              </Button>
+            </CardFooter>
+          </Card> */}
+                <Card className="bg-white dark:bg-gray-800 ">
+                  <CardHeader>
+                    <CardTitle>System Management</CardTitle>
+                    <CardDescription>
+                      Manage system-wide settings and operations
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <h4 className="font-medium mb-2">User Management</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                          Manage users, roles, and permissions
+                        </p>
+                        <Button variant="outline">
+                          <Link to={"/admin/users"}>Manage Users</Link>
+                        </Button>
+                      </div>
+
+                      <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <h4 className="font-medium mb-2">Course Management</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                          Manage courses and categories
+                        </p>
+                        <Button variant="outline">
+                          <Link to={"/admin/courses"}>Manage Courses</Link>
+                        </Button>
+                      </div>
+
+                      {/* <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <h4 className="font-medium mb-2">Payment Management</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Manage payment settings and transactions
+                  </p>
+                  <Button variant="outline">Manage Payments</Button>
+                </div> */}
+
+                      {/* <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <h4 className="font-medium mb-2">System Logs</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    View system logs and activity
+                  </p>
+                  <Button variant="outline">View Logs</Button>
+                </div> */}
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+            {/* <Card className="border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 ">
+              <CardHeader>
+                <CardTitle className="text-red-600 dark:text-red-400">
+                  Danger Zone
+                </CardTitle>
+                <CardDescription>
+                  Irreversible and destructive actions
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                  <div>
+                    <h4 className="font-medium">Log out from all devices</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      This will log you out from all devices except this one
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="mt-2 md:mt-0 border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
+                    onClick={() => setIsLogoutDialogOpen(true)}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Log out from all devices
+                  </Button>
+                </div>
+
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                  <div>
+                    <h4 className="font-medium">Delete account</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Permanently delete your account and all of your content
+                    </p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    className="mt-2 md:mt-0"
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Account
+                  </Button>
+                </div>
+              </CardContent>
+            </Card> */}
+          </TabsContent>
+
+          {/* Appearance Settings */}
+          <TabsContent value="appearance" className="space-y-8">
+            <Card className="bg-white dark:bg-gray-800 ">
               <CardHeader>
                 <CardTitle>Accessibility</CardTitle>
                 <CardDescription>
@@ -447,7 +845,7 @@ export default function SettingsPage() {
 
           {/* Notification Settings */}
           <TabsContent value="notifications" className="space-y-8">
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 ">
               <CardHeader>
                 <CardTitle>Notification Preferences</CardTitle>
                 <CardDescription>
@@ -641,7 +1039,7 @@ export default function SettingsPage() {
 
           {/* Privacy Settings */}
           <TabsContent value="privacy" className="space-y-8">
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 ">
               <CardHeader>
                 <CardTitle>Privacy Settings</CardTitle>
                 <CardDescription>
@@ -794,7 +1192,7 @@ export default function SettingsPage() {
               </CardFooter>
             </Card>
 
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 ">
               <CardHeader>
                 <CardTitle>Data & Cookies</CardTitle>
                 <CardDescription>
@@ -848,402 +1246,6 @@ export default function SettingsPage() {
           </TabsContent>
 
           {/* Tutor Settings */}
-          {user?.role === "Tutor" && (
-            <TabsContent value="tutor" className="space-y-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Tutor Settings</CardTitle>
-                  <CardDescription>
-                    Manage your tutor-specific settings
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Auto-Accept Bookings</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Automatically accept booking requests from students
-                      </p>
-                    </div>
-                    <Switch
-                      checked={tutorSettings.autoAcceptBookings}
-                      onCheckedChange={(checked) =>
-                        setTutorSettings((prev) => ({
-                          ...prev,
-                          autoAcceptBookings: checked,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Display Rating</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Show your rating on your profile
-                      </p>
-                    </div>
-                    <Switch
-                      checked={tutorSettings.displayRating}
-                      onCheckedChange={(checked) =>
-                        setTutorSettings((prev) => ({
-                          ...prev,
-                          displayRating: checked,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Display Reviews</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Show student reviews on your profile
-                      </p>
-                    </div>
-                    <Switch
-                      checked={tutorSettings.displayReviews}
-                      onCheckedChange={(checked) =>
-                        setTutorSettings((prev) => ({
-                          ...prev,
-                          displayReviews: checked,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">
-                        Available for New Students
-                      </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Show as available for new students
-                      </p>
-                    </div>
-                    <Switch
-                      checked={tutorSettings.availableForNewStudents}
-                      onCheckedChange={(checked) =>
-                        setTutorSettings((prev) => ({
-                          ...prev,
-                          availableForNewStudents: checked,
-                        }))
-                      }
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-end">
-                  <Button
-                    onClick={handleSaveSettings}
-                    disabled={isSaving}
-                    className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
-                  >
-                    {isSaving ? "Saving..." : "Save Preferences"}
-                  </Button>
-                </CardFooter>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Contracts Manage</CardTitle>
-                  <CardDescription>Manage your contracts</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <div className="flex items-center">
-                      <FileText className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
-                      <div>
-                        <h4 className="font-medium">Contracts History</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          View your contracts history
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => navigation("/contracts")}
-                      variant="outline"
-                    >
-                      View
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
-
-          {/* Student Settings */}
-          {user?.role === "Student" && (
-            <TabsContent value="student" className="space-y-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Student Settings</CardTitle>
-                  <CardDescription>
-                    Manage your student-specific settings
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">
-                        Share Progress with Tutors
-                      </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Allow tutors to see your progress in courses
-                      </p>
-                    </div>
-                    <Switch
-                      checked={studentSettings.shareProgressWithTutors}
-                      onCheckedChange={(checked) =>
-                        setStudentSettings((prev) => ({
-                          ...prev,
-                          shareProgressWithTutors: checked,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Receive Recommendations</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Receive course and tutor recommendations based on your
-                        interests
-                      </p>
-                    </div>
-                    <Switch
-                      checked={studentSettings.receiveRecommendations}
-                      onCheckedChange={(checked) =>
-                        setStudentSettings((prev) => ({
-                          ...prev,
-                          receiveRecommendations: checked,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Allow Tutors to Contact</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Allow tutors to contact you directly
-                      </p>
-                    </div>
-                    <Switch
-                      checked={studentSettings.allowTutorsToContact}
-                      onCheckedChange={(checked) =>
-                        setStudentSettings((prev) => ({
-                          ...prev,
-                          allowTutorsToContact: checked,
-                        }))
-                      }
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-end">
-                  <Button
-                    onClick={handleSaveSettings}
-                    disabled={isSaving}
-                    className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
-                  >
-                    {isSaving ? "Saving..." : "Save Preferences"}
-                  </Button>
-                </CardFooter>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Contracts Manage</CardTitle>
-                  <CardDescription>Manage your contracts</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <div className="flex items-center">
-                      <FileText className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
-                      <div>
-                        <h4 className="font-medium">Contracts History</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          View your contracts history
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => navigation("/contracts")}
-                      variant="outline"
-                    >
-                      View
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Payment Methods</CardTitle>
-                  <CardDescription>Manage your payment methods</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <div className="flex items-center">
-                      <CreditCard className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
-                      <div>
-                        <h4 className="font-medium">Payment Methods</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Manage your payment methods
-                        </p>
-                      </div>
-                    </div>
-                    <Button variant="outline">Manage</Button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <div className="flex items-center">
-                      <FileText className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
-                      <div>
-                        <h4 className="font-medium">Billing History</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          View your billing history
-                        </p>
-                      </div>
-                    </div>
-                    <Button variant="outline">View</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
-
-          {/* Admin Settings */}
-          {user?.role === "Admin" && (
-            <TabsContent value="admin" className="space-y-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Admin Settings</CardTitle>
-                  <CardDescription>Manage system-wide settings</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">System Notifications</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Enable system-wide notifications
-                      </p>
-                    </div>
-                    <Switch
-                      checked={adminSettings.enableSystemNotifications}
-                      onCheckedChange={(checked) =>
-                        setAdminSettings((prev) => ({
-                          ...prev,
-                          enableSystemNotifications: checked,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Maintenance Mode</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Put the system in maintenance mode
-                      </p>
-                    </div>
-                    <Switch
-                      checked={adminSettings.enableSystemMaintenance}
-                      onCheckedChange={(checked) =>
-                        setAdminSettings((prev) => ({
-                          ...prev,
-                          enableSystemMaintenance: checked,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Beta Features</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Enable beta features for all users
-                      </p>
-                    </div>
-                    <Switch
-                      checked={adminSettings.enableBetaFeatures}
-                      onCheckedChange={(checked) =>
-                        setAdminSettings((prev) => ({
-                          ...prev,
-                          enableBetaFeatures: checked,
-                        }))
-                      }
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-end">
-                  <Button
-                    onClick={handleSaveSettings}
-                    disabled={isSaving}
-                    className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
-                  >
-                    {isSaving ? "Saving..." : "Save Preferences"}
-                  </Button>
-                </CardFooter>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>System Management</CardTitle>
-                  <CardDescription>
-                    Manage system-wide settings and operations
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                      <h4 className="font-medium mb-2">User Management</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        Manage users, roles, and permissions
-                      </p>
-                      <Button variant="outline">Manage Users</Button>
-                    </div>
-
-                    <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                      <h4 className="font-medium mb-2">Course Management</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        Manage courses and categories
-                      </p>
-                      <Button variant="outline">Manage Courses</Button>
-                    </div>
-
-                    <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                      <h4 className="font-medium mb-2">Payment Management</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        Manage payment settings and transactions
-                      </p>
-                      <Button variant="outline">Manage Payments</Button>
-                    </div>
-
-                    <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                      <h4 className="font-medium mb-2">System Logs</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        View system logs and activity
-                      </p>
-                      <Button variant="outline">View Logs</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
         </div>
       </Tabs>
 

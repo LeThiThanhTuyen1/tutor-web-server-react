@@ -24,15 +24,15 @@ interface ContractViewModalProps {
 export function ContractViewModal({
   isOpen,
   onClose,
-  onFileComplaint,
+  // onFileComplaint,
   contract,
-  canFileComplaint,
+  // canFileComplaint,
 }: ContractViewModalProps) {
   if (!contract) return null;
 
   const footer = (
     <div className="flex justify-end space-x-2">
-      {canFileComplaint && (
+      {/* {canFileComplaint && (
         <Button
           variant="outline"
           className="bg-red-500 hover:bg-red-600 text-white"
@@ -40,7 +40,7 @@ export function ContractViewModal({
         >
           File Complaint
         </Button>
-      )}
+      )} */}
       <Button variant="outline" onClick={onClose}>
         Close
       </Button>

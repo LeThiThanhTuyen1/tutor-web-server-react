@@ -23,6 +23,7 @@ import { ContractModal } from "@/ui/modals/contract-modal.tsx";
 interface CourseCardProps {
   course: any;
   isTutor: boolean;
+  isAdmin: boolean;
 }
 
 // Status styles - moved outside component to prevent recreation on each render
@@ -31,11 +32,12 @@ export const STATUS_STYLES: Record<string, string> = {
     "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
   completed: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
   canceled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+  pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
   coming:
     "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
 };
 
-function CourseCardComponent({ course, isTutor }: CourseCardProps) {
+function CourseCardComponent({ course, isTutor, isAdmin }: CourseCardProps) {
   const { isAuthenticated, user } = useAuth();
   const { toast, toasts, dismiss } = useToast();
   const [isContractDialogOpen, setIsContractDialogOpen] = useState(false);
@@ -165,7 +167,7 @@ function CourseCardComponent({ course, isTutor }: CourseCardProps) {
                   View
                 </Link>
               </Button>
-              {!isTutor && course.status !== "completed" && course.status !== "canceled" &&(
+              {!isTutor && !isAdmin && course.status !== "completed" && course.status !== "canceled" &&(
                 <Button
                   className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90 h-12 text-base"
                   onClick={() => {

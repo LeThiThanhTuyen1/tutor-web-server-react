@@ -30,6 +30,22 @@ export interface Tutor {
   rating: number;
 }
 
+export interface StudentDTO {
+  id: number;
+  fullName: string;
+  email: string;
+  profileImage: string;
+  role: string;
+  location: string;
+  school: string;
+}
+
+export interface ListResponse<T> {
+  succeeded: boolean;
+  message?: string;
+  data?: T;
+}
+
 export const getStudentStats = async () => {
   try {
     const response = await api.get("/student/stats");
@@ -81,6 +97,22 @@ export const getStudentCourses = async () => {
 export const getStudentTutors = async () => {
   try {
     const response = await api.get("/student/tutors");
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching student tutors:", error);
+    const errorMessage =
+      error.response?.data?.message || "An unexpected error occurred";
+    return {
+      data: null,
+      succeeded: false,
+      message: errorMessage,
+    };
+  }
+};
+
+export const getStatsPublic = async () => {
+  try {
+    const response = await api.get("/student/stats/public");
     return response.data;
   } catch (error: any) {
     console.error("Error fetching student tutors:", error);

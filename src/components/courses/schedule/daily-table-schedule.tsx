@@ -1,9 +1,11 @@
 "use client"
 
+import type React from "react"
+
 import { useMemo } from "react"
 import { cn } from "@/ui/cn"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/table"
-import { MapPin, Globe, AlertTriangle } from 'lucide-react'
+import { MapPin, Globe, AlertTriangle, Clock } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/ui/tooltip"
 
@@ -42,8 +44,7 @@ interface ScheduleWithCourse extends Schedule {
 }
 
 // Day of week mapping
-const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-const DAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+// const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
 // Mode icons
 const MODE_ICONS: Record<string, React.JSX.Element> = {
@@ -79,23 +80,16 @@ const hasTimeOverlap = (start1: string, end1: string, start2: string, end2: stri
   )
 }
 
-// Get all unique time slots from schedules
-const getUniqueTimeSlots = (schedules: ScheduleWithCourse[]) => {
-  const timeSlots = new Set<string>()
-
-  schedules.forEach((schedule) => {
-    const key = `${schedule.startHour}-${schedule.endHour}`
-    timeSlots.add(key)
-  })
-
-  return Array.from(timeSlots)
-    .map((slot) => {
-      const [start, end] = slot.split("-")
-      return { start, end }
+// Generate time slots for the day (hourly from 7 AM to 10 PM)
+const generateTimeSlots = () => {
+  const slots = []
+  for (let hour = 7; hour <= 22; hour++) {
+    slots.push({
+      start: `${hour.toString().padStart(2, "0")}:00:00`,
+      end: `${(hour + 1).toString().padStart(2, "0")}:00:00`,
     })
-    .sort((a, b) => {
-      return timeToMinutes(a.start) - timeToMinutes(b.start)
-    })
+  }
+  return slots
 }
 
 // Schedule cell component
@@ -161,23 +155,27 @@ const ScheduleCell = ({ schedules }: { schedules: ScheduleWithCourse[] }) => {
 }
 
 // Main component
-interface WeeklyTableScheduleProps {
+interface DailyTableScheduleProps {
   courses: Course[]
   currentDate: Date
-  weekNumber: number
-  dateRange: string
 }
 
-const WeeklyTableSchedule = ({ courses, currentDate, weekNumber, dateRange }: WeeklyTableScheduleProps) => {
-  // Process schedules and check for conflicts
-  const { schedulesByTimeAndDay, timeSlots } = useMemo(() => {
-    // Create a map to store schedules by time slot and day
-    const scheduleMap: Record<string, Record<number, ScheduleWithCourse[]>> = {}
+const DailyTableSchedule = ({ courses, currentDate }: DailyTableScheduleProps) => {
+  // Get the current day of the week (0-6)
+  const currentDayOfWeek = currentDate.getDay()
+  const formattedDate = currentDate.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
 
-    // Create a map to store courses by ID for quick lookup
-    const courseMap: Record<number, Course> = {}
+  // Process schedules for the current day
+  const { schedulesByTime, timeSlots } = useMemo(() => {
+    // Create a map to store schedules by time slot
+    const scheduleMap: Record<string, ScheduleWithCourse[]> = {}
 
-    // Collect all schedules with course info
+    // Collect all schedules with course info for the current day
     const allSchedules: ScheduleWithCourse[] = []
 
     // Process courses and their schedules
@@ -185,20 +183,20 @@ const WeeklyTableSchedule = ({ courses, currentDate, weekNumber, dateRange }: We
       // Skip canceled courses
       if (course.status === "canceled") return
 
-      // Store course in map
-      courseMap[course.id] = course
-
       // Process each schedule, if it exists
       if (Array.isArray(course.schedule)) {
         course.schedule.forEach((schedule) => {
-          const scheduleWithCourse: ScheduleWithCourse = {
-            ...schedule,
-            courseId: course.id,
-            hasConflict: false,
-            course,
-          }
+          // Only include schedules for the current day of the week
+          if (schedule.dayOfWeek === currentDayOfWeek) {
+            const scheduleWithCourse: ScheduleWithCourse = {
+              ...schedule,
+              courseId: course.id,
+              hasConflict: false,
+              course,
+            }
 
-          allSchedules.push(scheduleWithCourse)
+            allSchedules.push(scheduleWithCourse)
+          }
         })
       }
     })
@@ -209,59 +207,41 @@ const WeeklyTableSchedule = ({ courses, currentDate, weekNumber, dateRange }: We
         const s1 = allSchedules[i]
         const s2 = allSchedules[j]
 
-        if (s1.dayOfWeek === s2.dayOfWeek && hasTimeOverlap(s1.startHour, s1.endHour, s2.startHour, s2.endHour)) {
+        if (hasTimeOverlap(s1.startHour, s1.endHour, s2.startHour, s2.endHour)) {
           s1.hasConflict = true
           s2.hasConflict = true
         }
       }
     }
 
-    // Get unique time slots
-    const timeSlots = getUniqueTimeSlots(allSchedules)
+    // Generate time slots for the day
+    const timeSlots = generateTimeSlots()
 
-    // Organize schedules by time slot and day
+    // Initialize empty arrays for each time slot
     timeSlots.forEach(({ start, end }) => {
       const timeKey = `${start}-${end}`
-      scheduleMap[timeKey] = {}
+      scheduleMap[timeKey] = []
+    })
 
-      // Initialize empty arrays for each day
-      DAYS_OF_WEEK.forEach((_, dayIndex) => {
-        scheduleMap[timeKey][dayIndex] = []
-      })
-
-      // Add schedules to the appropriate day and time slot
-      allSchedules.forEach((schedule) => {
-        if (schedule.startHour === start && schedule.endHour === end) {
-          scheduleMap[timeKey][schedule.dayOfWeek].push(schedule)
+    // Add schedules to the appropriate time slot
+    allSchedules.forEach((schedule) => {
+      // Find all time slots that overlap with this schedule
+      timeSlots.forEach(({ start, end }) => {
+        const timeKey = `${start}-${end}`
+        if (hasTimeOverlap(schedule.startHour, schedule.endHour, start, end)) {
+          scheduleMap[timeKey].push(schedule)
         }
       })
     })
 
-    return { schedulesByTimeAndDay: scheduleMap, timeSlots }
-  }, [courses])
-
-  // Get the current day of the week (0-6)
-  const currentDayOfWeek = currentDate.getDay()
-
-  // Generate dates for the week
-  const weekDates = useMemo(() => {
-    const dates = []
-    const startOfWeek = new Date(currentDate)
-    startOfWeek.setDate(currentDate.getDate() - currentDayOfWeek)
-
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startOfWeek)
-      date.setDate(startOfWeek.getDate() + i)
-      dates.push(date)
-    }
-    return dates
-  }, [currentDate, currentDayOfWeek])
+    return { schedulesByTime: scheduleMap, timeSlots }
+  }, [courses, currentDayOfWeek])
 
   return (
     <div className="w-full overflow-hidden">
       <Card className="border border-indigo-100 dark:border-indigo-900">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm text-indigo-800 dark:text-indigo-300">Week {weekNumber}: {dateRange}</CardTitle>
+          <CardTitle className="text-sm text-indigo-800 dark:text-indigo-300">{formattedDate}</CardTitle>
         </CardHeader>
         <CardContent className="p-2">
           <div className="w-full overflow-x-auto" style={{ maxWidth: "100%" }}>
@@ -269,57 +249,27 @@ const WeeklyTableSchedule = ({ courses, currentDate, weekNumber, dateRange }: We
               <Table className="w-full border-collapse">
                 <TableHeader>
                   <TableRow>
-                    {DAYS_SHORT.map((day, index) => (
-                      <TableHead
-                        key={day}
-                        className={cn(
-                          "text-center text-xs p-1 w-[14.28%]",
-                          currentDayOfWeek === index && "bg-indigo-50 dark:bg-indigo-900/20"
-                        )}
-                      >
-                        <div>{day}</div>
-                        <div className="text-[10px] text-gray-500 dark:text-gray-400">
-                          {weekDates[index].toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                        </div>
-                      </TableHead>
-                    ))}
+                    <TableHead className="w-16 text-xs p-1">Time</TableHead>
+                    <TableHead className="text-center text-xs p-1">Classes</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {timeSlots.map(({ start, end }) => {
                     const timeKey = `${start}-${end}`
-                    const hasAnySchedule = Object.values(schedulesByTimeAndDay[timeKey]).some(
-                      (schedules) => schedules.length > 0
-                    )
-
-                    if (!hasAnySchedule) return null
+                    const schedules = schedulesByTime[timeKey] || []
+                    const hasSchedules = schedules.length > 0
 
                     return (
-                      <TableRow key={timeKey} className="group">
-                        {DAYS_OF_WEEK.map((_, dayIndex) => {
-                          const daySchedules = schedulesByTimeAndDay[timeKey][dayIndex]
-                          return (
-                            <TableCell
-                              key={dayIndex}
-                              className={cn(
-                                "p-1 align-top relative",
-                                currentDayOfWeek === dayIndex && "bg-indigo-50/50 dark:bg-indigo-900/10"
-                              )}
-                            >
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-100 cursor-help" />
-                                  </TooltipTrigger>
-                                  <TooltipContent side="left" className="text-xs">
-                                    {formatTime(start)} - {formatTime(end)}
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                              <ScheduleCell schedules={daySchedules} />
-                            </TableCell>
-                          )
-                        })}
+                      <TableRow key={timeKey} className={hasSchedules ? "bg-gray-50 dark:bg-gray-800/50" : ""}>
+                        <TableCell className="font-medium text-xs p-3 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <Clock className="h-3 w-3 mr-1 text-gray-500 dark:text-gray-400" />
+                            {formatTime(start)} - {formatTime(end)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="p-1 align-top">
+                          <ScheduleCell schedules={schedules} />
+                        </TableCell>
                       </TableRow>
                     )
                   })}
@@ -328,9 +278,9 @@ const WeeklyTableSchedule = ({ courses, currentDate, weekNumber, dateRange }: We
             </div>
           </div>
 
-          {timeSlots.length === 0 && (
+          {Object.values(schedulesByTime).every((schedules) => schedules.length === 0) && (
             <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-              <p>No classes scheduled for this week.</p>
+              <p>No classes scheduled for this day.</p>
             </div>
           )}
         </CardContent>
@@ -339,4 +289,4 @@ const WeeklyTableSchedule = ({ courses, currentDate, weekNumber, dateRange }: We
   )
 }
 
-export default WeeklyTableSchedule
+export default DailyTableSchedule

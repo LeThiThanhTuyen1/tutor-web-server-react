@@ -223,7 +223,7 @@ function Footer() {
                 <span className="text-indigo-100">info@tutorconnect.com</span>
               </li>
             </ul>
-            <div className="mt-6">
+            {/* <div className="mt-6">
               <Link
                 to="/contact"
                 className="inline-flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
@@ -231,12 +231,12 @@ function Footer() {
                 Get in Touch
                 <ExternalLink className="ml-2 h-4 w-4" />
               </Link>
-            </div>
+            </div> */}
           </motion.div>
         </div>
 
         {/* Newsletter */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
@@ -267,7 +267,7 @@ function Footer() {
               </form>
             </div>
           </div>
-        </motion.div>
+        </motion.div> */}
 
         {/* Divider */}
         <div className="border-t border-white/10 my-8"></div>

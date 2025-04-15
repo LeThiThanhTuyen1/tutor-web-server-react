@@ -1,26 +1,54 @@
 import api from "@/config/axiosInstance";
 import { PaginationFilter } from "@/types/paginated-response";
 
-export const getAllCourses = async (filter: PaginationFilter) => {
+interface Course {
+  id: number;
+  courseName: string;
+  tutorName: string;
+  description: string;
+  status: string;
+  startDate: string;
+  endDate: string;
+  fee: number;
+  maxStudents: number;
+  createdAt: string;
+}
+
+interface CourseResponse {
+  data: Course[];
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+  totalRecords: number;
+  succeeded: boolean;
+  message?: string;
+}
+
+export const getAllCourses = async (
+  filter: PaginationFilter,
+  searchTerm?: string,
+  status?: string
+): Promise<CourseResponse> => {
   try {
     const response = await api.get("/Courses", {
       params: {
         pageNumber: filter.pageNumber,
         pageSize: filter.pageSize,
+        ...(searchTerm && { searchTerm }),
+        ...(status && { status }),
       },
     });
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching courses:", error);
-    // Return a default response structure instead of throwing
     return {
       data: [],
-      pageNumber: 1,
+      pageNumber: filter.pageNumber,
       pageSize: filter.pageSize,
       totalPages: 0,
       totalRecords: 0,
       succeeded: false,
-      message: "Failed to fetch courses",
+      message: error.response?.data?.message || "Failed to fetch courses",
     };
   }
 };

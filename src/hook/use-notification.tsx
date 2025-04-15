@@ -11,7 +11,7 @@ import { initializeSignalRConnection, isConnected } from "@/services/signalRServ
 export const useNotification = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const token = localStorage.getItem("accessToken");
   const connectionInitialized = useRef(false);
 
@@ -40,7 +40,6 @@ export const useNotification = () => {
   // Fetch notifications on mount if not already fetched
   useEffect(() => {
     if (user && !lastFetched) {
-      console.log("Fetching notifications for user:", user);
       dispatch(fetchAllNotifications());
     }
   }, [dispatch, user, lastFetched]);

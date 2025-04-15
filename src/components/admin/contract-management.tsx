@@ -1,18 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import {
-  FileText,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Search,
-  Filter,
-  Eye,
-  ThumbsUp,
-  ThumbsDown,
-} from "lucide-react";
+import { FileText, AlertTriangle, Search, Filter, Eye } from "lucide-react";
 import { getAllContracts } from "@/services/contractService";
 import {
   getAllComplaints,
@@ -20,14 +9,7 @@ import {
   getComplaintById,
 } from "@/services/complaintService";
 import { Button } from "@/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/ui/card";
 import { Badge } from "@/ui/badge";
 import { Skeleton } from "@/ui/skeleton";
 import { useToast } from "@/hook/use-toast";
@@ -246,7 +228,9 @@ export default function ContractManagement() {
       case "rejected":
         return <Badge className="bg-red-500 hover:bg-red-600">Rejected</Badge>;
       case "completed":
-        return <Badge className="bg-green-500 hover:bg-green-600">Completed</Badge>;
+        return (
+          <Badge className="bg-green-500 hover:bg-green-600">Completed</Badge>
+        );
       case "active":
         return <Badge className="bg-blue-500 hover:bg-blue-600">Active</Badge>;
       default:
@@ -290,7 +274,16 @@ export default function ContractManagement() {
   };
 
   const handleViewComplaintDetails = (complaint: Complaint) => {
-    fetchComplaintById(complaint.id); // Fetch full details
+    fetchComplaintById(complaint.id);
+  };
+
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   return (
@@ -312,37 +305,45 @@ export default function ContractManagement() {
         </TabsList>
 
         <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search..."
-              className="pl-10 bg-white dark:bg-gray-800 dark:text-white"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800">
-              <div className="flex items-center">
-                <Filter className="h-4 w-4 mr-2" />
-                <span>Filter by Status</span>
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="canceled">Cancelled</SelectItem>
-              {activeTab === "complaints" && (
-                <>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </>
-              )}
-            </SelectContent>
-          </Select>
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search..."
+            className="pl-10 bg-white dark:bg-gray-800 dark:text-white"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800">
+            <div className="flex items-center">
+              <Filter className="h-4 w-4 mr-2" />
+              <span>
+                {statusFilter === "all"
+                  ? "All Statuses"
+                  : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+              </span>
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            {activeTab === "contracts" ? (
+              <>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="canceled">Cancelled</SelectItem>
+              </>
+            ) : (
+              <>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="canceled">Rejected</SelectItem>
+              </>
+            )}
+          </SelectContent>
+        </Select>
+      </div>
 
         <TabsContent value="contracts" className="mt-0">
           {loadingContracts ? (
@@ -358,15 +359,104 @@ export default function ContractManagement() {
               statusFilter={statusFilter}
             />
           ) : (
-            <div className="grid gap-4">
-              {filteredContracts.map((contract) => (
-                <ContractCard
-                  key={contract.id}
-                  contract={contract}
-                  getStatusBadge={getStatusBadge}
-                  onViewDetails={handleViewContract}
-                />
-              ))}
+            <div className="overflow-hidden border rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-800">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      Course Name
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      Tutor
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      Student
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      Fee
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      Duration
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      Status
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                  {filteredContracts.map((contract) => (
+                    <tr
+                      key={contract.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {contract.courseName}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-gray-400">
+                          {contract.tutorName}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-gray-400">
+                          {contract.studentName}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-gray-400">
+                          ${contract.fee.toFixed(2)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-gray-400">
+                          {formatDate(contract.startDate)} -{" "}
+                          {formatDate(contract.endDate)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {getStatusBadge(contract.status)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
+                          onClick={() => handleViewContract(contract)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </TabsContent>
@@ -385,15 +475,104 @@ export default function ContractManagement() {
               statusFilter={statusFilter}
             />
           ) : (
-            <div className="grid gap-4">
-              {filteredComplaints.map((complaint) => (
-                <ComplaintCard
-                  key={complaint.id}
-                  complaint={complaint}
-                  getStatusBadge={getStatusBadge}
-                  onViewDetails={handleViewComplaintDetails}
-                />
-              ))}
+            <div className="overflow-hidden border rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-800">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      ID
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      Contract
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      User
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      Description
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      Submitted On
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      Status
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                  {filteredComplaints.map((complaint) => (
+                    <tr
+                      key={complaint.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          #{complaint.id}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-gray-400">
+                          {complaint.contract?.courseName ||
+                            `#${complaint.contractId}`}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-gray-400">
+                          {complaint.user?.name || `#${complaint.userId}`}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900 dark:text-gray-400 line-clamp-2">
+                          {complaint.description}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-gray-400">
+                          {new Date(complaint.createdAt).toLocaleString()}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {getStatusBadge(complaint.status)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
+                          onClick={() => handleViewComplaintDetails(complaint)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </TabsContent>
@@ -469,121 +648,4 @@ const NoDataCard = ({
       </p>
     </CardContent>
   </Card>
-);
-
-const ContractCard = ({
-  contract,
-  getStatusBadge,
-  onViewDetails,
-}: {
-  contract: ContractDTO;
-  getStatusBadge: (status: string) => JSX.Element;
-  onViewDetails: (contract: ContractDTO) => void;
-}) => (
-  <motion.div
-    className="bg-white dark:bg-gray-800"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3 }}
-  >
-    <Card className="w-full hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-xl">{contract.courseName}</CardTitle>
-            <CardDescription>
-              Tutor: {contract.tutorName} | Student: {contract.studentName}
-            </CardDescription>
-          </div>
-          {getStatusBadge(contract.status)}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Fee
-            </p>
-            <p className="font-medium">${contract.fee.toFixed(2)}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Start Date
-            </p>
-            <p className="font-medium">
-              {new Date(contract.startDate).toLocaleDateString()}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              End Date
-            </p>
-            <p className="font-medium">
-              {new Date(contract.endDate).toLocaleDateString()}
-            </p>
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-end">
-        <Button variant="outline" onClick={() => onViewDetails(contract)}>
-          <Eye className="h-4 w-4 mr-2" />
-          View Details
-        </Button>
-      </CardFooter>
-    </Card>
-  </motion.div>
-);
-
-const ComplaintCard = ({
-  complaint,
-  getStatusBadge,
-  onViewDetails,
-}: {
-  complaint: Complaint;
-  getStatusBadge: (status: string) => JSX.Element;
-  onViewDetails: (complaint: Complaint) => void;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3 }}
-  >
-    <Card className="w-full bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-xl">Complaint #{complaint.id}</CardTitle>
-            <CardDescription>
-              Contract:{" "}
-              {complaint.contract?.courseName || `#${complaint.contractId}`} |
-              User: {complaint.user?.name || `#${complaint.userId}`}
-            </CardDescription>
-          </div>
-          {getStatusBadge(complaint.status)}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-4">
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Description
-          </p>
-          <p className="line-clamp-2">{complaint.description}</p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Submitted On
-          </p>
-          <p className="font-medium">
-            {new Date(complaint.createdAt).toLocaleString()}
-          </p>
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-end">
-        <Button variant="outline" onClick={() => onViewDetails(complaint)}>
-          <Eye className="h-4 w-4 mr-2" />
-          View Details
-        </Button>
-      </CardFooter>
-    </Card>
-  </motion.div>
 );

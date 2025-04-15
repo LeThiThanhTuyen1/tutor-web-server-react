@@ -23,82 +23,99 @@ import {
   GraduationCap,
   ArrowUp,
   ArrowDown,
-  DollarSign,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
 import { useAuth } from "@/hook/use-auth";
 import { fadeIn, staggerContainer } from "../layout/animation";
-
-// Mock data for the dashboard
-const mockStats = {
-  courses: 42,
-  students: 187,
-  tutors: 24,
-  revenue: 12580,
-};
-
-const mockBarData = [
-  { name: "Jan", students: 20, revenue: 2400 },
-  { name: "Feb", students: 35, revenue: 4500 },
-  { name: "Mar", students: 42, revenue: 5200 },
-  { name: "Apr", students: 38, revenue: 4800 },
-  { name: "May", students: 55, revenue: 6700 },
-  { name: "Jun", students: 70, revenue: 8900 },
-];
-
-const mockPieData = [
-  { name: "Mathematics", value: 35, color: "#4f46e5" },
-  { name: "Science", value: 25, color: "#0ea5e9" },
-  { name: "Languages", value: 20, color: "#8b5cf6" },
-  { name: "Arts", value: 10, color: "#ec4899" },
-  { name: "Other", value: 10, color: "#f97316" },
-];
-
-const mockRecentActivity = [
-  {
-    id: 1,
-    action: "New tutor registered",
-    description: "Michael Johnson joined as a Mathematics tutor",
-    time: "2 hours ago",
-    icon: GraduationCap,
-  },
-  {
-    id: 2,
-    action: "New course created",
-    description: "Advanced Python Programming was added by Sarah Williams",
-    time: "Yesterday",
-    icon: BookOpen,
-  },
-  {
-    id: 3,
-    action: "Payment received",
-    description: "$350 payment received for Premium Subscription",
-    time: "2 days ago",
-    icon: DollarSign,
-  },
-];
+import {
+  getAdminDashboard,
+  AdminDashboardData,
+} from "@/services/adminService";
 
 export function AdminDashboard() {
   const { user } = useAuth();
   const [greeting, setGreeting] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
+  const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour < 12) setGreeting("Good morning");
     else if (hour < 18) setGreeting("Good afternoon");
     else setGreeting("Good evening");
+
+    const fetchData = async () => {
+      setLoading(true);
+      const response = await getAdminDashboard();
+      if (response.succeeded) {
+        setDashboardData(response.data);
+      } else {
+        setError(response.message);
+      }
+      setLoading(false);
+    };
+
+    fetchData();
   }, []);
 
   const container = staggerContainer(0.1);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {[...Array(3)].map((_, i) => (
+          <div
+            key={i}
+            className="bg-white dark:bg-gray-700 rounded-xl shadow-md overflow-hidden animate-pulse"
+          >
+            <div className="w-full h-48 bg-gray-300 dark:bg-gray-600"></div>
+            <div className="p-6">
+              <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-3/4 mb-4"></div>
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-full mb-2"></div>
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-full mb-4"></div>
+              <div className="flex justify-between items-center">
+                <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/3"></div>
+                <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <motion.div variants={fadeIn("up", 0.1)} initial="hidden" animate="show">
+          <h1 className="text-3xl font-bold mb-2">Error</h1>
+          <p className="text-red-600 dark:text-red-400">{error}</p>
+          <button
+            className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  const pieData = dashboardData?.courseStatuses.map((status) => ({
+    name: status.status,
+    value: status.count,
+    color: `#${Math.floor(Math.random() * 16777215).toString(16)}`, 
+  })) || [];
 
   return (
     <div className="p-6">
       <motion.div variants={fadeIn("up", 0.1)} initial="hidden" animate="show">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">
-            {greeting}, {user?.name}
+            {greeting}, {user?.name}!
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
             Here's what's happening with your platform today.
@@ -113,22 +130,32 @@ export function AdminDashboard() {
         className="space-y-6"
       >
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <motion.div variants={fadeIn("up", 0.1)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Total Students
+                    <p className="text-sm font-medium text-blue-500 dark:text-blue-400">
+                      <strong>Total Students</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
-                      {mockStats.students}
+                      {dashboardData?.stats.totalStudents || 0}
                     </h3>
                     <div className="flex items-center mt-1 text-sm">
-                      <span className="flex items-center text-emerald-600 dark:text-emerald-400">
-                        <ArrowUp className="h-3 w-3 mr-1" />
-                        12%
+                      <span
+                        className={`flex items-center ${
+                          dashboardData?.stats.studentsChange >= 0
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-600 dark:text-red-400"
+                        }`}
+                      >
+                        {dashboardData?.stats.studentsChange >= 0 ? (
+                          <ArrowUp className="h-3 w-3 mr-1" />
+                        ) : (
+                          <ArrowDown className="h-3 w-3 mr-1" />
+                        )}
+                        {Math.abs(dashboardData?.stats.studentsChange || 0)}
                       </span>
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
@@ -144,20 +171,30 @@ export function AdminDashboard() {
           </motion.div>
 
           <motion.div variants={fadeIn("up", 0.2)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Total Courses
+                    <p className="text-sm font-medium text-purple-500 dark:text-purple-400">
+                      <strong>Total Courses</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
-                      {mockStats.courses}
+                      {dashboardData?.stats.totalCourses || 0}
                     </h3>
                     <div className="flex items-center mt-1 text-sm">
-                      <span className="flex items-center text-emerald-600 dark:text-emerald-400">
-                        <ArrowUp className="h-3 w-3 mr-1" />
-                        8%
+                      <span
+                        className={`flex items-center ${
+                          dashboardData?.stats.coursesChange >= 0
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-600 dark:text-red-400"
+                        }`}
+                      >
+                        {dashboardData?.stats.coursesChange >= 0 ? (
+                          <ArrowUp className="h-3 w-3 mr-1" />
+                        ) : (
+                          <ArrowDown className="h-3 w-3 mr-1" />
+                        )}
+                        {Math.abs(dashboardData?.stats.coursesChange || 0)}
                       </span>
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
@@ -173,36 +210,46 @@ export function AdminDashboard() {
           </motion.div>
 
           <motion.div variants={fadeIn("up", 0.3)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Total Tutors
+                    <p className="text-sm font-medium text-red-500 dark:text-red-400">
+                      <strong>Total Tutors</strong>
                     </p>
                     <h3 className="text-2xl font-bold mt-1">
-                      {mockStats.tutors}
+                      {dashboardData?.stats.totalTutors || 0}
                     </h3>
                     <div className="flex items-center mt-1 text-sm">
-                      <span className="flex items-center text-emerald-600 dark:text-emerald-400">
-                        <ArrowUp className="h-3 w-3 mr-1" />
-                        5%
+                      <span
+                        className={`flex items-center ${
+                          dashboardData?.stats.tutorsChange >= 0
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-600 dark:text-red-400"
+                        }`}
+                      >
+                        {dashboardData?.stats.tutorsChange >= 0 ? (
+                          <ArrowUp className="h-3 w-3 mr-1" />
+                        ) : (
+                          <ArrowDown className="h-3 w-3 mr-1" />
+                        )}
+                        {Math.abs(dashboardData?.stats.tutorsChange || 0)}
                       </span>
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
                       </span>
                     </div>
                   </div>
-                  <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
-                    <GraduationCap className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  <div className="bg-red-100 dark:bg-red-900/30 p-3 rounded-lg">
+                    <GraduationCap className="h-6 w-6 text-red-600 dark:text-red-400" />
                   </div>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
 
-          <motion.div variants={fadeIn("up", 0.4)}>
-            <Card className="border-indigo-100 dark:border-indigo-900">
+          {/* <motion.div variants={fadeIn("up", 0.4)}>
+            <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
@@ -228,7 +275,7 @@ export function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </motion.div> */}
         </div>
 
         {/* Tabs for different views */}
@@ -242,12 +289,13 @@ export function AdminDashboard() {
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="students">Students</TabsTrigger>
               <TabsTrigger value="courses">Courses</TabsTrigger>
-              <TabsTrigger value="revenue">Revenue</TabsTrigger>
+              {/* Bỏ tab revenue nhưng giữ code để tham khảo */}
+              {/* <TabsTrigger value="revenue">Revenue</TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="overview">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <Card className="border-indigo-100 dark:border-indigo-900">
+                <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
                   <CardHeader>
                     <CardTitle className="text-xl font-semibold">
                       Student Enrollment
@@ -257,7 +305,10 @@ export function AdminDashboard() {
                     <div className="h-80">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
-                          data={mockBarData}
+                          data={dashboardData?.monthlyActivities.map((activity) => ({
+                            name: activity.month,
+                            students: activity.newStudents,
+                          }))}
                           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                         >
                           <CartesianGrid
@@ -278,7 +329,7 @@ export function AdminDashboard() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-indigo-100 dark:border-indigo-900">
+                <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
                   <CardHeader>
                     <CardTitle className="text-xl font-semibold">
                       Course Distribution
@@ -289,7 +340,7 @@ export function AdminDashboard() {
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
-                            data={mockPieData}
+                            data={pieData}
                             cx="50%"
                             cy="50%"
                             labelLine={false}
@@ -300,7 +351,7 @@ export function AdminDashboard() {
                               `${name} ${(percent * 100).toFixed(0)}%`
                             }
                           >
-                            {mockPieData.map((entry, index) => (
+                            {pieData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                           </Pie>
@@ -311,41 +362,10 @@ export function AdminDashboard() {
                   </CardContent>
                 </Card>
               </div>
-
-              <Card className="border-indigo-100 dark:border-indigo-900">
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold">
-                    Recent Activity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {mockRecentActivity.map((activity) => (
-                      <div
-                        key={activity.id}
-                        className="flex items-start p-3 border-b border-gray-200 dark:border-gray-700 last:border-0"
-                      >
-                        <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-full mr-4">
-                          <activity.icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                        </div>
-                        <div>
-                          <p className="font-medium">{activity.action}</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {activity.description}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {activity.time}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
             </TabsContent>
 
             <TabsContent value="students">
-              <Card className="border-indigo-100 dark:border-indigo-900">
+              <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold">
                     Student Growth
@@ -355,7 +375,10 @@ export function AdminDashboard() {
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart
-                        data={mockBarData}
+                        data={dashboardData?.monthlyActivities.map((activity) => ({
+                          name: activity.month,
+                          students: activity.newStudents,
+                        }))}
                         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
@@ -377,7 +400,7 @@ export function AdminDashboard() {
             </TabsContent>
 
             <TabsContent value="courses">
-              <Card className="border-indigo-100 dark:border-indigo-900">
+              <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold">
                     Course Analytics
@@ -387,7 +410,10 @@ export function AdminDashboard() {
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
-                        data={mockPieData}
+                        data={dashboardData?.monthlyActivities.map((activity) => ({
+                          name: activity.month,
+                          value: activity.newCourses,
+                        }))}
                         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                         layout="vertical"
                       >
@@ -399,11 +425,7 @@ export function AdminDashboard() {
                           dataKey="value"
                           fill="#8884d8"
                           radius={[0, 4, 4, 0]}
-                        >
-                          {mockPieData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Bar>
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -411,8 +433,8 @@ export function AdminDashboard() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="revenue">
-              <Card className="border-indigo-100 dark:border-indigo-900">
+            {/* <TabsContent value="revenue">
+              <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold">
                     Revenue Trends
@@ -442,7 +464,7 @@ export function AdminDashboard() {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
+            </TabsContent> */}
           </Tabs>
         </motion.div>
       </motion.div>
