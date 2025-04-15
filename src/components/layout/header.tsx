@@ -44,7 +44,6 @@ export default function Header({
 
   const handleLogout = () => {
     dispatch(logout());
-    // Redirect to home page after logout
     navigate("/");
     setIsProfileMenuOpen(false);
   };
@@ -70,12 +69,14 @@ export default function Header({
         isHomePage && !isScrolled
           ? "bg-transparent"
           : "bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm"
-      } sticky top-0 z-10 transition-all duration-300`}
+      } sticky top-0 z-10 transition-all duration-300`} 
     >
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center">
           <button
-            onClick={toggleSidebar}
+            onClick={() => {
+              toggleSidebar();
+            }}
             className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
           >
             <Menu className="h-6 w-6" />
@@ -83,17 +84,6 @@ export default function Header({
         </div>
 
         <div className="flex items-center space-x-4">
-          {/* {!isHomePage && (
-            <div className="relative hidden md:block">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="pl-10 pr-4 py-1 w-64 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            </div>
-          )} */}
-
           <button
             onClick={toggleDarkMode}
             className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"

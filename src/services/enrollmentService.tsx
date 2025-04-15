@@ -1,19 +1,17 @@
 import api from "@/config/axiosInstance";
-import { PagedResponse, Response } from "./adminService";
 import { PaginationFilter } from "@/types/paginated-response";
+import { PagedResponse, Response } from "./adminService";
 
 export interface BillHistoryModel {
   paymentId: number;
-  enrollmentId: number;
-  courseId: number;
   courseName: string;
   amount: number;
-  paymentMethod: string;
-  transactionId: string;
-  orderId: string;
-  status: string;
+  userId: number;
   createdAt: string;
-  vnPayResponseCode: string;
+  status: string;
+  transactionId: string;
+  paymentMethod?: string; // Optional, to support both Stripe and VNPay
+  vnPayResponseCode?: string; // Optional, for VNPay only
 }
 
 export const enrollCourse = async (courseId: number) => {
@@ -89,15 +87,10 @@ export const getBillHistory = async (filter: PaginationFilter): Promise<PagedRes
 
 export const initiatePayment = async (enrollmentId: number) => {
   try {
-    const response = await api.post(
-      `/Payment/enroll-and-pay?enrollmentId=${enrollmentId}`
-    );
+    const response = await api.post(`/Payment/enroll-and-pay`, { enrollmentId });
     return response.data.paymentUrl;
-  } catch (error) {
-    console.error(
-      `Error initiating payment for enrollment ${enrollmentId}:`,
-      error
-    );
+  } catch (error: any) {
+    console.error(`Error initiating payment for enrollment ${enrollmentId}:`, error);
     throw error;
   }
 };

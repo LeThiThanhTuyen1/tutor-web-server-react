@@ -1,3 +1,5 @@
+"use client";
+
 import { NavLink, Link } from "react-router-dom";
 import {
   BookOpen,
@@ -12,6 +14,12 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hook/use-auth";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/ui/tooltip";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -49,13 +57,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       {
         name: "Manage Courses",
         path: "/admin/courses",
-        icon: <User className="h-5 w-5" />,
+        icon: <BookOpen className="h-5 w-5" />,
       },
-      // {
-      //   name: "Notifications",
-      //   path: "/notifications",
-      //   icon: <Bell className="h-5 w-5" />,
-      // },
       {
         name: "Manage Contracts",
         path: "/admin/contracts/manage",
@@ -75,12 +78,12 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       },
       {
         name: "My Schedule",
-        path: "/schedules",
+        path: "/tutor/schedules",
         icon: <Calendar className="h-5 w-5" />,
       },
       {
         name: "Notifications",
-        path: "/notifications",
+        path: "/tutor/notifications",
         icon: <Bell className="h-5 w-5" />,
       },
     ],
@@ -97,12 +100,12 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       },
       {
         name: "My Schedule",
-        path: "/schedules",
+        path: "/student/schedules",
         icon: <Calendar className="h-5 w-5" />,
       },
       {
         name: "Notifications",
-        path: "/notifications",
+        path: "/student/notifications",
         icon: <Bell className="h-5 w-5" />,
       },
     ],
@@ -114,12 +117,13 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     <aside
       className={`bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ${
         isOpen ? "w-64" : "w-20"
-      } flex flex-col h-full shadow-lg p-4 overflow-hidden relative`}
+      } flex flex-col h-full shadow-lg p-4 relative z-20`} // Added z-20 to ensure visibility
     >
+      {/* Logo Section */}
       <div className="p-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
         <div
           className={`flex items-center ${
-            isOpen ? "" : "justify-center w-full"
+            isOpen ? "justify-start" : "justify-center w-full"
           }`}
         >
           <div className="h-8 w-8 bg-indigo-700 rounded-md flex items-center justify-center text-white font-bold">
@@ -128,16 +132,18 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           {isOpen && <h1 className="ml-2 text-lg font-bold">TutorConnect</h1>}
         </div>
       </div>
-      <nav className="flex-1 overflow-y-auto py-4">
+
+      {/* Navigation Section */}
+      <nav className="flex-1 py-4 overflow-y-auto">
         {Object.keys(navItems).map(
           (category) =>
             (category === "Public" || category === role) && (
               <div
                 key={category}
-                className=" mb-6 bg-white/10 p-3 rounded-lg shadow-md"
+                className="mb-6 bg-white/10 p-3 rounded-lg shadow-md"
               >
                 <ul className="space-y-2">
-                  {navItems[category].map((item) => (
+                  {navItems[category].map((item: any) => (
                     <motion.li
                       key={item.path}
                       whileHover={{
@@ -145,20 +151,45 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                         transition: { duration: 0.2 },
                       }}
                     >
-                      <NavLink
-                        to={item.path}
-                        className={({ isActive }) => `
-                        flex items-center px-3 py-2 rounded-lg transition-all
-                        ${
-                          isActive
-                            ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200"
-                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        }
-                      `}
-                      >
-                        <span className="flex-shrink-0">{item.icon}</span>
-                        {isOpen && <span className="ml-3">{item.name}</span>}
-                      </NavLink>
+                      {isOpen ? (
+                        <NavLink
+                          to={item.path}
+                          className={({ isActive }) =>
+                            `flex items-center px-3 py-2 rounded-lg transition-all ${
+                              isActive
+                                ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200"
+                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            }`
+                          }
+                        >
+                          <span className="flex-shrink-0">{item.icon}</span>
+                          <span className="ml-3">{item.name}</span>
+                        </NavLink>
+                      ) : (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <NavLink
+                                to={item.path}
+                                className={({ isActive }) =>
+                                  `flex items-center justify-center px-3 py-2 rounded-lg transition-all ${
+                                    isActive
+                                      ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200"
+                                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                  }`
+                                }
+                              >
+                                <span className="flex-shrink-0">
+                                  {item.icon}
+                                </span>
+                              </NavLink>
+                            </TooltipTrigger>
+                            <TooltipContent side="right">
+                              <p>{item.name}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
                     </motion.li>
                   ))}
                 </ul>
@@ -166,12 +197,28 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             )
         )}
       </nav>
+
+      {/* User Section */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-700">
         {isAuthenticated ? (
-          <div className="flex items-center">
-            <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center">
-              {user?.name?.charAt(0) || "U"}
-            </div>
+          <div
+            className={`flex items-center ${isOpen ? "" : "justify-center"}`}
+          >
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center">
+                    {user?.name?.charAt(0) || "U"}
+                  </div>
+                </TooltipTrigger>
+                {!isOpen && (
+                  <TooltipContent side="right">
+                    <p>{user?.name}</p>
+                    <p className="text-xs capitalize">{user?.role}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
             {isOpen && (
               <div className="ml-3">
                 <p className="text-sm font-medium">{user?.name}</p>
@@ -182,7 +229,9 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             )}
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div
+            className={`flex ${isOpen ? "flex-col gap-2" : "justify-center"}`}
+          >
             {isOpen ? (
               <>
                 <Link
@@ -201,12 +250,21 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                 </Link>
               </>
             ) : (
-              <Link
-                to="/auth/login"
-                className="flex items-center justify-center p-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
-              >
-                <LogIn className="h-5 w-5" />
-              </Link>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/auth/login"
+                      className="flex items-center justify-center p-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                    >
+                      <LogIn className="h-5 w-5" />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p>Login</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
         )}

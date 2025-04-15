@@ -3,10 +3,9 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
 import { Button } from "@/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
+import { Card, CardContent, CardHeader } from "@/ui/card";
 import { formatDistanceToNow } from "date-fns";
-import { ArrowLeft, Bell, Check, CheckCheck } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Bell, Check, CheckCheck } from "lucide-react";
 import { Skeleton } from "@/ui/skeleton";
 import { useNotification } from "@/hook/use-notification";
 
@@ -51,24 +50,14 @@ export default function NotificationsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6 flex items-center">
-          <Button variant="ghost" size="sm" className="mr-2" asChild>
-            <Link to="/">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Link>
-          </Button>
-          <h1 className="text-2xl font-bold">Notifications</h1>
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <h1 className="text-2xl font-bold mb-4 md:mb-0">
+            <Bell className="h-6 w-6 mr-2 text-indigo-500 inline" />
+            Your Notifications
+          </h1>
         </div>
-
         <Card className="bg-white dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Bell className="h-5 w-5 mr-2 text-indigo-500" />
-              Your Notifications
-            </CardTitle>
-          </CardHeader>
           <CardContent>
             <Tabs
               defaultValue="all"
@@ -76,7 +65,7 @@ export default function NotificationsPage() {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsList className="grid w-full grid-cols-3 mb-4 mt-2">
                 <TabsTrigger value="all">
                   All ({notifications.length})
                 </TabsTrigger>

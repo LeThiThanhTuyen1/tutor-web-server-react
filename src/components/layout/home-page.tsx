@@ -129,7 +129,10 @@ export default function HomePage() {
   const testimonialsRef = useRef<HTMLDivElement | null>(null);
   const [stats, setStats] = useState<any>([]);
 
-  const staggerContainer = (staggerChildren: number, delayChildren: number) => ({
+  const staggerContainer = (
+    staggerChildren: number,
+    delayChildren: number
+  ) => ({
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -139,7 +142,7 @@ export default function HomePage() {
       },
     },
   });
-  
+
   const scaleIn = (delay: number) => ({
     hidden: { scale: 0.8, opacity: 0 },
     show: {
@@ -294,32 +297,32 @@ export default function HomePage() {
 
       {/* Stats Section - White with subtle gradient */}
       <section className="py-12 bg-gradient-to-b from-white to-indigo-50 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-6">
-        <motion.div
-          variants={staggerContainer(0.1, 0)}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.25 }}
-          className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center"
-        >
-          {stats.map((stat: any, index: number) => (
-            <motion.div
-              key={stat.id}
-              variants={scaleIn(index * 0.1)}
-              className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center justify-center"
-              whileHover={{ scale: 1.05 }}
-            >
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
-                {stat.value}
-              </h3>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                {stat.label}
-              </p>
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-    </section>
+        <div className="container mx-auto px-6">
+          <motion.div
+            variants={staggerContainer(0.1, 0)}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.25 }}
+            className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center"
+          >
+            {stats.map((stat: any, index: number) => (
+              <motion.div
+                key={stat.id}
+                variants={scaleIn(index * 0.1)}
+                className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center justify-center"
+                whileHover={{ scale: 1.05 }}
+              >
+                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
+                  {stat.value}
+                </h3>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                  {stat.label}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
 
       {/* Benefits of Tutoring Section - Indigo to purple gradient */}
       <section className="py-8 bg-gradient-to-b from-indigo-600 via-indigo-700 to-purple-800 dark:from-indigo-900 dark:via-indigo-900 dark:to-purple-900 text-white relative overflow-hidden">

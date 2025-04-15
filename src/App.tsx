@@ -44,9 +44,6 @@ const StudentCourseList = lazy(
 const ScheduleView = lazy(
   () => import("./components/courses/schedule/schedule-view")
 );
-const EnrollmentPage = lazy(
-  () => import("./components/student/course/enrollment-page")
-);
 const SettingsPage = lazy(() => import("./components/layout/setting-page"));
 const NotificationsPage = lazy(
   () => import("./components/notification/notifications-page")
@@ -153,6 +150,8 @@ export default function App() {
             <Route path="courses" element={<TutorCourseListComponent />} />
             <Route path="dashboard" element={<TutorDashboard />} />
             <Route path="courses/new" element={<CourseForm />} />
+            <Route path="schedules" element={<ScheduleView />}/>
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route path="courses/:id/edit" element={<EditCoursePage />} />
             <Route path="students" element={<div>Students Management</div>} />
           </Route>
@@ -168,7 +167,6 @@ export default function App() {
           >
             <Route index element={<HomePage />} />
             <Route path="courses" element={<CourseList />} />
-            <Route path="enrollment/:id" element={<EnrollmentPage />} />
             <Route path="tutors" element={<TutorList />} />
             <Route path="tutor/:id" element={<TutorProfile />} />
             <Route path="courses/:id" element={<CourseDetail />} />
@@ -198,25 +196,7 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="notifications"
-              element={
-                <ProtectedRoute>
-                  <NotificationsPage />
-                </ProtectedRoute>
-              }
-            />
           </Route>
-          <Route
-            path="schedules"
-            element={
-              <PublicLayout>
-                <ProtectedRoute>
-                  <ScheduleView />
-                </ProtectedRoute>
-              </PublicLayout>
-            }
-          />
           <Route
             path="/student"
             element={
@@ -229,6 +209,8 @@ export default function App() {
             <Route path="courses" element={<StudentCourseList />} />
             <Route path="tutors" element={<TutorList />} />
             <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="schedules" element={<ScheduleView />}/>
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route path="bill-history" element={<BillHistory />} />
             <Route path="tutor/:id" element={<TutorProfile />} />
             <Route path="courses/:id" element={<CourseDetail />} />

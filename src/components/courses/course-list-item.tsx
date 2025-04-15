@@ -41,7 +41,7 @@ function CourseListItemComponent({
   const { toast, toasts, dismiss } = useToast();
   const [isContractDialogOpen, setIsContractDialogOpen] = useState(false);
   const { isAuthenticated, user } = useAuth();
-  const [hasSignedContract, setHasSignedContract] = useState(false);
+  const [hasSignedContract] = useState(false);
 
   const handleCancelCourse = async () => {
     try {

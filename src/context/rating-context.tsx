@@ -10,7 +10,6 @@ import {
 } from "react";
 import { getTutorById } from "@/services/tutorService";
 import { getTutorFeedbacks } from "@/services/feedbackService";
-import { Console } from "console";
 
 interface RatingContextType {
   refreshRating: (tutorId: number) => Promise<void>;
@@ -49,12 +48,11 @@ export const RatingProvider: React.FC<{ children: ReactNode }> = ({
       setIsRefreshing(true);
       try {
         // Fetch updated tutor data and feedback
-        const [tutorResponse, feedbackResponse] = await Promise.all([
+        const [feedbackResponse] = await Promise.all([
           getTutorById(tutorId),
           getTutorFeedbacks(tutorId),
         ]);
 
-        const tutor = tutorResponse.data;
         const feedbacks = feedbackResponse.data || [];
         // Calculate average rating
         console.log(feedbacks)

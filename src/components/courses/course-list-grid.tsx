@@ -10,7 +10,7 @@ import {
   lazy,
 } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, Search, Filter, Book, Grid, List } from "lucide-react";
+import { Search, Filter, Book, Grid, List } from "lucide-react";
 import { getAllCourses, deleteCourses } from "@/services/courseService";
 import { Button } from "@/ui/button";
 import {
@@ -76,7 +76,7 @@ export default function CourseList() {
   // State
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");

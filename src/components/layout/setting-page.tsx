@@ -2,12 +2,10 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Bell,
-  Moon,
-  Sun,
   Mail,
   FileText,
   AlertTriangle,
@@ -52,7 +50,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("account");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  // const [isDarkMode, setIsDarkMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
     useState(false);
@@ -98,30 +96,30 @@ export default function SettingsPage() {
   // });
 
   // Check if dark mode is enabled on mount
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark");
-    setIsDarkMode(isDark);
-  }, []);
+  // useEffect(() => {
+  //   const isDark = document.documentElement.classList.contains("dark");
+  //   setIsDarkMode(isDark);
+  // }, []);
 
   // Toggle dark mode
-  const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
+  // const toggleDarkMode = () => {
+  //   const newDarkMode = !isDarkMode;
+  //   setIsDarkMode(newDarkMode);
 
-    if (newDarkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("darkMode", "true");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("darkMode", "false");
-    }
+  //   if (newDarkMode) {
+  //     document.documentElement.classList.add("dark");
+  //     localStorage.setItem("darkMode", "true");
+  //   } else {
+  //     document.documentElement.classList.remove("dark");
+  //     localStorage.setItem("darkMode", "false");
+  //   }
 
-    toast({
-      title: newDarkMode ? "Dark mode enabled" : "Light mode enabled",
-      description: "Your preference has been saved.",
-      variant: "success",
-    });
-  };
+  //   toast({
+  //     title: newDarkMode ? "Dark mode enabled" : "Light mode enabled",
+  //     description: "Your preference has been saved.",
+  //     variant: "success",
+  //   });
+  // };
 
   // Handle save settings
   const handleSaveSettings = async () => {
@@ -250,7 +248,7 @@ export default function SettingsPage() {
         <div className="grid gap-8 rounded-lg">
           {/* Account Settings */}
           <TabsContent value="account" className="space-y-8">
-            <Card className="bg-white dark:bg-gray-800 ">
+            {/* <Card className="bg-white dark:bg-gray-800 ">
               <CardHeader>
                 <CardTitle>Theme</CardTitle>
                 <CardDescription>
@@ -322,7 +320,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </CardContent>
-              {/* <CardFooter className="flex justify-end">
+              <CardFooter className="flex justify-end">
                 <Button
                   onClick={handleSaveSettings}
                   disabled={isSaving}
@@ -330,8 +328,8 @@ export default function SettingsPage() {
                 >
                   {isSaving ? "Saving..." : "Save Preferences"}
                 </Button>
-              </CardFooter> */}
-            </Card>
+              </CardFooter> 
+            </Card> */}
 
             <Card className="bg-white dark:bg-gray-800 ">
               <CardHeader>
