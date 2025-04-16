@@ -623,7 +623,7 @@ export default function HomePage() {
                 >
                   <div className="relative h-48">
                     <LazyImage
-                      src="https://img.freepik.com/free-vector/online-class-illustration_52683-42415.jpg?t=st=1743147413~exp=1743151013~hmac=c4288e5ca85b45e3ddd6376fb4bc5a842f46a5fb06869cf27c1e7d078eb41e21&w=826"
+                      src="https://www.shutterstock.com/image-vector/flat-line-icons-set-elearning-600nw-320901137.jpg"
                       alt={course.courseName}
                       className="w-full h-full object-cover"
                     />

@@ -287,6 +287,7 @@ export default function CourseList() {
 
   const handlePageChange = useCallback((newPage: number) => {
     setPagination((prev) => ({ ...prev, pageNumber: newPage }));
+    window.scrollTo({ top: 0, behavior: "smooth" }); 
   }, []);
 
   const handleClearFilters = useCallback(() => {

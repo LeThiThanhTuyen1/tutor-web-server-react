@@ -86,7 +86,7 @@ function CourseCardComponent({ course, isTutor, isAdmin }: CourseCardProps) {
       >
         <Card
           className={cn(
-            "flex flex-col h-full overflow-hidden transition-all duration-200 hover:shadow-md border-indigo-100 dark:border-indigo-900 min-h-[400px]" // Added min-h
+            "flex flex-col h-full overflow-hidden transition-all duration-200 hover:shadow-md border-indigo-100 dark:border-indigo-900 min-h-[320px]" 
           )}
         >
           <div className="h-1 bg-gradient-to-r from-indigo-600 to-blue-600"></div>

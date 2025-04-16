@@ -309,6 +309,7 @@ export default function ContractManagement() {
     tab: "contracts" | "complaints",
     pageNumber: number
   ) => {
+    window.scrollTo({ top: 0, behavior: "smooth" }); 
     if (tab === "contracts") {
       setContractPagination((prev) => ({ ...prev, pageNumber }));
     } else {

@@ -211,6 +211,7 @@ export default function SettingsPage() {
 
   const handlePageChange = (pageNumber: number) => {
     setPagination((prev) => ({ ...prev, pageNumber }));
+    window.scrollTo({ top: 0, behavior: "smooth" }); 
   };
 
   return (

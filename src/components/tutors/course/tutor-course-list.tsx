@@ -135,6 +135,7 @@ export default function TutorCourseList() {
 
   const handlePageChange = useCallback((newPage: number) => {
     setPagination((prev) => ({ ...prev, pageNumber: newPage }));
+    window.scrollTo({ top: 0, behavior: "smooth" }); 
   }, []);
 
   // Select all courses
@@ -333,30 +334,35 @@ export default function TutorCourseList() {
                             <div className="flex flex-wrap gap-2">
                               {(course.status === "coming" ||
                                 course.status === "ongoing") && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleCancelCourse(course.id)}
-                                  className="border-red-200 dark:border-red-800 text-red-700 hover:text-red-800 dark:text-red-300"
-                                >
-                                  <XCircle className="h-3.5 w-3.5 mr-1" />
-                                  Cancel
-                                </Button>
+                                <>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleCancelCourse(course.id)
+                                    }
+                                    className="border-red-200 dark:border-red-800 text-red-700 hover:text-red-800 dark:text-red-300"
+                                  >
+                                    <XCircle className="h-3.5 w-3.5 mr-1" />
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    asChild
+                                    className="bg-yellow-200 hover:bg-yellow-300 dark:bg-yellow-800 text-yellow-700 dark:text-yellow-300"
+                                  >
+                                    <Link
+                                      to={`/tutor/courses/${course.id}/edit`}
+                                      className="flex items-center"
+                                    >
+                                      <Edit className="h-3.5 w-3.5 mr-1" />
+                                      Edit
+                                    </Link>
+                                  </Button>
+                                </>
                               )}
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                asChild
-                                className="bg-yellow-200 hover:bg-yellow-300 dark:bg-yellow-800 text-yellow-700 dark:text-yellow-300"
-                              >
-                                <Link
-                                  to={`/tutor/courses/${course.id}/edit`}
-                                  className="flex items-center"
-                                >
-                                  <Edit className="h-3.5 w-3.5 mr-1" />
-                                  Edit
-                                </Link>
-                              </Button>
+
                               <Button
                                 variant="destructive"
                                 size="sm"

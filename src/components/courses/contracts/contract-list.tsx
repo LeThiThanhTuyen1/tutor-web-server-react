@@ -192,6 +192,7 @@ export default function ContractList() {
 
   const handlePageChange = (pageNumber: number) => {
     setPagination((prev) => ({ ...prev, pageNumber }));
+    window.scrollTo({ top: 0, behavior: "smooth" }); 
   };
 
   if (loading) {
