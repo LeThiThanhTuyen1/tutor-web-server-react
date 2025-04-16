@@ -13,12 +13,14 @@ interface HeaderProps {
   toggleSidebar: () => void;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
+  isSidebarOpen?: boolean; // Optional: to control icon rotation
 }
 
 export default function Header({
   toggleSidebar,
   isDarkMode,
   toggleDarkMode,
+  isSidebarOpen = false,
 }: HeaderProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -28,14 +30,9 @@ export default function Header({
   const [isScrolled, setIsScrolled] = useState(false);
   const isHomePage = location.pathname === "/";
 
-  // Handle scroll effect for transparent header on home page
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 50);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -48,14 +45,10 @@ export default function Header({
     setIsProfileMenuOpen(false);
   };
 
-  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isProfileMenuOpen) {
-        const target = event.target as HTMLElement;
-        if (!target.closest(".profile-menu")) {
-          setIsProfileMenuOpen(false);
-        }
+      if (isProfileMenuOpen && !event.target.closest(".profile-menu")) {
+        setIsProfileMenuOpen(false);
       }
     };
 
@@ -69,24 +62,27 @@ export default function Header({
         isHomePage && !isScrolled
           ? "bg-transparent"
           : "bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm"
-      } sticky top-0 z-10 transition-all duration-300`} 
+      } sticky top-0 z-10 transition-all duration-300`}
     >
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center">
           <button
-            onClick={() => {
-              toggleSidebar();
-            }}
-            className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+            onClick={toggleSidebar}
+            className="w-10 h-10 p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none flex items-center justify-center"
+            aria-label="Toggle sidebar"
           >
-            <Menu className="h-6 w-6" />
+            <Menu
+              className={`h-6 w-6 transition-transform duration-300 ${
+                isSidebarOpen ? "rotate-90" : "rotate-0"
+              }`}
+            />
           </button>
         </div>
 
         <div className="flex items-center space-x-4">
           <button
             onClick={toggleDarkMode}
-            className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+            className="w-10 h-10 p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none flex items-center justify-center"
           >
             {isDarkMode ? (
               <Sun className="h-5 w-5" />
@@ -98,7 +94,6 @@ export default function Header({
           {isAuthenticated ? (
             <>
               {user?.role !== "Admin" && <NotificationDropdown />}
-
               <div className="relative profile-menu">
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -115,39 +110,34 @@ export default function Header({
                       <User className="h-5 w-5" />
                     )}
                   </div>
-
                   <span className="hidden md:inline-block font-medium">
                     {user?.name}
                   </span>
                 </button>
-
                 {isProfileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10">
-                    <div>
-                      {user?.role !== "Admin" && (
-                        <Link
-                          to={`/profile`}
-                          className="block px-4 p-2 text-sm text-gray-700 dark:text-gray-200 hover:rounded-tl-md hover:rounded-tr-md hover:bg-gray-100 dark:hover:bg-gray-700"
-                          onClick={() => setIsProfileMenuOpen(false)}
-                        >
-                          Your Profile
-                        </Link>
-                      )}
-
+                    {user?.role !== "Admin" && (
                       <Link
-                        to={`/setting`}
-                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        to="/profile"
+                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:rounded-t-md hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => setIsProfileMenuOpen(false)}
                       >
-                        Settings
+                        Your Profile
                       </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:rounded-bl-md hover:rounded-br-md dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        Sign out
-                      </button>
-                    </div>
+                    )}
+                    <Link
+                      to="/setting"
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      Settings
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:rounded-b-md hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      Sign out
+                    </button>
                   </div>
                 )}
               </div>

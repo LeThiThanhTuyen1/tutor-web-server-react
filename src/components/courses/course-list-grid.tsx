@@ -61,7 +61,7 @@ const ListItemSkeleton = () => (
   </div>
 );
 
-const statusOptions = ["All", ...Object.keys(STATUS_STYLES)];
+const statusOptions = Object.keys(STATUS_STYLES); // e.g., ["ongoing", "completed", ...]
 
 // Animation variants
 const container = staggerContainer(0.05);
@@ -79,7 +79,7 @@ export default function CourseList() {
   const [, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("All");
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [pagination, setPagination] = useState<PaginationFilter>({
     pageNumber: 1,
     pageSize: 9,
@@ -102,49 +102,50 @@ export default function CourseList() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-      setPagination((prev) => ({ ...prev, pageNumber: 1 })); // Reset to page 1 on search
+      setPagination((prev) => ({ ...prev, pageNumber: 1 }));
     }, 300);
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
   // Fetch courses
-  // Inside CourseList component
-const fetchCourses = useCallback(async () => {
-  try {
-    setLoading(true);
-    const response = await getAllCourses(
-      {
-        pageNumber: pagination.pageNumber,
-        pageSize: pagination.pageSize,
-      },
-      debouncedSearchTerm,
-      selectedStatus === "All" ? undefined : selectedStatus.toLowerCase()
-    );
+  const fetchCourses = useCallback(async () => {
+    try {
+      setLoading(true);
+      const statusFilter =
+        selectedStatuses.length > 0 ? selectedStatuses : undefined;
+      const response = await getAllCourses(
+        {
+          pageNumber: pagination.pageNumber,
+          pageSize: pagination.pageSize,
+        },
+        debouncedSearchTerm,
+        statusFilter
+      );
 
-    if (response.succeeded && response.data) {
-      setCourses(response.data);
-      setTotalPages(response.totalPages);
-      setError(null);
-    } else {
-      setError(response.message || "Failed to load courses.");
+      if (response.succeeded && response.data) {
+        setCourses(response.data);
+        setTotalPages(response.totalPages);
+        setError(null);
+      } else {
+        setError(response.message || "Failed to load courses.");
+        toast({
+          title: "Error",
+          description: response.message || "Failed to load courses",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      setError("Failed to load courses. Please try again later.");
       toast({
         title: "Error",
-        description: response.message || "Failed to load courses",
+        description: "Failed to load courses",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    setError("Failed to load courses. Please try again later.");
-    toast({
-      title: "Error",
-      description: "Failed to load courses",
-      variant: "destructive",
-    });
-  } finally {
-    setLoading(false);
-  }
-}, [pagination, debouncedSearchTerm, selectedStatus]);
+  }, [pagination, debouncedSearchTerm, selectedStatuses]);
 
   // Fetch courses when dependencies change
   useEffect(() => {
@@ -276,7 +277,11 @@ const fetchCourses = useCallback(async () => {
   }, []);
 
   const handleStatusChange = useCallback((status: string) => {
-    setSelectedStatus(status);
+    setSelectedStatuses((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status]
+    );
     setPagination((prev) => ({ ...prev, pageNumber: 1 }));
   }, []);
 
@@ -286,7 +291,7 @@ const fetchCourses = useCallback(async () => {
 
   const handleClearFilters = useCallback(() => {
     setSearchTerm("");
-    setSelectedStatus("All");
+    setSelectedStatuses([]);
     setPagination((prev) => ({ ...prev, pageNumber: 1 }));
   }, []);
 
@@ -443,18 +448,6 @@ const fetchCourses = useCallback(async () => {
           </Button>
         </div>
       </motion.div>
-{/* 
-      {error && (
-        <motion.div
-          variants={fadeIn("up", 0.2)}
-          initial="hidden"
-          animate="show"
-          className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg mb-6 flex items-center"
-        >
-          <AlertTriangle className="h-5 w-5 mr-2" />
-          {error}
-        </motion.div>
-      )} */}
 
       <div className="flex flex-col md:flex-row gap-6">
         {/* Filter Sidebar */}
@@ -498,7 +491,7 @@ const fetchCourses = useCallback(async () => {
                       <div key={status} className="flex items-center space-x-2">
                         <Checkbox
                           id={`status-${status}`}
-                          checked={selectedStatus === status}
+                          checked={selectedStatuses.includes(status)}
                           onCheckedChange={() => handleStatusChange(status)}
                           className="border-indigo-300 dark:border-indigo-700 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                         />
@@ -506,9 +499,7 @@ const fetchCourses = useCallback(async () => {
                           htmlFor={`status-${status}`}
                           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                         >
-                          {status === "All"
-                            ? "All Statuses"
-                            : status.charAt(0).toUpperCase() + status.slice(1)}
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
                         </label>
                       </div>
                     ))}

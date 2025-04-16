@@ -16,6 +16,7 @@ import { ScrollArea } from "@/ui/scroll-area";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { useNotification } from "@/hook/use-notification";
+import { useAuth } from "@/hook/use-auth";
 
 export function NotificationDropdown() {
   const {
@@ -27,6 +28,7 @@ export function NotificationDropdown() {
     lastFetched,
   } = useNotification();
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
 
   // Refresh notifications when dropdown opens, but only if stale
   useEffect(() => {
@@ -155,7 +157,7 @@ export function NotificationDropdown() {
             className="w-full justify-center text-indigo-600 dark:text-indigo-400"
             asChild
           >
-            <Link to="/notifications" onClick={() => setOpen(false)}>
+            <Link to={user?.role ? `/${user.role}/notifications` : "/notifications"} onClick={() => setOpen(false)}>
               View all notifications
             </Link>
           </Button>

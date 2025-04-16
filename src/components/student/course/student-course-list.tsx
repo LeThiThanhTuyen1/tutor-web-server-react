@@ -30,7 +30,12 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Badge } from "@/ui/badge";
 import { useCourse } from "@/hook/use-course";
 import { STATUS_STYLES } from "@/components/courses/course-card";
-import { initiatePayment, unenrollStudent, getBillHistory, confirmPayment } from "@/services/enrollmentService";
+import {
+  initiatePayment,
+  unenrollStudent,
+  getBillHistory,
+  confirmPayment,
+} from "@/services/enrollmentService";
 import {
   Table,
   TableBody,
@@ -49,7 +54,12 @@ import { Skeleton } from "@/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/ui/tabs";
 
 export default function StudentCourseTable() {
-  const { studentCourses, loading: coursesLoading, totalPages: totalCoursePages, getStudentCourses } = useCourse();
+  const {
+    studentCourses,
+    loading: coursesLoading,
+    totalPages: totalCoursePages,
+    getStudentCourses,
+  } = useCourse();
   const [filteredCourses, setFilteredCourses] = useState(studentCourses);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -110,48 +120,48 @@ export default function StudentCourseTable() {
     const message = searchParams.get("message");
 
     if (success === "true" && enrollmentId && sessionId) {
-        // Confirm the payment manually
-        const confirmPaymentManually = async () => {
-            try {
-                const response = await confirmPayment(sessionId);
-                if (response.succeeded) {
-                    toast({
-                        title: "Payment Confirmed",
-                        description: "Your payment was confirmed successfully!",
-                        variant: "success",
-                    });
-                    // Refresh courses and bill history
-                    getStudentCourses(coursePagination);
-                    const billResponse = await getBillHistory(billPagination);
-                    if (billResponse.succeeded) {
-                        setBillHistory(billResponse.data);
-                        setTotalBillPages(billResponse.totalPages);
-                    }
-                } else {
-                    toast({
-                        title: "Payment Confirmation Failed",
-                        description: response.message || "Unable to confirm payment",
-                        variant: "destructive",
-                    });
-                }
-            } catch (error) {
-                toast({
-                    title: "Error",
-                    description: "An error occurred while confirming payment",
-                    variant: "destructive",
-                });
+      // Confirm the payment manually
+      const confirmPaymentManually = async () => {
+        try {
+          const response = await confirmPayment(sessionId);
+          if (response.succeeded) {
+            toast({
+              title: "Payment Confirmed",
+              description: "Your payment was confirmed successfully!",
+              variant: "success",
+            });
+            // Refresh courses and bill history
+            getStudentCourses(coursePagination);
+            const billResponse = await getBillHistory(billPagination);
+            if (billResponse.succeeded) {
+              setBillHistory(billResponse.data);
+              setTotalBillPages(billResponse.totalPages);
             }
-        };
-
-        confirmPaymentManually();
-    } else if (success === "false") {
-        toast({
-            title: "Payment Failed",
-            description: message || "Payment was cancelled or failed",
+          } else {
+            toast({
+              title: "Payment Confirmation Failed",
+              description: response.message || "Unable to confirm payment",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "An error occurred while confirming payment",
             variant: "destructive",
-        });
+          });
+        }
+      };
+
+      confirmPaymentManually();
+    } else if (success === "false") {
+      toast({
+        title: "Payment Failed",
+        description: message || "Payment was cancelled or failed",
+        variant: "destructive",
+      });
     }
-}, [searchParams]);
+  }, [searchParams]);
 
   // Filter courses based on search and status
   useEffect(() => {
@@ -226,13 +236,22 @@ export default function StudentCourseTable() {
 
     try {
       setIsCancelling(true);
-      await unenrollStudent(courseToCancel);
-      toast({
-        title: "Success",
-        description: "Course has been cancelled successfully",
-        variant: "success",
-      });
-      getStudentCourses(coursePagination);
+      const response = await unenrollStudent(courseToCancel);
+      if (response.succeeded) {
+        toast({
+          title: "Success",
+          description: "Course has been cancelled successfully",
+          variant: "success",
+        });
+        getStudentCourses(coursePagination);
+      }
+      else {
+        toast({
+          title: "Error",
+          description: response.message,
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -282,7 +301,10 @@ export default function StudentCourseTable() {
                   className="h-9"
                 >
                   <RefreshCw
-                    className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")}
+                    className={cn(
+                      "h-4 w-4 mr-2",
+                      isRefreshing && "animate-spin"
+                    )}
                   />
                   Refresh
                 </Button>
@@ -436,7 +458,7 @@ export default function StudentCourseTable() {
                                       </DropdownMenuItem>
                                       <DropdownMenuItem
                                         onClick={() =>
-                                          handleCancelCourse(course.id)
+                                          handleCancelCourse(course.courseId)
                                         }
                                         className="text-red-600"
                                       >
@@ -465,12 +487,16 @@ export default function StudentCourseTable() {
                       <Button
                         key={i}
                         variant={
-                          coursePagination.pageNumber === i + 1 ? "default" : "outline"
+                          coursePagination.pageNumber === i + 1
+                            ? "default"
+                            : "outline"
                         }
                         size="sm"
                         onClick={() => handleCoursePageChange(i + 1)}
                         className={
-                          coursePagination.pageNumber === i + 1 ? "bg-indigo-600" : ""
+                          coursePagination.pageNumber === i + 1
+                            ? "bg-indigo-600"
+                            : ""
                         }
                       >
                         {i + 1}
@@ -529,7 +555,9 @@ export default function StudentCourseTable() {
                             </div>
                           </TableCell>
                           <TableCell>${bill.amount}</TableCell>
-                          <TableCell>{bill.paymentMethod || "Stripe"}</TableCell>
+                          <TableCell>
+                            {bill.paymentMethod || "Stripe"}
+                          </TableCell>
                           <TableCell>{bill.transactionId}</TableCell>
                           <TableCell>
                             <Badge
@@ -541,7 +569,8 @@ export default function StudentCourseTable() {
                                   : "bg-red-100 text-red-800"
                               )}
                             >
-                              {bill.status.charAt(0).toUpperCase() + bill.status.slice(1)}
+                              {bill.status.charAt(0).toUpperCase() +
+                                bill.status.slice(1)}
                             </Badge>
                           </TableCell>
                           <TableCell>{formatDate(bill.createdAt)}</TableCell>
@@ -561,12 +590,16 @@ export default function StudentCourseTable() {
                       <Button
                         key={i}
                         variant={
-                          billPagination.pageNumber === i + 1 ? "default" : "outline"
+                          billPagination.pageNumber === i + 1
+                            ? "default"
+                            : "outline"
                         }
                         size="sm"
                         onClick={() => handleBillPageChange(i + 1)}
                         className={
-                          billPagination.pageNumber === i + 1 ? "bg-indigo-600" : ""
+                          billPagination.pageNumber === i + 1
+                            ? "bg-indigo-600"
+                            : ""
                         }
                       >
                         {i + 1}

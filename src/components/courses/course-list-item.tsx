@@ -47,15 +47,12 @@ function CourseListItemComponent({
     try {
       setIsCancelling(true);
       const response = await cancelCourse(course.id);
-      console.log(response);
       if (response.succeeded) {
         toast({
           title: "Success",
           description: "Course has been cancelled successfully",
           variant: "success",
         });
-
-        // Refresh the course list
         if (onCourseUpdated) {
           onCourseUpdated();
         }
@@ -100,7 +97,7 @@ function CourseListItemComponent({
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-indigo-950 dark:text-indigo-50">
-                      {course.courseName}
+                      {course.courseName || "Untitled Course"}
                     </h3>
 
                     <Badge
@@ -111,37 +108,49 @@ function CourseListItemComponent({
                           "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
                       )}
                     >
-                      {course.status.charAt(0).toUpperCase() +
-                        course.status.slice(1)}
+                      {(course.status || "unknown").charAt(0).toUpperCase() +
+                        (course.status || "unknown").slice(1)}
                     </Badge>
                   </div>
 
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
-                    {course.description}
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2 min-h-[40px]">
+                    {course.description || "No description available."}
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 mt-3">
                     <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                       <User className="h-4 w-4 mr-2 text-indigo-500 dark:text-indigo-400" />
-                      <span>Tutor: {course.tutorName}</span>
+                      <span>Tutor: {course.tutorName || "Unknown"}</span>
                     </div>
 
                     <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                       <Calendar className="h-4 w-4 mr-2 text-indigo-500 dark:text-indigo-400" />
                       <span>
-                        {new Date(course.startDate).toLocaleDateString()} -{" "}
-                        {new Date(course.endDate).toLocaleDateString()}
+                        {course.startDate
+                          ? new Date(course.startDate).toLocaleDateString()
+                          : "N/A"}{" "}
+                        -{" "}
+                        {course.endDate
+                          ? new Date(course.endDate).toLocaleDateString()
+                          : "N/A"}
                       </span>
                     </div>
 
                     <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                       <DollarSign className="h-4 w-4 mr-2 text-indigo-500 dark:text-indigo-400" />
-                      <span>Fee: ${course.fee}</span>
+                      <span>
+                        Fee: ${course.fee != null ? course.fee : "N/A"}
+                      </span>
                     </div>
 
                     <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                       <Users className="h-4 w-4 mr-2 text-indigo-500 dark:text-indigo-400" />
-                      <span>Max Students: {course.maxStudents}</span>
+                      <span>
+                        Max Students:{" "}
+                        {course.maxStudents != null
+                          ? course.maxStudents
+                          : "N/A"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -149,59 +158,64 @@ function CourseListItemComponent({
             </div>
 
             {/* Right section with actions */}
-            <div className="flex flex-row md:flex-col gap-2 justify-end md:min-w-[140px]">
+            <div className="flex flex-row md:flex-col gap-2 justify-start md:min-w-[140px] md:items-start">
               <Button
                 variant="default"
                 size="sm"
-                className="flex-1 md:w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
+                className="w-full h-10 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
               >
                 <Link
-                  to={`/courses/${course.id}`}
+                  to={`/courses/${course.id || "#"}`}
                   className="flex items-center w-full justify-center"
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   View Details
                 </Link>
               </Button>
-              {!isTutor && !isAdmin && course.status !== "completed" && course.status !== "canceled" &&(
-                <Button
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90 h-12 text-base"
-                  onClick={() => {
-                    if (!isAuthenticated) {
-                      toast({
-                        title: "Error",
-                        description: "You must be logged in to enroll.",
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-                    setIsContractDialogOpen(true);
-                  }}
-                  disabled={isEnrolling || hasSignedContract}
-                >
-                  {isEnrolling
-                    ? "Enrolling..."
-                    : hasSignedContract
-                    ? "Enrolled"
-                    : "Enroll"}
-                </Button>
-              )}
-              {!isTutor && (
-                <ContractModal
-                  isOpen={isContractDialogOpen}
-                  onClose={() => setIsContractDialogOpen(false)}
-                  onConfirm={handleEnrollCourse}
-                  isProcessing={isEnrolling}
-                  courseTitle={course.courseName}
-                  tutorName={course.tutorName}
-                  studentName={user?.name || "Student"}
-                  fee={course.fee}
-                />
-              )}
+              {!isTutor &&
+                !isAdmin &&
+                course.status !== "completed" &&
+                course.status !== "canceled" && (
+                  <Button
+                    className="w-full h-10 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        toast({
+                          title: "Error",
+                          description: "You must be logged in to enroll.",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      setIsContractDialogOpen(true);
+                    }}
+                    disabled={isEnrolling || hasSignedContract}
+                  >
+                    {isEnrolling
+                      ? "Enrolling..."
+                      : hasSignedContract
+                      ? "Enrolled"
+                      : "Enroll"}
+                  </Button>
+                )}
             </div>
           </div>
         </div>
       </motion.div>
+
+      {/* Contract Modal */}
+      {!isTutor && (
+        <ContractModal
+          isOpen={isContractDialogOpen}
+          onClose={() => setIsContractDialogOpen(false)}
+          onConfirm={handleEnrollCourse}
+          isProcessing={isEnrolling}
+          courseTitle={course.courseName || "Untitled"}
+          tutorName={course.tutorName || "Unknown"}
+          studentName={user?.name || "Student"}
+          fee={course.fee != null ? course.fee : 0}
+        />
+      )}
 
       {/* Cancel Course Confirmation Modal */}
       <CancelCourseModal
@@ -219,7 +233,6 @@ function CourseListItemComponent({
   );
 }
 
-// Use memo to prevent unnecessary re-renders
 const CourseListItem = memo(CourseListItemComponent);
 
 export default CourseListItem;

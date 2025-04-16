@@ -48,6 +48,11 @@ interface Complaint {
   };
 }
 
+interface PaginationFilter {
+  pageNumber: number;
+  pageSize: number;
+}
+
 export default function ContractManagement() {
   const { toast, toasts, dismiss } = useToast();
   const [activeTab, setActiveTab] = useState("contracts");
@@ -57,6 +62,18 @@ export default function ContractManagement() {
   const [loadingComplaints, setLoadingComplaints] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [contractPagination, setContractPagination] =
+    useState<PaginationFilter>({
+      pageNumber: 1,
+      pageSize: 10,
+    });
+  const [complaintPagination, setComplaintPagination] =
+    useState<PaginationFilter>({
+      pageNumber: 1,
+      pageSize: 10,
+    });
+  const [contractTotalPages, setContractTotalPages] = useState(1);
+  const [complaintTotalPages, setComplaintTotalPages] = useState(1);
   const [selectedContract, setSelectedContract] = useState<ContractDTO | null>(
     null
   );
@@ -73,14 +90,15 @@ export default function ContractManagement() {
     } else if (activeTab === "complaints") {
       fetchComplaints();
     }
-  }, [activeTab]);
+  }, [activeTab, contractPagination, complaintPagination]);
 
   const fetchContracts = async () => {
     try {
       setLoadingContracts(true);
-      const response = await getAllContracts();
+      const response = await getAllContracts(contractPagination);
       if (response.succeeded && response.data) {
         setContracts(response.data);
+        setContractTotalPages(response.totalPages || 1);
       } else {
         toast({
           title: "Error",
@@ -102,9 +120,10 @@ export default function ContractManagement() {
   const fetchComplaints = async () => {
     try {
       setLoadingComplaints(true);
-      const response = await getAllComplaints({ pageNumber: 1, pageSize: 100 });
+      const response = await getAllComplaints(complaintPagination);
       if (response.succeeded && response.data) {
         setComplaints(response.data || []);
+        setComplaintTotalPages(response.totalPages || 1);
       } else {
         toast({
           title: "Error",
@@ -286,6 +305,17 @@ export default function ContractManagement() {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  const handlePageChange = (
+    tab: "contracts" | "complaints",
+    pageNumber: number
+  ) => {
+    if (tab === "contracts") {
+      setContractPagination((prev) => ({ ...prev, pageNumber }));
+    } else {
+      setComplaintPagination((prev) => ({ ...prev, pageNumber }));
+    }
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex justify-between items-center mb-6">
@@ -305,45 +335,46 @@ export default function ContractManagement() {
         </TabsList>
 
         <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search..."
-            className="pl-10 bg-white dark:bg-gray-800 dark:text-white"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search..."
+              className="pl-10 bg-white dark:bg-gray-800 dark:text-white"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800">
+              <div className="flex items-center">
+                <Filter className="h-4 w-4 mr-2" />
+                <span>
+                  {statusFilter === "all"
+                    ? "All Statuses"
+                    : statusFilter.charAt(0).toUpperCase() +
+                      statusFilter.slice(1)}
+                </span>
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              {activeTab === "contracts" ? (
+                <>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="canceled">Cancelled</SelectItem>
+                </>
+              ) : (
+                <>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </>
+              )}
+            </SelectContent>
+          </Select>
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800">
-            <div className="flex items-center">
-              <Filter className="h-4 w-4 mr-2" />
-              <span>
-                {statusFilter === "all"
-                  ? "All Statuses"
-                  : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
-              </span>
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            {activeTab === "contracts" ? (
-              <>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="canceled">Cancelled</SelectItem>
-              </>
-            ) : (
-              <>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="canceled">Rejected</SelectItem>
-              </>
-            )}
-          </SelectContent>
-        </Select>
-      </div>
 
         <TabsContent value="contracts" className="mt-0">
           {loadingContracts ? (
@@ -359,105 +390,138 @@ export default function ContractManagement() {
               statusFilter={statusFilter}
             />
           ) : (
-            <div className="overflow-hidden border rounded-lg">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      Course Name
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      Tutor
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      Student
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      Fee
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      Duration
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      Status
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                  {filteredContracts.map((contract) => (
-                    <tr
-                      key={contract.id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {contract.courseName}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 dark:text-gray-400">
-                          {contract.tutorName}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 dark:text-gray-400">
-                          {contract.studentName}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 dark:text-gray-400">
-                          ${contract.fee.toFixed(2)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 dark:text-gray-400">
-                          {formatDate(contract.startDate)} -{" "}
-                          {formatDate(contract.endDate)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(contract.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
-                          onClick={() => handleViewContract(contract)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                      </td>
+            <>
+              <div className="overflow-hidden border rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Course Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Tutor
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Student
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Fee
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Duration
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Status
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Actions
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                    {filteredContracts.map((contract) => (
+                      <tr
+                        key={contract.id}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {contract.courseName}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            {contract.tutorName}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            {contract.studentName}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            ${contract.fee.toFixed(2)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            {formatDate(contract.startDate)} -{" "}
+                            {contract.endDate
+                              ? formatDate(contract.endDate)
+                              : "Ongoing"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(contract.status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
+                            onClick={() => handleViewContract(contract)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="flex justify-between items-center mt-4">
+                <Button
+                  disabled={contractPagination.pageNumber === 1}
+                  onClick={() =>
+                    handlePageChange(
+                      "contracts",
+                      contractPagination.pageNumber - 1
+                    )
+                  }
+                  variant="outline"
+                >
+                  Previous
+                </Button>
+                <span>
+                  Page {contractPagination.pageNumber} of {contractTotalPages}
+                </span>
+                <Button
+                  disabled={contractPagination.pageNumber >= contractTotalPages}
+                  onClick={() =>
+                    handlePageChange(
+                      "contracts",
+                      contractPagination.pageNumber + 1
+                    )
+                  }
+                  variant="outline"
+                >
+                  Next
+                </Button>
+              </div>
+            </>
           )}
         </TabsContent>
 
@@ -475,105 +539,140 @@ export default function ContractManagement() {
               statusFilter={statusFilter}
             />
           ) : (
-            <div className="overflow-hidden border rounded-lg">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      ID
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      Contract
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      User
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      Description
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      Submitted On
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      Status
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                  {filteredComplaints.map((complaint) => (
-                    <tr
-                      key={complaint.id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          #{complaint.id}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 dark:text-gray-400">
-                          {complaint.contract?.courseName ||
-                            `#${complaint.contractId}`}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 dark:text-gray-400">
-                          {complaint.user?.name || `#${complaint.userId}`}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900 dark:text-gray-400 line-clamp-2">
-                          {complaint.description}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 dark:text-gray-400">
-                          {new Date(complaint.createdAt).toLocaleString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(complaint.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
-                          onClick={() => handleViewComplaintDetails(complaint)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                      </td>
+            <>
+              <div className="overflow-hidden border rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        ID
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Contract
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        User
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Description
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Submitted On
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Status
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Actions
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                    {filteredComplaints.map((complaint) => (
+                      <tr
+                        key={complaint.id}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            #{complaint.id}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            {complaint.contract?.courseName ||
+                              `#${complaint.contractId}`}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            {complaint.user?.name || `#${complaint.userId}`}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900 dark:text-gray-400 line-clamp-2">
+                            {complaint.description}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            {new Date(complaint.createdAt).toLocaleString()}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(complaint.status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
+                            onClick={() =>
+                              handleViewComplaintDetails(complaint)
+                            }
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="flex justify-between items-center mt-4">
+                <Button
+                  disabled={complaintPagination.pageNumber === 1}
+                  onClick={() =>
+                    handlePageChange(
+                      "complaints",
+                      complaintPagination.pageNumber - 1
+                    )
+                  }
+                  variant="outline"
+                >
+                  Previous
+                </Button>
+                <span>
+                  Page {complaintPagination.pageNumber} of {complaintTotalPages}
+                </span>
+                <Button
+                  disabled={
+                    complaintPagination.pageNumber >= complaintTotalPages
+                  }
+                  onClick={() =>
+                    handlePageChange(
+                      "complaints",
+                      complaintPagination.pageNumber + 1
+                    )
+                  }
+                  variant="outline"
+                >
+                  Next
+                </Button>
+              </div>
+            </>
           )}
         </TabsContent>
       </Tabs>
@@ -583,6 +682,10 @@ export default function ContractManagement() {
         isOpen={isContractModalOpen}
         onClose={() => setIsContractModalOpen(false)}
         contract={selectedContract}
+        onFileComplaint={function (): void {
+          throw new Error("Function not implemented.");
+        }}
+        canFileComplaint={false}
       />
 
       {/* Complaint View Modal */}

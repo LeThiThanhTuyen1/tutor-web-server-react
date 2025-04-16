@@ -27,7 +27,7 @@ interface CourseResponse {
 export const getAllCourses = async (
   filter: PaginationFilter,
   searchTerm?: string,
-  status?: string
+  statuses?: string[]
 ): Promise<CourseResponse> => {
   try {
     const response = await api.get("/Courses", {
@@ -35,7 +35,7 @@ export const getAllCourses = async (
         pageNumber: filter.pageNumber,
         pageSize: filter.pageSize,
         ...(searchTerm && { searchTerm }),
-        ...(status && { status }),
+        ...(statuses && statuses.length > 0 && { statuses: statuses.join(",") }),
       },
     });
     return response.data;

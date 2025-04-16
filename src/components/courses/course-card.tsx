@@ -26,13 +26,13 @@ interface CourseCardProps {
   isAdmin: boolean;
 }
 
-// Status styles - moved outside component to prevent recreation on each render
 export const STATUS_STYLES: Record<string, string> = {
   ongoing:
     "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
   completed: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
   canceled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+  pending:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
   coming:
     "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
 };
@@ -59,9 +59,6 @@ function CourseCardComponent({ course, isTutor, isAdmin }: CourseCardProps) {
         });
         setHasSignedContract(true);
         setIsContractDialogOpen(false);
-
-        // Refresh the course details
-        // getCourseById(Number(id));
       } else {
         toast({
           title: "Error",
@@ -89,7 +86,7 @@ function CourseCardComponent({ course, isTutor, isAdmin }: CourseCardProps) {
       >
         <Card
           className={cn(
-            "h-full overflow-hidden transition-all duration-200 hover:shadow-md border-indigo-100 dark:border-indigo-900"
+            "flex flex-col h-full overflow-hidden transition-all duration-200 hover:shadow-md border-indigo-100 dark:border-indigo-900 min-h-[400px]" // Added min-h
           )}
         >
           <div className="h-1 bg-gradient-to-r from-indigo-600 to-blue-600"></div>
@@ -98,7 +95,7 @@ function CourseCardComponent({ course, isTutor, isAdmin }: CourseCardProps) {
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <CardTitle className="text-lg font-semibold text-indigo-950 dark:text-indigo-50 line-clamp-1">
-                  {course.courseName}
+                  {course.courseName || "Untitled Course"}
                 </CardTitle>
               </div>
             </div>
@@ -108,68 +105,81 @@ function CourseCardComponent({ course, isTutor, isAdmin }: CourseCardProps) {
                 variant="outline"
                 className={cn(
                   "text-xs font-medium",
-                  STATUS_STYLES[course.status] ||
+                  STATUS_STYLES[course.status?.toLowerCase()] ||
                     "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
                 )}
               >
-                {course.status.charAt(0).toUpperCase() + course.status.slice(1)}
+                {(course.status
+                  ? course.status.charAt(0).toUpperCase() +
+                    course.status.slice(1)
+                  : "Unknown") || "Unknown"}
               </Badge>
               <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                ID: {course.id}
+                ID: {course.id || "N/A"}
               </span>
             </div>
           </CardHeader>
 
-          <CardContent className="p-4 pt-2">
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-4">
-              {course.description}
+          <CardContent className="p-4 pt-2 flex-1">
+            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-4 min-h-[40px]">
+              {course.description || "No description available."}
             </p>
 
             <div className="space-y-2 text-sm">
               <div className="flex items-center text-gray-600 dark:text-gray-400">
                 <User className="h-4 w-4 mr-2 text-indigo-500 dark:text-indigo-400" />
-                <span>Tutor: {course.tutorName}</span>
+                <span>Tutor: {course.tutorName || "N/A"}</span>
               </div>
 
               <div className="flex items-center text-gray-600 dark:text-gray-400">
                 <Calendar className="h-4 w-4 mr-2 text-indigo-500 dark:text-indigo-400" />
                 <span>
-                  {new Date(course.startDate).toLocaleDateString()} -{" "}
-                  {new Date(course.endDate).toLocaleDateString()}
+                  {course.startDate
+                    ? new Date(course.startDate).toLocaleDateString()
+                    : "N/A"}{" "}
+                  -{" "}
+                  {course.endDate
+                    ? new Date(course.endDate).toLocaleDateString()
+                    : "N/A"}
                 </span>
               </div>
 
               <div className="flex items-center text-gray-600 dark:text-gray-400">
                 <DollarSign className="h-4 w-4 mr-2 text-indigo-500 dark:text-indigo-400" />
-                <span>Fee: ${course.fee}</span>
+                <span>Fee: ${course.fee ? course.fee.toFixed(2) : "N/A"}</span>
               </div>
 
               <div className="flex items-center text-gray-600 dark:text-gray-400">
                 <Clock className="h-4 w-4 mr-2 text-indigo-500 dark:text-indigo-400" />
                 <span>
-                  Created: {new Date(course.createdAt).toLocaleDateString()}
+                  Created:{" "}
+                  {course.createdAt
+                    ? new Date(course.createdAt).toLocaleDateString()
+                    : "N/A"}
                 </span>
               </div>
             </div>
           </CardContent>
 
           <CardFooter className="p-4 pt-0 flex flex-wrap gap-2">
-            <>
-              <Button
-                variant="default"
-                size="sm"
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
+            <Button
+              variant="default"
+              size="sm"
+              className="flex-1 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
+            >
+              <Link
+                to={`/courses/${course.id || ""}`}
+                className="flex items-center w-full justify-center"
               >
-                <Link
-                  to={`/courses/${course.id}`}
-                  className="flex items-center w-full justify-center"
-                >
-                  View
-                </Link>
-              </Button>
-              {!isTutor && !isAdmin && course.status !== "completed" && course.status !== "canceled" &&(
+                View
+              </Link>
+            </Button>
+            {!isTutor &&
+              !isAdmin &&
+              course.status !== "completed" &&
+              course.status !== "canceled" && (
                 <Button
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90 h-12 text-base"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600/90 dark:hover:bg-indigo-700/90"
                   onClick={() => {
                     if (!isAuthenticated) {
                       toast({
@@ -190,7 +200,6 @@ function CourseCardComponent({ course, isTutor, isAdmin }: CourseCardProps) {
                     : "Enroll"}
                 </Button>
               )}
-            </>
           </CardFooter>
         </Card>
       </motion.div>
@@ -200,10 +209,10 @@ function CourseCardComponent({ course, isTutor, isAdmin }: CourseCardProps) {
           onClose={() => setIsContractDialogOpen(false)}
           onConfirm={handleEnrollCourse}
           isProcessing={isEnrolling}
-          courseTitle={course.courseName}
-          tutorName={course.tutorName}
+          courseTitle={course.courseName || "Untitled Course"}
+          tutorName={course.tutorName || "N/A"}
           studentName={user?.name || "Student"}
-          fee={course.fee}
+          fee={course.fee || 0}
         />
       )}
       <ToastContainer
@@ -214,7 +223,6 @@ function CourseCardComponent({ course, isTutor, isAdmin }: CourseCardProps) {
   );
 }
 
-// Use memo to prevent unnecessary re-renders
 const CourseCard = memo(CourseCardComponent);
 
 export default CourseCard;

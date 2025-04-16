@@ -1,4 +1,6 @@
 import api from "@/config/axiosInstance";
+import { PaginationFilter } from "@/types/paginated-response";
+import { PagedResponse } from "./adminService";
 
 // Define the ContractDTO interface matching your backend ContractDTO
 interface ContractDTO {
@@ -13,42 +15,36 @@ interface ContractDTO {
   status: string;
 }
 
-// Define Response type matching your backend Response<T>
-interface Response<T> {
-  succeeded: boolean;
-  message: string;
-  errors: string[] | null;
-  data: T | null;
-}
-
 // Get all contracts (Admin only)
-export const getAllContracts = async (): Promise<Response<ContractDTO[]>> => {
+export const getAllContracts = async (filter: PaginationFilter): Promise<PagedResponse<ContractDTO[]>> => {
   try {
-    const response = await api.get("/Contracts");
-    return response.data;
-  } catch (error: any) {
-    console.error("Error fetching all contracts:", error);
-    return {
-      succeeded: false,
-      message: error.response?.data?.message || "Failed to fetch contracts",
-      errors: error.response?.data?.errors || ["Network Error"],
-      data: null,
-    };
+      const response = await api.get("/Contracts", {
+          params: {
+              pageNumber: filter.pageNumber,
+              pageSize: filter.pageSize
+          }
+      });
+      return response.data;
+  } catch (error) {
+      console.error("Error fetching contracts:", error);
+      throw error;
   }
 };
 
 // Get all contracts by user ID
-export const getContractsByUserId = async (userId: number): Promise<Response<ContractDTO[]>> => {
+export const getContractsByUserId = async (
+  filter: PaginationFilter
+): Promise<PagedResponse<ContractDTO[]>> => {
   try {
-    const response = await api.get(`/Contracts/User/${userId}`);
+    const response = await api.get(`/Contracts/User`, {
+      params: {
+        pageNumber: filter.pageNumber,
+        pageSize: filter.pageSize,
+      },
+    });
     return response.data;
   } catch (error: any) {
-    console.error(`Error fetching contracts for user ID ${userId}:`, error);
-    return {
-      succeeded: false,
-      message: error.response?.data?.message || "Failed to fetch contracts for the user",
-      errors: error.response?.data?.errors || ["Network Error"],
-      data: null,
-    };
+    console.error("Error fetching contracts for user:", error);
+    throw error;
   }
 };

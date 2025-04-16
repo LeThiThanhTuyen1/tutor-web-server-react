@@ -1,74 +1,90 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { FileText, Eye, FileWarning } from "lucide-react"
-import { getContractsByUserId } from "@/services/contractService"
-import { createComplaint } from "@/services/complaintService"
-import { useAuth } from "@/hook/use-auth"
-import { Button } from "@/ui/button"
-import { Card, CardContent, CardFooter, CardHeader } from "@/ui/card"
-import { Badge } from "@/ui/badge"
-import { Skeleton } from "@/ui/skeleton"
-import { useToast } from "@/hook/use-toast"
-import { ContractViewModal } from "@/ui/modals/contract-view-modal"
-import { ComplaintDialog } from "@/ui/modals/complaint-dialog"
-import { ToastContainer } from "@/ui/toast"
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { FileText, Eye, FileWarning } from "lucide-react";
+import { getContractsByUserId } from "@/services/contractService";
+import { createComplaint } from "@/services/complaintService";
+import { useAuth } from "@/hook/use-auth";
+import { Button } from "@/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/ui/card";
+import { Badge } from "@/ui/badge";
+import { Skeleton } from "@/ui/skeleton";
+import { useToast } from "@/hook/use-toast";
+import { ContractViewModal } from "@/ui/modals/contract-view-modal";
+import { ComplaintDialog } from "@/ui/modals/complaint-dialog";
+import { ToastContainer } from "@/ui/toast";
 
 interface ContractDTO {
-  id: number
-  tutorName: string
-  studentName: string
-  courseName: string
-  terms: string
-  fee: number
-  startDate: string
-  endDate: string
-  status: string
+  id: number;
+  tutorName: string;
+  studentName: string;
+  courseName: string;
+  terms: string;
+  fee: number;
+  startDate: string;
+  endDate?: string;
+  status: string;
+}
+
+interface PaginationFilter {
+  pageNumber: number;
+  pageSize: number;
 }
 
 export default function ContractList() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const { toast, toasts, dismiss } = useToast()
-  const [contracts, setContracts] = useState<ContractDTO[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedContract, setSelectedContract] = useState<ContractDTO | null>(null)
-  const [isContractModalOpen, setIsContractModalOpen] = useState(false)
-  const [isComplaintDialogOpen, setIsComplaintDialogOpen] = useState(false)
-  const [isSubmittingComplaint, setIsSubmittingComplaint] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast, toasts, dismiss } = useToast();
+  const [contracts, setContracts] = useState<ContractDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedContract, setSelectedContract] = useState<ContractDTO | null>(
+    null
+  );
+  const [isContractModalOpen, setIsContractModalOpen] = useState(false);
+  const [isComplaintDialogOpen, setIsComplaintDialogOpen] = useState(false);
+  const [isSubmittingComplaint, setIsSubmittingComplaint] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pagination, setPagination] = useState<PaginationFilter>({
+    pageNumber: 1,
+    pageSize: 10,
+  });
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchContracts = async () => {
-      if (!user?.id) return
+      if (!user?.id) return;
 
       try {
-        setLoading(true)
-        const response = await getContractsByUserId(Number.parseInt(user.id))
+        setLoading(true);
+        const response = await getContractsByUserId(
+          Number.parseInt(user.id),
+          pagination
+        );
 
         if (response.succeeded && response.data) {
-          setContracts(response.data)
+          setContracts(response.data);
+          setTotalPages(response.totalPages || 1);
         } else {
           toast({
             title: "Error",
             description: response.message || "Failed to fetch contracts",
             variant: "destructive",
-          })
+          });
         }
       } catch (error) {
         toast({
           title: "Error",
           description: "An unexpected error occurred",
           variant: "destructive",
-        })
+        });
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchContracts()
-  }, [user])
+    fetchContracts();
+  }, [user, pagination]);
 
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
@@ -77,92 +93,106 @@ export default function ContractList() {
           <Badge className="bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700">
             Active
           </Badge>
-        )
+        );
       case "pending":
         return (
-          <Badge className="bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700">Pending</Badge>
-        )
+          <Badge className="bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700">
+            Pending
+          </Badge>
+        );
       case "completed":
         return (
-          <Badge className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700">Completed</Badge>
-        )
+          <Badge className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700">
+            Completed
+          </Badge>
+        );
       case "canceled":
         return (
-          <Badge className="bg-rose-500 hover:bg-rose-600 dark:bg-rose-600 dark:hover:bg-rose-700">Cancelled</Badge>
-        )
+          <Badge className="bg-rose-500 hover:bg-rose-600 dark:bg-rose-600 dark:hover:bg-rose-700">
+            Cancelled
+          </Badge>
+        );
       default:
-        return <Badge>{status}</Badge>
+        return <Badge>{status}</Badge>;
     }
-  }
+  };
 
   const handleViewContract = (contract: ContractDTO) => {
-    setSelectedContract(contract)
-    setIsContractModalOpen(true)
-  }
+    setSelectedContract(contract);
+    setIsContractModalOpen(true);
+  };
 
   const handleOpenComplaintDialog = () => {
-    setIsContractModalOpen(false)
-    setIsComplaintDialogOpen(true)
-  }
+    setIsContractModalOpen(false);
+    setIsComplaintDialogOpen(true);
+  };
 
   const handleSubmitComplaint = async (description: string) => {
-    if (!selectedContract) return
+    if (!selectedContract) return;
 
     try {
-      setIsSubmittingComplaint(true)
+      setIsSubmittingComplaint(true);
       const response = await createComplaint({
         contractId: selectedContract.id,
         description,
-      })
+      });
 
       if (response.succeeded) {
         toast({
           title: "Success",
           description: "Your complaint has been submitted successfully",
           variant: "success",
-        })
-        setIsComplaintDialogOpen(false)
+        });
+        setIsComplaintDialogOpen(false);
 
         // Update the contract status in the local state
         setContracts((prevContracts) =>
           prevContracts.map((contract) =>
-            contract.id === selectedContract.id ? { ...contract, status: "pending" } : contract,
-          ),
-        )
+            contract.id === selectedContract.id
+              ? { ...contract, status: "pending" }
+              : contract
+          )
+        );
 
         if (selectedContract) {
-          setSelectedContract({ ...selectedContract, status: "pending" })
+          setSelectedContract({ ...selectedContract, status: "pending" });
         }
       } else {
         toast({
           title: "Error",
           description: response.message || "Failed to submit complaint",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
       toast({
         title: "Error",
         description: "An unexpected error occurred",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmittingComplaint(false)
+      setIsSubmittingComplaint(false);
     }
-  }
+  };
 
   const canFileComplaint = (status: string) => {
-    return ["active", "completed"].includes(status.toLowerCase())
-  }
+    return ["active", "completed"].includes(status.toLowerCase());
+  };
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
       month: "short",
       day: "numeric",
-    }
-    return new Date(dateString).toLocaleDateString(undefined, options)
-  }
+    };
+    return dateString
+      ? new Date(dateString).toLocaleDateString(undefined, options)
+      : "Ongoing";
+  };
+
+  const handlePageChange = (pageNumber: number) => {
+    setPagination((prev) => ({ ...prev, pageNumber }));
+  };
 
   if (loading) {
     return (
@@ -170,7 +200,10 @@ export default function ContractList() {
         <h1 className="text-2xl font-bold mb-6">My Contracts</h1>
         <div className="grid gap-4">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="w-full border border-gray-200 dark:border-gray-700">
+            <Card
+              key={i}
+              className="w-full border border-gray-200 dark:border-gray-700"
+            >
               <CardHeader className="pb-2">
                 <Skeleton className="h-6 w-3/4 mb-2" />
                 <Skeleton className="h-4 w-1/2" />
@@ -189,12 +222,12 @@ export default function ContractList() {
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   const filteredContracts = contracts.filter((contract) =>
-    contract.courseName.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+    contract.courseName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -233,9 +266,13 @@ export default function ContractList() {
             <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-full mb-4">
               <FileText className="h-16 w-16 text-gray-500 dark:text-gray-400" />
             </div>
-            <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-2">No Contracts Found</h3>
+            <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-2">
+              No Contracts Found
+            </h3>
             <p className="text-gray-600 dark:text-gray-400 text-center max-w-md mb-6">
-              You don't have any contracts yet. Contracts will appear here when you enroll in courses.
+              {searchTerm
+                ? "No contracts match your search criteria."
+                : "You don't have any contracts yet. Contracts will appear here when you enroll in courses."}
             </p>
             <Button
               onClick={() => navigate("/courses")}
@@ -246,100 +283,133 @@ export default function ContractList() {
           </CardContent>
         </Card>
       ) : (
-        <div className="overflow-hidden border rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                >
-                  Course Name
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                >
-                  {user?.role === "Student" ? "Tutor" : "Student"}
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                >
-                  Fee
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                >
-                  Duration
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                >
-                  Status
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-              {filteredContracts.map((contract) => (
-                <tr key={contract.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{contract.courseName}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-gray-400">
-                      {user?.role === "Student" ? contract.tutorName : contract.studentName}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-gray-400">${contract.fee.toFixed(2)}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-gray-400">
-                      {formatDate(contract.startDate)} - {formatDate(contract.endDate)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(contract.status)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
-                        onClick={() => handleViewContract(contract)}
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
-                      {canFileComplaint(contract.status) && (
+        <>
+          <div className="overflow-hidden border rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                  >
+                    Course Name
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                  >
+                    {user?.role === "Student" ? "Tutor" : "Student"}
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                  >
+                    Fee
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                  >
+                    Duration
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                  >
+                    Status
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                {filteredContracts.map((contract) => (
+                  <tr
+                    key={contract.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {contract.courseName}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 dark:text-gray-400">
+                        {user?.role === "Student"
+                          ? contract.tutorName
+                          : contract.studentName}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 dark:text-gray-400">
+                        ${contract.fee.toFixed(2)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 dark:text-gray-400">
+                        {formatDate(contract.startDate)} -{" "}
+                        {formatDate(contract.endDate)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {getStatusBadge(contract.status)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex justify-end space-x-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/30 text-rose-600 dark:text-rose-400"
-                          onClick={() => {
-                            setSelectedContract(contract)
-                            setIsComplaintDialogOpen(true)
-                          }}
+                          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
+                          onClick={() => handleViewContract(contract)}
                         >
-                          <FileWarning className="h-4 w-4 mr-1" />
-                          Complaint
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
                         </Button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                        {canFileComplaint(contract.status) && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/30 text-rose-600 dark:text-rose-400"
+                            onClick={() => {
+                              setSelectedContract(contract);
+                              setIsComplaintDialogOpen(true);
+                            }}
+                          >
+                            <FileWarning className="h-4 w-4 mr-1" />
+                            Complaint
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex justify-between items-center mt-4">
+            <Button
+              disabled={pagination.pageNumber === 1}
+              onClick={() => handlePageChange(pagination.pageNumber - 1)}
+              variant="outline"
+            >
+              Previous
+            </Button>
+            <span>
+              Page {pagination.pageNumber} of {totalPages}
+            </span>
+            <Button
+              disabled={pagination.pageNumber >= totalPages}
+              onClick={() => handlePageChange(pagination.pageNumber + 1)}
+              variant="outline"
+            >
+              Next
+            </Button>
+          </div>
+        </>
       )}
 
       {/* Contract View Modal */}
@@ -348,7 +418,9 @@ export default function ContractList() {
         onClose={() => setIsContractModalOpen(false)}
         onFileComplaint={handleOpenComplaintDialog}
         contract={selectedContract}
-        canFileComplaint={selectedContract ? canFileComplaint(selectedContract.status) : false}
+        canFileComplaint={
+          selectedContract ? canFileComplaint(selectedContract.status) : false
+        }
       />
 
       {/* Complaint Dialog */}
@@ -360,7 +432,10 @@ export default function ContractList() {
         contractId={selectedContract?.id}
       />
 
-      <ToastContainer toasts={toasts.map((toast) => ({ ...toast, onDismiss: dismiss }))} dismiss={dismiss} />
+      <ToastContainer
+        toasts={toasts.map((toast) => ({ ...toast, onDismiss: dismiss }))}
+        dismiss={dismiss}
+      />
     </div>
-  )
+  );
 }

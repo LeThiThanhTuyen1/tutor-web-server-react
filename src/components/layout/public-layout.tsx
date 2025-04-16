@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, type ReactNode } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Sidebar from "./sidebar";
 import Header from "./header";
 import { useLocation } from "react-router-dom";
@@ -27,7 +27,6 @@ export default function PublicLayout({ children }: AppLayoutProps) {
       document.documentElement.classList.add("dark");
     }
 
-    // Simulate page loading
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
@@ -35,13 +34,11 @@ export default function PublicLayout({ children }: AppLayoutProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Close sidebar on mobile for non-authenticated users on home page
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setIsSidebarOpen(false);
       } else {
-        // On desktop, keep sidebar open except on home page for non-authenticated users
         setIsSidebarOpen(!(isHomePage && !isAuthenticated));
       }
     };
@@ -54,12 +51,7 @@ export default function PublicLayout({ children }: AppLayoutProps) {
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
     localStorage.setItem("darkMode", (!isDarkMode).toString());
-
-    if (!isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    document.documentElement.classList.toggle("dark");
   };
 
   const toggleSidebar = () => {
@@ -80,49 +72,37 @@ export default function PublicLayout({ children }: AppLayoutProps) {
         </div>
       ) : (
         <>
-          {/* Main content wrapper */}
           <div className="flex flex-1">
-            {/* Sidebar overlay for mobile */}
-            <AnimatePresence>
-              {isSidebarOpen && (
-                <>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.5 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    onClick={toggleSidebar}
-                    className="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden"
-                  />
-                  <motion.div
-                    initial={{ x: -300 }}
-                    animate={{ x: 0 }}
-                    exit={{ x: -300 }}
-                    transition={{ duration: 0.3 }}
-                    className="fixed md:sticky top-0 z-20 min-h-screen w-64 bg-white dark:bg-gray-800 shadow-md"
-                  >
-                    <Sidebar
-                      isOpen={isSidebarOpen}
-                      // isHomePage={isHomePage}
-                    />
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
+            {isSidebarOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                onClick={toggleSidebar}
+                className="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden"
+              />
+            )}
 
-            {/* Main content and header */}
+            <motion.div
+              animate={{ width: isSidebarOpen ? 256 : 80 }}
+              transition={{ duration: 0.3 }}
+              className="fixed md:sticky top-0 z-20 min-h-screen bg-white dark:bg-gray-800 shadow-md"
+            >
+              <Sidebar isOpen={isSidebarOpen} />
+            </motion.div>
+
             <div className="flex flex-col flex-1">
               <Header
                 toggleSidebar={toggleSidebar}
                 isDarkMode={isDarkMode}
                 toggleDarkMode={toggleDarkMode}
+                isSidebarOpen={isSidebarOpen} // Pass state to Header
               />
-
               <main className="flex-1 overflow-y-auto">{children}</main>
             </div>
           </div>
 
-          {/* Footer - outside the flex container to ensure it spans full width */}
           <LazyFooter />
         </>
       )}
