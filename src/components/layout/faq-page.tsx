@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { HelpCircle, ChevronDown, ChevronUp, Search } from "lucide-react";
@@ -47,7 +45,7 @@ export default function FAQPage() {
         variants={fadeIn("up", 0.1)}
         initial="hidden"
         animate="show"
-        className="max-w-4xl mx-auto"
+        className="max-w-8xl mx-auto"
       >
         <header className="mb-10">
           <div className="flex items-center mb-4">
@@ -61,7 +59,7 @@ export default function FAQPage() {
 
           {/* Search Bar */}
           <div className="relative mb-8">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <Input
               type="text"
               placeholder="Search for questions or keywords..."

@@ -1,5 +1,3 @@
-"use client";
-
 import { NavLink, Link } from "react-router-dom";
 import {
   BookOpen,

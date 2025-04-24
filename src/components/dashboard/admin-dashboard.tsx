@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import {
   BarChart,
@@ -33,7 +31,7 @@ import { getAdminDashboard, AdminDashboardData } from "@/services/adminService";
 export function AdminDashboard() {
   const { user } = useAuth();
   const [greeting, setGreeting] = useState("");
-  const [activeTab, setActiveTab] = useState("overview");
+  // const [activeTab, setActiveTab] = useState("overview");
   const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(
     null
   );
@@ -149,12 +147,14 @@ export function AdminDashboard() {
                     <div className="flex items-center mt-1 text-sm">
                       <span
                         className={`flex items-center ${
-                          dashboardData?.stats.studentsChange >= 0
+                          dashboardData?.stats &&
+                          dashboardData.stats.studentsChange >= 0
                             ? "text-emerald-600 dark:text-emerald-400"
                             : "text-red-600 dark:text-red-400"
                         }`}
                       >
-                        {dashboardData?.stats.studentsChange >= 0 ? (
+                        {dashboardData?.stats &&
+                        dashboardData.stats.studentsChange >= 0 ? (
                           <ArrowUp className="h-3 w-3 mr-1" />
                         ) : (
                           <ArrowDown className="h-3 w-3 mr-1" />
@@ -188,12 +188,14 @@ export function AdminDashboard() {
                     <div className="flex items-center mt-1 text-sm">
                       <span
                         className={`flex items-center ${
-                          dashboardData?.stats.coursesChange >= 0
+                          dashboardData?.stats &&
+                          dashboardData.stats.coursesChange >= 0
                             ? "text-emerald-600 dark:text-emerald-400"
                             : "text-red-600 dark:text-red-400"
                         }`}
                       >
-                        {dashboardData?.stats.coursesChange >= 0 ? (
+                        {dashboardData?.stats &&
+                        dashboardData.stats.coursesChange >= 0 ? (
                           <ArrowUp className="h-3 w-3 mr-1" />
                         ) : (
                           <ArrowDown className="h-3 w-3 mr-1" />
@@ -227,12 +229,14 @@ export function AdminDashboard() {
                     <div className="flex items-center mt-1 text-sm">
                       <span
                         className={`flex items-center ${
-                          dashboardData?.stats.tutorsChange >= 0
+                          dashboardData?.stats &&
+                          dashboardData.stats.tutorsChange >= 0
                             ? "text-emerald-600 dark:text-emerald-400"
                             : "text-red-600 dark:text-red-400"
                         }`}
                       >
-                        {dashboardData?.stats.tutorsChange >= 0 ? (
+                        {dashboardData?.stats &&
+                        dashboardData.stats.tutorsChange >= 0 ? (
                           <ArrowUp className="h-3 w-3 mr-1" />
                         ) : (
                           <ArrowDown className="h-3 w-3 mr-1" />
@@ -286,7 +290,7 @@ export function AdminDashboard() {
         <motion.div variants={fadeIn("up", 0.5)}>
           <Tabs
             defaultValue="overview"
-            onValueChange={setActiveTab}
+            // onValueChange={setActiveTab}
             className="w-full"
           >
             <TabsList className="mb-6 bg-gray-100 dark:bg-gray-800">

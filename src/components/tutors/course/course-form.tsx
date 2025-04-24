@@ -1,5 +1,3 @@
-"use client";
-
 import type React from "react";
 
 import { useState, useEffect, useCallback } from "react";
@@ -292,7 +290,6 @@ export default function CourseForm({
     return Object.keys(errors).length === 0;
   }, [formData]);
 
-  // Handle form submission - memoized with useCallback
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -365,22 +362,28 @@ export default function CourseForm({
           });
 
           const scheduleResponses = await Promise.all(schedulePromises);
-
           const scheduleFailed = scheduleResponses.some(
             (res) => !res.succeeded
           );
+
           if (scheduleFailed) {
-            if (!isEditing) await deleteCourses([Number(courseId)]);
+            const failedMessages =
+              scheduleResponses
+                .filter((res) => !res.succeeded)
+                .map((res) => res.message)
+                .join(", ") || "Failed to save schedule(s).";
 
             toast({
-              title: "Error",
-              description:
-                scheduleResponses
-                  .filter((res) => !res.succeeded)
-                  .map((res) => res.message)
-                  .join(", ") || "Failed to save schedule(s).",
+              title: "Schedule Error",
+              description: failedMessages,
               variant: "destructive",
             });
+
+            if (!isEditing) {
+              await deleteCourses([Number(courseId)]);
+            }
+
+            return;
           } else {
             toast({
               title: "Success",

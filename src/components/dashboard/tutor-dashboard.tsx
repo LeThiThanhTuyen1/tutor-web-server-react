@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
@@ -13,7 +11,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { Users, BookOpen, Star, ArrowUp, Clock } from "lucide-react";
+import { Users, BookOpen, Star, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -127,7 +125,7 @@ export function TutorDashboard() {
                     <h3 className="text-2xl font-bold mt-1">
                       {dashboardData?.stats.courses || 0}
                     </h3>
-                    <div className="flex items-center mt-1 text-sm">
+                    {/* <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
                         <ArrowUp className="h-3 w-3 mr-1" />
                         {dashboardData?.stats.coursesChange || 0}
@@ -135,7 +133,7 @@ export function TutorDashboard() {
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
                       </span>
-                    </div>
+                    </div> */}
                   </div>
                   <div className="bg-indigo-100 dark:bg-indigo-900/30 p-3 rounded-lg">
                     <BookOpen className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
@@ -156,7 +154,7 @@ export function TutorDashboard() {
                     <h3 className="text-2xl font-bold mt-1">
                       {dashboardData?.stats.students || 0}
                     </h3>
-                    <div className="flex items-center mt-1 text-sm">
+                    {/* <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
                         <ArrowUp className="h-3 w-3 mr-1" />
                         {dashboardData?.stats.studentsChange || 0}
@@ -164,7 +162,7 @@ export function TutorDashboard() {
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
                       </span>
-                    </div>
+                    </div> */}
                   </div>
                   <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg">
                     <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
@@ -185,7 +183,7 @@ export function TutorDashboard() {
                     <h3 className="text-2xl font-bold mt-1">
                       {dashboardData?.stats.hours || 0}
                     </h3>
-                    <div className="flex items-center mt-1 text-sm">
+                    {/* <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
                         <ArrowUp className="h-3 w-3 mr-1" />
                         {dashboardData?.stats.hoursChange || 0}
@@ -193,7 +191,7 @@ export function TutorDashboard() {
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
                       </span>
-                    </div>
+                    </div> */}
                   </div>
                   <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
                     <Clock className="h-6 w-6 text-red-600 dark:text-red-400" />
@@ -214,7 +212,7 @@ export function TutorDashboard() {
                     <h3 className="text-2xl font-bold mt-1">
                       {dashboardData?.stats.rating.toFixed(1) || 0}
                     </h3>
-                    <div className="flex items-center mt-1 text-sm">
+                    {/* <div className="flex items-center mt-1 text-sm">
                       <span className="flex items-center text-emerald-600 dark:text-emerald-400">
                         <ArrowUp className="h-3 w-3 mr-1" />
                         0.2
@@ -222,7 +220,7 @@ export function TutorDashboard() {
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
                       </span>
-                    </div>
+                    </div> */}
                   </div>
                   <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-lg">
                     <Star className="h-6 w-6 text-amber-600 dark:text-amber-400" />

@@ -1,6 +1,6 @@
 import api from "@/config/axiosInstance";
-import { PaginationFilter } from "@/types/paginated-response";
 import { PagedResponse } from "./adminService";
+import { PaginationFilter } from "@/store/authSlice";
 
 // Define the ContractDTO interface matching your backend ContractDTO
 interface ContractDTO {

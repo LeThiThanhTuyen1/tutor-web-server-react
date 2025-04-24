@@ -1,5 +1,3 @@
-"use client";
-
 import { memo, useState } from "react";
 import { motion } from "framer-motion";
 import { Calendar, DollarSign, User, ExternalLink, Users } from "lucide-react";

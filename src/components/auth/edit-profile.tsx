@@ -1,5 +1,3 @@
-"use client";
-
 import type React from "react";
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -49,7 +47,7 @@ export function EditProfileModal({
         image: profile.image,
         tutorInfo: profile.tutorInfo || null,
       });
-      setPhoneError(null); 
+      setPhoneError(null);
     }
   }, [profile]);
 
@@ -62,7 +60,7 @@ export function EditProfileModal({
       const { name, value } = e.target;
 
       if (name === "phone") {
-        setPhoneError(validatePhone(value)); 
+        setPhoneError(validatePhone(value));
       }
 
       if (name.startsWith("tutorInfo.")) {
@@ -109,7 +107,7 @@ export function EditProfileModal({
       const phoneValidation = validatePhone(formData.phone || "");
       if (phoneValidation) {
         setPhoneError(phoneValidation);
-        return; 
+        return;
       }
       await onSave(formData);
     },

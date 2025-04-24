@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FileText, Eye, FileWarning, Search } from "lucide-react";

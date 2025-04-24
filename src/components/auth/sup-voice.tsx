@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { cn } from "@/components/ui/cn";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";

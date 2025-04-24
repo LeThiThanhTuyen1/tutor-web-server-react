@@ -1,5 +1,3 @@
-"use client";
-
 import {
   useState,
   useEffect,
@@ -29,9 +27,18 @@ import { useAuth } from "@/hook/use-auth";
 import { cn } from "../ui/cn";
 import Pagination from "../layout/pagination";
 import { DeleteConfirmationModal } from "@/components/ui/modals/delete-confirm";
-import CourseCard, { STATUS_STYLES } from "./course-card";
+import CourseCard from "./course-card";
 import { enrollCourse } from "@/services/enrollmentService";
 import { PaginationFilter } from "@/store/authSlice";
+
+export const STATUS_STYLES: Record<string, string> = {
+  ongoing:
+    "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
+  completed: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  canceled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+  coming:
+    "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+};
 
 // Lazy load components
 const CourseListItem = lazy(() => import("./course-list-item"));
@@ -470,7 +477,7 @@ export default function CourseList() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   type="text"
-                  placeholder="Search courses..."
+                  placeholder="Search courses name..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 bg-white dark:bg-gray-800 border-indigo-200 dark:border-indigo-800 focus-visible:ring-indigo-500"

@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { cn } from "@/components/ui/cn";
 const TabsContext = React.createContext<{

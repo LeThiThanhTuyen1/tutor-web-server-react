@@ -1,5 +1,3 @@
-"use client";
-
 import { motion } from "framer-motion";
 import { FileText } from "lucide-react";
 import { fadeIn } from "@/components/layout/animation";

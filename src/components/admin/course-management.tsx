@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -156,7 +154,7 @@ export function CourseTable() {
         <div className="relative w-full md:w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search courses..."
+            placeholder="Search courses name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-white dark:bg-gray-800 pl-10"

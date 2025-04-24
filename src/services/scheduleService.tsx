@@ -1,5 +1,5 @@
 import api from "@/config/axiosInstance";
-import { PaginationFilter } from "@/types/paginated-response";
+import { PaginationFilter } from "@/store/authSlice";
 
 export const getAllSchedules = async (filter: PaginationFilter) => {
   try {
@@ -110,7 +110,7 @@ export const updateSchedule = async (
 ) => {
   try {
     const response = await api.put(`/Schedule/${id}`, schedule);
-    return response.data;
+    return response.data; 
   } catch (error) {
     console.error(`Error updating schedule with ID ${id}:`, error);
     return {

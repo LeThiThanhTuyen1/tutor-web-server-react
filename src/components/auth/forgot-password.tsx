@@ -1,88 +1,113 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Mail, Lock, ArrowLeft, Send, RefreshCw } from "lucide-react"
-import { validateEmail, validatePassword, validateConfirmPassword } from "@/utils/validation"
-import { forgotPassword, resetPassword } from "@/services/authService"
+import type React from "react";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Mail, Lock, ArrowLeft, Send, RefreshCw } from "lucide-react";
+import {
+  validateEmail,
+  validatePassword,
+  validateConfirmPassword,
+} from "@/utils/validation";
+import { forgotPassword, resetPassword } from "@/services/authService";
+import { useNavigate } from "react-router-dom";
 
 interface ForgotPasswordFormProps {
-  onBack: () => void
+  onBack: () => void;
 }
 
-export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
-  const [step, setStep] = useState<"request" | "reset">("request")
-  const [email, setEmail] = useState("")
-  const [verificationCode, setVerificationCode] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState("")
-  const [error, setError] = useState("")
+export default function ForgotPasswordForm({
+  onBack,
+}: ForgotPasswordFormProps) {
+  const [step, setStep] = useState<"request" | "reset">("request");
+  const [email, setEmail] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const navigation = useNavigate();
 
   const handleRequestReset = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const emailError = validateEmail(email)
+    const emailError = validateEmail(email);
     if (emailError) {
-      setError(emailError)
-      return
+      setError(emailError);
+      return;
     }
 
-    setIsLoading(true)
-    setError("")
-    setMessage("")
+    setIsLoading(true);
+    setError("");
+    setMessage("");
 
     try {
-      const response = await forgotPassword(email)
+      const response = await forgotPassword(email);
       if (response.succeeded) {
-        setMessage("Verification code sent to your email. Please check your inbox.")
-        setStep("reset")
+        setMessage(
+          "Verification code sent to your email. Please check your inbox."
+        );
+        setStep("reset");
       } else {
-        setError(response.message || "Failed to send verification code. Please try again.")
+        setError(
+          response.message ||
+            "Failed to send verification code. Please try again."
+        );
       }
     } catch (err) {
-      setError("An error occurred. Please try again later.")
+      setError("An error occurred. Please try again later.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const passwordError = validatePassword(newPassword)
-    const confirmError = validateConfirmPassword(newPassword, confirmPassword)
+    const passwordError = validatePassword(newPassword);
+    const confirmError = validateConfirmPassword(newPassword, confirmPassword);
 
     if (passwordError || confirmError) {
-      setError(passwordError || confirmError || "")
-      return
+      setError(passwordError || confirmError || "");
+      return;
     }
 
-    setIsLoading(true)
-    setError("")
-    setMessage("")
+    setIsLoading(true);
+    setError("");
+    setMessage("");
 
     try {
-      const response = await resetPassword(email, verificationCode, newPassword)
+      const response = await resetPassword(
+        email,
+        verificationCode,
+        newPassword
+      );
 
       if (response.succeeded) {
-        setMessage("Password reset successfully. You can now login with your new password.")
+        setMessage(
+          "Password reset successfully. You can now login with your new password."
+        );
+        navigation("/auth/login");
       } else {
-        setError(response.message || "Failed to reset password. Please try again.")
+        setError(
+          response.message || "Failed to reset password. Please try again."
+        );
       }
     } catch (err) {
-      setError("An error occurred. Please try again later.")
+      setError("An error occurred. Please try again later.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="w-full">
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Reset Your Password</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Reset Your Password
+        </h2>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
           {step === "request"
             ? "Enter your email to receive a verification code"
@@ -113,7 +138,10 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
       {step === "request" ? (
         <form onSubmit={handleRequestReset} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+            >
               Email
             </label>
             <div className="relative">
@@ -200,7 +228,10 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
           </div>
 
           <div>
-            <label htmlFor="new-password" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="new-password"
+              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+            >
               New Password
             </label>
             <div className="relative">
@@ -291,7 +322,5 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
         </form>
       )}
     </div>
-  )
+  );
 }
-
-  

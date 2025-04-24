@@ -1,5 +1,3 @@
-"use client";
-
 import type React from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";

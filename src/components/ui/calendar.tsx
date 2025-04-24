@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // Replace the entire file with a simplified calendar implementation that doesn't use date-fns
 
-"use client";
-
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/components/ui/cn";

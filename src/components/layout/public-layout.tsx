@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import Sidebar from "./sidebar";
@@ -97,7 +95,7 @@ export default function PublicLayout({ children }: AppLayoutProps) {
                 toggleSidebar={toggleSidebar}
                 isDarkMode={isDarkMode}
                 toggleDarkMode={toggleDarkMode}
-                isSidebarOpen={isSidebarOpen} 
+                isSidebarOpen={isSidebarOpen}
               />
               <main className="flex-1 overflow-y-auto">{children}</main>
             </div>

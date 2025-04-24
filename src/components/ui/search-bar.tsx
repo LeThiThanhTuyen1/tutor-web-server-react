@@ -25,7 +25,7 @@ export default function SearchBar({
           </div>
           <input
             type="text"
-            placeholder="Search courses..."
+            placeholder="Search courses name..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-10 w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"

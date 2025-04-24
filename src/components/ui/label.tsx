@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/components/ui/cn";
 import * as React from "react";
 

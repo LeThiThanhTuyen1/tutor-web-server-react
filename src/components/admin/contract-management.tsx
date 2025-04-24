@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { FileText, AlertTriangle, Search, Filter, Eye } from "lucide-react";
 import { getAllContracts } from "@/services/contractService";

@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -281,14 +279,11 @@ export default function HomePage() {
             </motion.div>
             <motion.div variants={fadeIn("left", 0.5)} className="md:w-1/2">
               <div className="relative z-0">
-                <div className="absolute -inset-2 bg-gradient-to-r from-pink-400 to-purple-400 dark:from-pink-500 dark:to-purple-500 rounded-lg opacity-20"></div>
-
+                <div className="absolute -inset-4 bg-gradient-to-r from-pink-500 to-purple-500 dark:from-pink-600 dark:to-purple-600 rounded-lg blur-lg opacity-30 animate-pulse"></div>
                 <img
-                  src="/src/assets/images/banner-header.jpg"
+                  src="/src/assets/images/banner-header.jpg?height=400&width=600"
                   alt="Students learning"
-                  loading="lazy"
-                  decoding="async"
-                  className="rounded-lg shadow-xl relative z-10"
+                  className="rounded-lg shadow-2xl relative z-0"
                 />
               </div>
             </motion.div>
@@ -313,7 +308,9 @@ export default function HomePage() {
 
       {/* Stats Section - White with subtle gradient */}
       {statsLoading ? (
-        <></>
+        <div className="py-12 bg-gradient-to-b from-white to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+          <div className="container mx-auto px-6"></div>
+        </div>
       ) : stats.length > 0 ? (
         <section className="py-12 bg-gradient-to-b from-white to-indigo-50 dark:from-gray-900 dark:to-gray-800">
           <div className="container mx-auto px-6">

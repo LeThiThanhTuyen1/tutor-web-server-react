@@ -1,5 +1,3 @@
-"use client";
-
 import type React from "react";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -111,7 +109,7 @@ export default function SignupForm({ onSwitchForm }: SignupFormProps) {
 
     if (response.succeeded) {
       setIsVerified(true);
-      navigate("/login");
+      navigate("/auth/login");
     } else {
       setErrors(response.message || "Invalid verification code");
     }

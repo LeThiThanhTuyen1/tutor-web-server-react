@@ -1,5 +1,5 @@
 import api from "@/config/axiosInstance";
-import { PaginationFilter } from "@/types/paginated-response";
+import { PaginationFilter } from "@/store/authSlice";
 
 interface Course {
   id: number;

@@ -1,5 +1,3 @@
-"use client";
-
 import type React from "react";
 import { useEffect, lazy, Suspense } from "react";
 import { Routes, Route, Navigate, useNavigate, Outlet } from "react-router-dom";
@@ -58,9 +56,6 @@ const ContractList = lazy(
 );
 const ContractManagement = lazy(
   () => import("./components/admin/contract-management")
-);
-const BillHistory = lazy(
-  () => import("./components/student/course/payment-history")
 );
 
 // Loading component for suspense fallback
@@ -219,7 +214,6 @@ export default function App() {
             <Route path="dashboard" element={<StudentDashboard />} />
             <Route path="schedules" element={<ScheduleView />} />
             <Route path="notifications" element={<NotificationsPage />} />
-            <Route path="bill-history" element={<BillHistory />} />
             <Route path="tutor/:id" element={<TutorProfile />} />
             <Route path="courses/:id" element={<CourseDetail />} />
 
