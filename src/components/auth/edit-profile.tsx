@@ -1,10 +1,10 @@
 "use client";
 
 import type React from "react";
-
-import { Image, X } from "lucide-react";
 import { useCallback, useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Image, X } from "lucide-react";
+import { validatePhone } from "@/utils/validation";
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -30,6 +30,7 @@ export function EditProfileModal({
     role: undefined,
     tutorInfo: null,
   });
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   // Update form data when profile changes
   useEffect(() => {
@@ -48,6 +49,7 @@ export function EditProfileModal({
         image: profile.image,
         tutorInfo: profile.tutorInfo || null,
       });
+      setPhoneError(null); 
     }
   }, [profile]);
 
@@ -59,22 +61,22 @@ export function EditProfileModal({
     ) => {
       const { name, value } = e.target;
 
+      if (name === "phone") {
+        setPhoneError(validatePhone(value)); 
+      }
+
       if (name.startsWith("tutorInfo.")) {
         const tutorField = name.split(".")[1];
         setFormData((prev) => {
-          // Create a new tutorInfo object with default empty strings for required fields
           const updatedTutorInfo: any = {
             experience: prev.tutorInfo?.experience || "",
             subjects: prev.tutorInfo?.subjects || "",
             introduction: prev.tutorInfo?.introduction || "",
           };
-
-          // Update the specific field
           if (tutorField === "experience") updatedTutorInfo.experience = value;
           if (tutorField === "subjects") updatedTutorInfo.subjects = value;
           if (tutorField === "introduction")
             updatedTutorInfo.introduction = value;
-
           return {
             ...prev,
             tutorInfo: updatedTutorInfo,
@@ -104,6 +106,11 @@ export function EditProfileModal({
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      const phoneValidation = validatePhone(formData.phone || "");
+      if (phoneValidation) {
+        setPhoneError(phoneValidation);
+        return; // Prevent submission if phone is invalid
+      }
       await onSave(formData);
     },
     [formData, onSave]
@@ -186,11 +193,19 @@ export function EditProfileModal({
               <input
                 id="phone"
                 name="phone"
-                type="text"
+                type="tel" // Changed to type="tel" for better mobile support
                 value={formData.phone || ""}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                className={`w-full p-2 border ${
+                  phoneError
+                    ? "border-red-500"
+                    : "border-gray-300 dark:border-gray-600"
+                } rounded-md bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary`}
+                pattern="[0-9+\-().\s]*" // Allow digits, +, -, (), and spaces
               />
+              {phoneError && (
+                <p className="mt-1 text-sm text-red-500">{phoneError}</p>
+              )}
             </div>
 
             <div>
@@ -241,7 +256,7 @@ export function EditProfileModal({
                 id="role"
                 name="role"
                 readOnly
-                type="role"
+                type="text" // Changed to text for consistency
                 value={formData.role}
                 disabled
                 className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"

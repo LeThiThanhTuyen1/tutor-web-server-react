@@ -1,5 +1,22 @@
+import { AuthState } from "@/services/authService"
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
-import type { AuthState } from "@/types/auth-state-type"
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+  totalRecords: number;
+  succeeded: boolean;
+  message: string | null;
+}
+
+export interface PaginationFilter {
+  pageNumber: number;
+  pageSize: number;
+  searchTerm?: string;
+  status?: string;
+}
 
 const initialState: AuthState = {
   user: null,

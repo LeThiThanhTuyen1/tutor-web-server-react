@@ -1,7 +1,7 @@
 // components/BillHistory.tsx
 import React, { useEffect, useState } from "react";
 import { BillHistoryModel, getBillHistory } from "@/services/enrollmentService";
-import { PaginationFilter } from "@/types/paginated-response";
+import { PaginationFilter } from "@/store/authSlice";
 
 const BillHistory: React.FC = () => {
   const [bills, setBills] = useState<BillHistoryModel[]>([]);

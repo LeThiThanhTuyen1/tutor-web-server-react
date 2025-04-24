@@ -21,13 +21,16 @@
 html,
 body,
 #root {
+  scroll-behavior: auto;
   height: 100%;
 }
 
-*, ::before, ::after  {
+*,
+::before,
+::after {
   margin: 0;
   padding: 0;
-  box-sizing: border-box!important;
+  box-sizing: border-box !important;
 }
 
 .bg-pattern {
@@ -35,7 +38,7 @@ body,
 }
 
 :root {
-  --radius: 1.5rem; 
+  --radius: 1.5rem;
 }
 
 .rounded-lg {

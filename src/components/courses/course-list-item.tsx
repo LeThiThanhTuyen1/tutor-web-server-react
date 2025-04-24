@@ -4,15 +4,15 @@ import { memo, useState } from "react";
 import { motion } from "framer-motion";
 import { Calendar, DollarSign, User, ExternalLink, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/ui/button";
-import { cn } from "../../ui/cn";
-import { Badge } from "@/ui/badge.tsx";
+import { Button } from "@/components/ui/button";
+import { cn } from "../ui/cn";
+import { Badge } from "@/components/ui/badge";
 import { cancelCourse } from "@/services/courseService";
 import { useToast } from "@/hook/use-toast";
-import { CancelCourseModal } from "@/ui/modals/cancel-course";
-import { ToastContainer } from "@/ui/toast";
+import { CancelCourseModal } from "@/components/ui/modals/cancel-course";
+import { ToastContainer } from "@/components/layout/toast";
 import { STATUS_STYLES } from "./course-card";
-import { ContractModal } from "@/ui/modals/contract-modal";
+import { ContractModal } from "@/components/ui/modals/contract-modal";
 import { useAuth } from "@/hook/use-auth";
 
 interface CourseListItemProps {

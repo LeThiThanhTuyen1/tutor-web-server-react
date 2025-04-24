@@ -22,7 +22,7 @@ import {
 } from "@/services/feedbackService";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/hook/use-auth";
-import { ToastContainer } from "@/ui/toast";
+import { ToastContainer } from "@/components/layout/toast";
 import { useToast } from "@/hook/use-toast";
 import type React from "react";
 import {
@@ -30,9 +30,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/ui/dropdown-menu";
-import { Button } from "@/ui/button";
-import { DeleteConfirmationModal } from "@/ui/modals/delete-confirm";
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { DeleteConfirmationModal } from "@/components/ui/modals/delete-confirm";
 import { useRating } from "@/context/rating-context";
 
 interface RatingStarsProps {

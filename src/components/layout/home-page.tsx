@@ -128,6 +128,13 @@ export default function HomePage() {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const testimonialsRef = useRef<HTMLDivElement | null>(null);
   const [stats, setStats] = useState<any>([]);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  const scrollToTestimonialSecton = (index: any) => {
+    if (index >= 0 && index < testimonials.length) {
+      setActiveTestimonial(index);
+    }
+  };
 
   const staggerContainer = (
     staggerChildren: number,
@@ -193,8 +200,16 @@ export default function HomePage() {
 
   useEffect(() => {
     const loadStats = async () => {
-      const statsData = await getStatsPublic();
-      setStats(statsData);
+      try {
+        setStatsLoading(true);
+        const statsData = await getStatsPublic();
+        setStats(Array.isArray(statsData) ? statsData : []);
+      } catch (error) {
+        console.error("Failed to load stats:", error);
+        setStats([]);
+      } finally {
+        setStatsLoading(false);
+      }
     };
     loadStats();
   }, []);
@@ -268,7 +283,7 @@ export default function HomePage() {
             <motion.div variants={fadeIn("left", 0.5)} className="md:w-1/2">
               <div className="relative z-0">
                 <div className="absolute -inset-4 bg-gradient-to-r from-pink-500 to-purple-500 dark:from-pink-600 dark:to-purple-600 rounded-lg blur-lg opacity-30 animate-pulse"></div>
-                <LazyImage
+                <img
                   src="https://truonghoc247.vn/wp-content/uploads/2022/12/yy.jpg?height=400&width=600"
                   alt="Students learning"
                   className="rounded-lg shadow-2xl relative z-0"
@@ -296,33 +311,38 @@ export default function HomePage() {
       </section>
 
       {/* Stats Section - White with subtle gradient */}
-      <section className="py-12 bg-gradient-to-b from-white to-indigo-50 dark:from-gray-900 dark:to-gray-800">
-        <div className="container mx-auto px-6">
-          <motion.div
-            variants={staggerContainer(0.1, 0)}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.25 }}
-            className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center"
-          >
-            {stats.map((stat: any, index: number) => (
-              <motion.div
-                key={stat.id}
-                variants={scaleIn(index * 0.1)}
-                className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center justify-center"
-                whileHover={{ scale: 1.05 }}
-              >
-                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
-                  {stat.value}
-                </h3>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  {stat.label}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+      {statsLoading ? (
+        <></>
+      ) : stats.length > 0 ? (
+        <section className="py-12 bg-gradient-to-b from-white to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+          <div className="container mx-auto px-6">
+            <motion.div
+              variants={staggerContainer(0.1, 0)}
+              initial="hidden"
+              animate="show" // Trigger animation directly
+              className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center"
+            >
+              {stats.map((stat: any, index: number) => (
+                <motion.div
+                  key={stat.id}
+                  variants={scaleIn(index * 0.1)}
+                  className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center justify-center"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
+                    {stat.value}
+                  </h3>
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    {stat.label}
+                  </p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+      ) : (
+        <div className="text-center py-12">No stats available</div>
+      )}
 
       {/* Benefits of Tutoring Section - Indigo to purple gradient */}
       <section className="py-8 bg-gradient-to-b from-indigo-600 via-indigo-700 to-purple-800 dark:from-indigo-900 dark:via-indigo-900 dark:to-purple-900 text-white relative overflow-hidden">
@@ -399,9 +419,9 @@ export default function HomePage() {
                     {category.icon}
                   </div>
                   <h3 className="font-semibold mb-6">{category.name}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {/* <p className="text-sm text-gray-500 dark:text-gray-400">
                     {category.count} courses
-                  </p>
+                  </p> */}
                 </div>
               </motion.div>
             ))}
@@ -677,7 +697,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials Section - Light indigo to medium indigo gradient */}
       <section className="py-8 bg-gradient-to-b from-indigo-50 via-indigo-100 to-purple-100 dark:from-gray-800 dark:via-gray-800 dark:to-gray-700 overflow-hidden">
         <div className="container mx-auto px-6">
           <SectionHeading
@@ -687,7 +706,7 @@ export default function HomePage() {
           />
 
           <div className="relative">
-            <div ref={testimonialsRef} className="overflow-hidden">
+            <div className="overflow-hidden">
               <div
                 className="flex transition-transform duration-500"
                 style={{
@@ -699,7 +718,7 @@ export default function HomePage() {
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
+                      transition={{ duration: 1 }}
                       className="bg-white dark:bg-gray-700 p-8 md:p-12 rounded-2xl shadow-lg max-w-3xl mx-auto"
                     >
                       <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
@@ -743,6 +762,49 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* Navigation Buttons */}
+            <button
+              onClick={() => scrollToTestimonialSecton(activeTestimonial - 1)}
+              disabled={activeTestimonial === 0}
+              className="absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-indigo-600 dark:bg-indigo-400 text-white hover:bg-indigo-700 dark:hover:bg-indigo-500 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors duration-300"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={() => scrollToTestimonial(activeTestimonial + 1)}
+              disabled={activeTestimonial === testimonials.length - 1}
+              className="absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-indigo-600 dark:bg-indigo-400 text-white hover:bg-indigo-700 dark:hover:bg-indigo-500 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors duration-300"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+
+            {/* Dots Navigation */}
             <div className="flex justify-center mt-8 space-x-2">
               {testimonials.map((_, index) => (
                 <button

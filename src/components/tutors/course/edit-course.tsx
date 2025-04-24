@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getCourseById } from "@/services/courseService";
-import { Skeleton } from "@/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import CourseForm from "./course-form";
 import { useAuth } from "@/hook/use-auth";
 

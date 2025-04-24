@@ -11,6 +11,8 @@ import {
   SettingsIcon,
   Bell,
   FileText,
+  BarChart,
+  BookCopy,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hook/use-auth";
@@ -19,35 +21,41 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/ui/tooltip";
+} from "@/components/ui/tooltip";
 
 interface SidebarProps {
   isOpen: boolean;
 }
 
+interface NavItem {
+  name: string;
+  path: string;
+  icon: JSX.Element;
+}
+
 export default function Sidebar({ isOpen }: SidebarProps) {
   const { user, isAuthenticated } = useAuth();
 
-  const navItems = {
+  const navItems: Record<string, NavItem[]> = {
     Public: [
       { name: "Home", path: "/", icon: <Home className="h-5 w-5" /> },
+      {
+        name: "Settings",
+        path: "/setting",
+        icon: <SettingsIcon className="h-5 w-5" />,
+      },
       { name: "Tutors", path: "/tutors", icon: <Users className="h-5 w-5" /> },
       {
         name: "Courses",
         path: "/courses",
         icon: <BookOpen className="h-5 w-5" />,
       },
-      {
-        name: "Settings",
-        path: "/setting",
-        icon: <SettingsIcon className="h-5 w-5" />,
-      },
     ],
     Admin: [
       {
         name: "Dashboard",
         path: "/admin/dashboard",
-        icon: <Home className="h-5 w-5" />,
+        icon: <BarChart className="h-5 w-5" />,
       },
       {
         name: "Manage Users",
@@ -69,12 +77,12 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       {
         name: "My Dashboard",
         path: "/tutor/dashboard",
-        icon: <Home className="h-5 w-5" />,
+        icon: <BarChart className="h-5 w-5" />,
       },
       {
         name: "My Courses",
         path: "/tutor/courses",
-        icon: <BookOpen className="h-5 w-5" />,
+        icon: <BookCopy className="h-5 w-5" />,
       },
       {
         name: "My Schedule",
@@ -91,12 +99,12 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       {
         name: "My Dashboard",
         path: "/student/dashboard",
-        icon: <Home className="h-5 w-5" />,
+        icon: <BarChart className="h-5 w-5" />,
       },
       {
         name: "My Courses",
         path: "/student/courses",
-        icon: <BookOpen className="h-5 w-5" />,
+        icon: <BookCopy className="h-5 w-5" />,
       },
       {
         name: "My Schedule",
@@ -122,12 +130,16 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       >
         {/* Header Logo */}
         <div className="p-4 flex items-center justify-center w-full border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center w-full justify-center">
-            <div className="h-8 w-8 bg-indigo-700 p-2 rounded-md flex items-center justify-center text-white font-bold">
-              TC
+          <NavLink to={"/"}>
+            <div className="flex items-center w-full justify-center">
+              <div className="h-8 w-8 bg-indigo-700 p-2 rounded-md flex items-center justify-center text-white font-bold">
+                TC
+              </div>
+              {isOpen && (
+                <h1 className="ml-2 text-lg font-bold">TutorConnect</h1>
+              )}
             </div>
-            {isOpen && <h1 className="ml-2 text-lg font-bold">TutorConnect</h1>}
-          </div>
+          </NavLink>
         </div>
 
         {/* Navigation */}
@@ -140,7 +152,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                   className="mb-6 bg-white/10 p-3 rounded-lg shadow-md"
                 >
                   <ul className="space-y-2">
-                    {navItems[category].map((item) => (
+                    {navItems[category].map((item: any) => (
                       <motion.li
                         key={item.path}
                         whileHover={{ scale: 1.05 }}
@@ -197,7 +209,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             >
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-full p-4 bg-indigo-600 text-white flex items-center justify-center">
                     {user?.name?.charAt(0) || "U"}
                   </div>
                 </TooltipTrigger>

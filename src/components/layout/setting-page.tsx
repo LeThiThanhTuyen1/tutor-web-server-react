@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { FileText, Eye, FileWarning, Search } from "lucide-react";
 import { getContractsByUserId } from "@/services/contractService";
 import { createComplaint } from "@/services/complaintService";
-import { Button } from "@/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,19 +13,19 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
-import { Badge } from "@/ui/badge";
-import { Skeleton } from "@/ui/skeleton";
-import { Input } from "@/ui/input";
+} from "@/components/ui/card";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hook/use-toast";
 import { useAuth } from "@/hook/use-auth";
 import { fadeIn } from "../layout/animation";
-import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer } from "@/ui/toast";
+import { Link } from "react-router-dom";
+import { ToastContainer } from "@/components/layout/toast";
 import { ChangePasswordModal } from "../auth/change-password";
-import { ContractViewModal } from "@/ui/modals/contract-view-modal";
-import { ComplaintDialog } from "@/ui/modals/complaint-dialog";
+import { ContractViewModal } from "@/components/ui/modals/contract-view-modal";
+import { ComplaintDialog } from "@/components/ui/modals/complaint-dialog";
 
 interface ContractDTO {
   id: number;
@@ -46,7 +46,6 @@ interface PaginationFilter {
 
 export default function SettingsPage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { toast, toasts, dismiss } = useToast();
   const [activeTab, setActiveTab] = useState("account");
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
@@ -211,11 +210,11 @@ export default function SettingsPage() {
 
   const handlePageChange = (pageNumber: number) => {
     setPagination((prev) => ({ ...prev, pageNumber }));
-    window.scrollTo({ top: 0, behavior: "smooth" }); 
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <div className="container mx-auto py-10 px-4 max-w-6xl">
+    <div className="container mx-auto py-10 px-4 max-w-8xl">
       <motion.div
         variants={fadeIn("up", 0.1)}
         initial="hidden"
@@ -234,9 +233,6 @@ export default function SettingsPage() {
         onValueChange={setActiveTab}
         className="w-full"
       >
-        <TabsList className="mb-4">
-          <TabsTrigger value="account">Account</TabsTrigger>
-        </TabsList>
         <TabsContent value="account" className="space-y-8">
           <Card className="bg-white dark:bg-gray-800">
             <CardHeader>

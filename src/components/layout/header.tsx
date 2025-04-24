@@ -13,7 +13,7 @@ interface HeaderProps {
   toggleSidebar: () => void;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
-  isSidebarOpen?: boolean; // Optional: to control icon rotation
+  isSidebarOpen?: boolean;
 }
 
 export default function Header({
@@ -47,7 +47,8 @@ export default function Header({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isProfileMenuOpen && !event.target.closest(".profile-menu")) {
+      const target = event.target as HTMLElement;
+      if (isProfileMenuOpen && target && !target.closest(".profile-menu")) {
         setIsProfileMenuOpen(false);
       }
     };
@@ -151,7 +152,7 @@ export default function Header({
                 Login
               </Link>
               <Link
-                to="/auth/signup"
+                to="/auth/sign-up"
                 className="px-4 py-1.5 text-sm rounded-md border border-indigo-600 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
               >
                 Sign Up

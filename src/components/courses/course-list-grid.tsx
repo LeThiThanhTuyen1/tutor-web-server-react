@@ -12,26 +12,26 @@ import {
 import { motion } from "framer-motion";
 import { Search, Filter, Book, Grid, List } from "lucide-react";
 import { getAllCourses, deleteCourses } from "@/services/courseService";
-import { Button } from "@/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/ui/accordion";
-import { Checkbox } from "@/ui/checkbox";
-import { Input } from "@/ui/input";
-import { Skeleton } from "@/ui/skeleton";
-import { ToastContainer } from "@/ui/toast";
+} from "@/components/ui/accordion";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ToastContainer } from "@/components/layout/toast";
 import { fadeIn, staggerContainer } from "../layout/animation";
 import { useToast } from "@/hook/use-toast";
 import { useAuth } from "@/hook/use-auth";
-import { cn } from "../../ui/cn";
+import { cn } from "../ui/cn";
 import Pagination from "../layout/pagination";
-import { DeleteConfirmationModal } from "@/ui/modals/delete-confirm";
-import { PaginationFilter } from "@/types/paginated-response";
+import { DeleteConfirmationModal } from "@/components/ui/modals/delete-confirm";
 import CourseCard, { STATUS_STYLES } from "./course-card";
 import { enrollCourse } from "@/services/enrollmentService";
+import { PaginationFilter } from "@/store/authSlice";
 
 // Lazy load components
 const CourseListItem = lazy(() => import("./course-list-item"));
@@ -287,7 +287,7 @@ export default function CourseList() {
 
   const handlePageChange = useCallback((newPage: number) => {
     setPagination((prev) => ({ ...prev, pageNumber: newPage }));
-    window.scrollTo({ top: 0, behavior: "smooth" }); 
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const handleClearFilters = useCallback(() => {

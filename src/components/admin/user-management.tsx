@@ -8,10 +8,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/ui/table";
-import { Button } from "@/ui/button";
-import { Checkbox } from "@/ui/checkbox";
-import { Input } from "@/ui/input";
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +21,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
 import { Trash2, Search, RefreshCw } from "lucide-react";
 import { getPagedUsers, deleteUsers, type User } from "@/services/adminService";
 import { useToast } from "@/hook/use-toast";

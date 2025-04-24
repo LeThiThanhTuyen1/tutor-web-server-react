@@ -8,17 +8,27 @@ import {
   processComplaint,
   getComplaintById,
 } from "@/services/complaintService";
-import { Button } from "@/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/ui/card";
-import { Badge } from "@/ui/badge";
-import { Skeleton } from "@/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hook/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
-import { Input } from "@/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/ui/select";
-import { ContractViewModal } from "@/ui/modals/contract-view-modal";
-import { ComplaintViewModal } from "@/ui/modals/complaint-view-modal";
-import { ToastContainer } from "@/ui/toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { ContractViewModal } from "@/components/ui/modals/contract-view-modal";
+import { ComplaintViewModal } from "@/components/ui/modals/complaint-view-modal";
+import { ToastContainer } from "@/components/layout/toast";
 
 export interface ContractDTO {
   id: number;
@@ -309,7 +319,7 @@ export default function ContractManagement() {
     tab: "contracts" | "complaints",
     pageNumber: number
   ) => {
-    window.scrollTo({ top: 0, behavior: "smooth" }); 
+    window.scrollTo({ top: 0, behavior: "smooth" });
     if (tab === "contracts") {
       setContractPagination((prev) => ({ ...prev, pageNumber }));
     } else {

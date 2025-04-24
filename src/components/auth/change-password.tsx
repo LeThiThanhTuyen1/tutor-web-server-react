@@ -1,10 +1,9 @@
 import { useToast } from "@/hook/use-toast";
-import { changePassword } from "@/services/authService";
-import { ChangePassword } from "@/types/change-password";
+import { changePassword, ChangePassword } from "@/services/authService";
 import { Eye, EyeOff, X, KeyRound } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ToastContainer } from "@/ui/toast";
+import { ToastContainer } from "@/components/layout/toast";
 
 export function ChangePasswordModal({ onClose }: { onClose: () => void }) {
   const [showOldPassword, setShowOldPassword] = useState(false);

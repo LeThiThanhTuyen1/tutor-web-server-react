@@ -3,16 +3,16 @@
 import type React from "react";
 import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
-import { Button } from "@/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
-import { Badge } from "@/ui/badge";
-import { ScrollArea } from "@/ui/scroll-area";
+} from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { useNotification } from "@/hook/use-notification";
@@ -157,7 +157,10 @@ export function NotificationDropdown() {
             className="w-full justify-center text-indigo-600 dark:text-indigo-400"
             asChild
           >
-            <Link to={user?.role ? `/${user.role}/notifications` : "/notifications"} onClick={() => setOpen(false)}>
+            <Link
+              to={user?.role ? `/${user.role}/notifications` : "/notifications"}
+              onClick={() => setOpen(false)}
+            >
               View all notifications
             </Link>
           </Button>

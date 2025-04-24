@@ -12,14 +12,14 @@ import {
   Calendar,
   ArrowDown,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
-import { Button } from "@/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/ui/avatar";
-import { Badge } from "@/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hook/use-auth";
 import { Link } from "react-router-dom";
 import { fadeIn, staggerContainer } from "../layout/animation";
-import { Progress } from "@/ui/progess";
+import { Progress } from "@/components/ui/progess";
 import {
   getStudentCourses,
   getStudentStats,
@@ -39,7 +39,7 @@ export function StudentDashboard() {
   const [tutors, setTutors] = useState<Tutor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   useEffect(() => {
     // Set greeting based on time
     const hour = new Date().getHours();
@@ -210,17 +210,24 @@ export function StudentDashboard() {
                     <div className="flex items-center mt-1 text-sm">
                       <span
                         className={`flex items-center ${
-                          stats!.completedCourses - stats!.completedCoursesLastMonth >= 0
+                          stats!.completedCourses -
+                            stats!.completedCoursesLastMonth >=
+                          0
                             ? "text-emerald-600 dark:text-emerald-400"
                             : "text-red-600 dark:text-red-400"
                         }`}
                       >
-                        {stats!.completedCourses - stats!.completedCoursesLastMonth >= 0 ? (
+                        {stats!.completedCourses -
+                          stats!.completedCoursesLastMonth >=
+                        0 ? (
                           <ArrowUp className="h-3 w-3 mr-1" />
                         ) : (
                           <ArrowDown className="h-3 w-3 mr-1" />
                         )}
-                        {Math.abs(stats!.completedCourses - stats!.completedCoursesLastMonth)}
+                        {Math.abs(
+                          stats!.completedCourses -
+                            stats!.completedCoursesLastMonth
+                        )}
                       </span>
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
@@ -249,17 +256,21 @@ export function StudentDashboard() {
                     <div className="flex items-center mt-1 text-sm">
                       <span
                         className={`flex items-center ${
-                          stats!.hoursLearned - stats!.hoursLearnedLastMonth >= 0
+                          stats!.hoursLearned - stats!.hoursLearnedLastMonth >=
+                          0
                             ? "text-emerald-600 dark:text-emerald-400"
                             : "text-red-600 dark:text-red-400"
                         }`}
                       >
-                        {stats!.hoursLearned - stats!.hoursLearnedLastMonth >= 0 ? (
+                        {stats!.hoursLearned - stats!.hoursLearnedLastMonth >=
+                        0 ? (
                           <ArrowUp className="h-3 w-3 mr-1" />
                         ) : (
                           <ArrowDown className="h-3 w-3 mr-1" />
                         )}
-                        {Math.abs(stats!.hoursLearned - stats!.hoursLearnedLastMonth)}
+                        {Math.abs(
+                          stats!.hoursLearned - stats!.hoursLearnedLastMonth
+                        )}
                       </span>
                       <span className="text-gray-500 dark:text-gray-400 ml-1">
                         vs last month
@@ -329,7 +340,7 @@ export function StudentDashboard() {
           <motion.div variants={fadeIn("up", 0.6)}>
             <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold">
+                <CardTitle className="text-xl font-semibold p-0!">
                   Learning Distribution
                 </CardTitle>
               </CardHeader>
@@ -437,7 +448,7 @@ export function StudentDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <motion.div variants={fadeIn("up", 0.9)}>
+        {/* <motion.div variants={fadeIn("up", 0.9)}>
           <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800 rounded-lg">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">
@@ -462,12 +473,12 @@ export function StudentDashboard() {
                   className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600/90 dark:hover:bg-blue-700/90"
                   asChild
                 >
-                  <Link to="/schedules">View Schedule</Link>
+                  <Link to="/student/schedules">View Schedule</Link>
                 </Button>
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </motion.div> */}
       </motion.div>
     </div>
   );

@@ -17,6 +17,10 @@ import { Link } from "react-router-dom";
 function Footer() {
   const currentYear = new Date().getFullYear();
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <footer className="relative bg-gradient-to-br from-indigo-900 via-purple-800 to-indigo-900 text-white overflow-hidden">
       {/* Decorative Elements */}
@@ -106,6 +110,7 @@ function Footer() {
               <li>
                 <Link
                   to="/"
+                  onClick={scrollToTop}
                   className="text-indigo-100 hover:text-white flex items-center gap-1 transition-colors"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -115,6 +120,7 @@ function Footer() {
               <li>
                 <Link
                   to="/about"
+                  onClick={scrollToTop}
                   className="text-indigo-100 hover:text-white flex items-center gap-1 transition-colors"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -124,6 +130,7 @@ function Footer() {
               <li>
                 <Link
                   to="/tutors"
+                  onClick={scrollToTop}
                   className="text-indigo-100 hover:text-white flex items-center gap-1 transition-colors"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -133,6 +140,7 @@ function Footer() {
               <li>
                 <Link
                   to="/courses"
+                  onClick={scrollToTop}
                   className="text-indigo-100 hover:text-white flex items-center gap-1 transition-colors"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -163,6 +171,7 @@ function Footer() {
               <li>
                 <Link
                   to="/faq"
+                  onClick={scrollToTop}
                   className="text-indigo-100 hover:text-white flex items-center gap-1 transition-colors"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -172,6 +181,7 @@ function Footer() {
               <li>
                 <Link
                   to="/contact"
+                  onClick={scrollToTop}
                   className="text-indigo-100 hover:text-white flex items-center gap-1 transition-colors"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -181,6 +191,7 @@ function Footer() {
               <li>
                 <Link
                   to="/privacy"
+                  onClick={scrollToTop}
                   className="text-indigo-100 hover:text-white flex items-center gap-1 transition-colors"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -190,6 +201,7 @@ function Footer() {
               <li>
                 <Link
                   to="/terms"
+                  onClick={scrollToTop}
                   className="text-indigo-100 hover:text-white flex items-center gap-1 transition-colors"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -293,22 +305,24 @@ function Footer() {
           >
             <Link
               to="/privacy"
+              onClick={scrollToTop}
               className="text-sm text-indigo-200 hover:text-white transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
               to="/terms"
+              onClick={scrollToTop}
               className="text-sm text-indigo-200 hover:text-white transition-colors"
             >
               Terms of Service
             </Link>
-            <Link
+            {/* <Link
               to="/cookies"
               className="text-sm text-indigo-200 hover:text-white transition-colors"
             >
               Cookie Policy
-            </Link>
+            </Link> */}
           </motion.div>
         </div>
       </div>

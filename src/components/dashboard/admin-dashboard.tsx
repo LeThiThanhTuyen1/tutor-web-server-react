@@ -24,20 +24,19 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hook/use-auth";
 import { fadeIn, staggerContainer } from "../layout/animation";
-import {
-  getAdminDashboard,
-  AdminDashboardData,
-} from "@/services/adminService";
+import { getAdminDashboard, AdminDashboardData } from "@/services/adminService";
 
 export function AdminDashboard() {
   const { user } = useAuth();
   const [greeting, setGreeting] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
-  const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(null);
+  const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,7 +89,11 @@ export function AdminDashboard() {
   if (error) {
     return (
       <div className="p-6">
-        <motion.div variants={fadeIn("up", 0.1)} initial="hidden" animate="show">
+        <motion.div
+          variants={fadeIn("up", 0.1)}
+          initial="hidden"
+          animate="show"
+        >
           <h1 className="text-3xl font-bold mb-2">Error</h1>
           <p className="text-red-600 dark:text-red-400">{error}</p>
           <button
@@ -104,11 +107,12 @@ export function AdminDashboard() {
     );
   }
 
-  const pieData = dashboardData?.courseStatuses.map((status) => ({
-    name: status.status,
-    value: status.count,
-    color: `#${Math.floor(Math.random() * 16777215).toString(16)}`, 
-  })) || [];
+  const pieData =
+    dashboardData?.courseStatuses.map((status) => ({
+      name: status.status,
+      value: status.count,
+      color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+    })) || [];
 
   return (
     <div className="p-6">
@@ -305,10 +309,12 @@ export function AdminDashboard() {
                     <div className="h-80">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
-                          data={dashboardData?.monthlyActivities.map((activity) => ({
-                            name: activity.month,
-                            students: activity.newStudents,
-                          }))}
+                          data={dashboardData?.monthlyActivities.map(
+                            (activity) => ({
+                              name: activity.month,
+                              students: activity.newStudents,
+                            })
+                          )}
                           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                         >
                           <CartesianGrid
@@ -375,10 +381,12 @@ export function AdminDashboard() {
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart
-                        data={dashboardData?.monthlyActivities.map((activity) => ({
-                          name: activity.month,
-                          students: activity.newStudents,
-                        }))}
+                        data={dashboardData?.monthlyActivities.map(
+                          (activity) => ({
+                            name: activity.month,
+                            students: activity.newStudents,
+                          })
+                        )}
                         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
@@ -410,10 +418,12 @@ export function AdminDashboard() {
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
-                        data={dashboardData?.monthlyActivities.map((activity) => ({
-                          name: activity.month,
-                          value: activity.newCourses,
-                        }))}
+                        data={dashboardData?.monthlyActivities.map(
+                          (activity) => ({
+                            name: activity.month,
+                            value: activity.newCourses,
+                          })
+                        )}
                         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                         layout="vertical"
                       >

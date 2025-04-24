@@ -14,17 +14,14 @@ import {
   Line,
 } from "recharts";
 import { Users, BookOpen, Star, ArrowUp, Clock } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
-import { Button } from "@/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/ui/avatar";
-import { Badge } from "@/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hook/use-auth";
 import { Link } from "react-router-dom";
 import { fadeIn, staggerContainer } from "../layout/animation";
-import {
-  getTutorDashboard,
-  TutorDashboardData,
-} from "@/services/tutorService";
+import { getTutorDashboard, TutorDashboardData } from "@/services/tutorService";
 import { API_BASE_URL } from "@/config/axiosInstance";
 
 export function TutorDashboard() {
@@ -398,7 +395,7 @@ export function TutorDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <motion.div variants={fadeIn("up", 0.9)}>
+        {/* <motion.div variants={fadeIn("up", 0.9)}>
           <Card className="border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-800">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">
@@ -428,7 +425,7 @@ export function TutorDashboard() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </motion.div> */}
       </motion.div>
     </div>
   );

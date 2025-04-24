@@ -18,7 +18,7 @@ export default function PublicLayout({ children }: AppLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const isHomePage = location.pathname === "/";
+  const isHomePage = location.pathname === "/home";
 
   useEffect(() => {
     const savedMode = localStorage.getItem("darkMode");
@@ -97,7 +97,7 @@ export default function PublicLayout({ children }: AppLayoutProps) {
                 toggleSidebar={toggleSidebar}
                 isDarkMode={isDarkMode}
                 toggleDarkMode={toggleDarkMode}
-                isSidebarOpen={isSidebarOpen} // Pass state to Header
+                isSidebarOpen={isSidebarOpen} 
               />
               <main className="flex-1 overflow-y-auto">{children}</main>
             </div>

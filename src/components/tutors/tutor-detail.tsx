@@ -17,9 +17,9 @@ import { Link, useParams } from "react-router-dom";
 import { getTutorById } from "@/services/tutorService";
 import { getTutorFeedbacks } from "@/services/feedbackService";
 import TutorReviews from "./tutor-feedback";
-import { Button } from "@/ui/button";
-import { Badge } from "@/ui/badge";
-import { cn } from "@/ui/cn";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/components/ui/cn";
 import { STATUS_STYLES } from "../courses/course-card";
 import { useRating } from "@/context/rating-context";
 

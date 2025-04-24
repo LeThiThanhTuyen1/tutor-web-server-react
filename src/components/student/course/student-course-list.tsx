@@ -11,23 +11,22 @@ import {
   RefreshCw,
   History,
 } from "lucide-react";
-import { Button } from "@/ui/button";
-import { Input } from "@/ui/input";
-import { Checkbox } from "@/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/ui/select";
+} from "@/components/ui/select";
 import { useToast } from "@/hook/use-toast";
-import { ToastContainer } from "@/ui/toast";
-import { CancelCourseModal } from "@/ui/modals/cancel-course";
-import type { PaginationFilter } from "@/types/paginated-response";
-import { cn } from "@/ui/cn";
+import { ToastContainer } from "@/components/layout/toast";
+import { CancelCourseModal } from "@/components/ui/modals/cancel-course";
+import { cn } from "@/components/ui/cn";
 import { Link, useSearchParams } from "react-router-dom";
-import { Badge } from "@/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { useCourse } from "@/hook/use-course";
 import { STATUS_STYLES } from "@/components/courses/course-card";
 import {
@@ -43,15 +42,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/ui/table";
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/ui/dropdown-menu";
-import { Skeleton } from "@/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/ui/tabs";
+} from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { PaginationFilter } from "@/store/authSlice";
 
 export default function StudentCourseTable() {
   const {
@@ -97,7 +97,7 @@ export default function StudentCourseTable() {
       try {
         const response = await getBillHistory(billPagination);
         if (response.succeeded) {
-          setBillHistory(response.data);
+          setBillHistory(response.data || []);
           setTotalBillPages(response.totalPages);
         } else {
           console.log(response.message);
@@ -134,7 +134,7 @@ export default function StudentCourseTable() {
             getStudentCourses(coursePagination);
             const billResponse = await getBillHistory(billPagination);
             if (billResponse.succeeded) {
-              setBillHistory(billResponse.data);
+              setBillHistory(billResponse.data || []);
               setTotalBillPages(billResponse.totalPages);
             }
           } else {
@@ -213,14 +213,14 @@ export default function StudentCourseTable() {
   };
 
   const handleCoursePageChange = (pageNumber: number) => {
-    setCoursePagination((prev) => ({
+    setCoursePagination((prev: any) => ({
       ...prev,
       pageNumber,
     }));
   };
 
   const handleBillPageChange = (pageNumber: number) => {
-    setBillPagination((prev) => ({
+    setBillPagination((prev: any) => ({
       ...prev,
       pageNumber,
     }));
@@ -244,8 +244,7 @@ export default function StudentCourseTable() {
           variant: "success",
         });
         getStudentCourses(coursePagination);
-      }
-      else {
+      } else {
         toast({
           title: "Error",
           description: response.message,
@@ -331,9 +330,9 @@ export default function StudentCourseTable() {
                     <SelectContent>
                       <SelectItem value="all">All Statuses</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
+                      {/* <SelectItem value="active">Active</SelectItem> */}
                       <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="canceled">Canceled</SelectItem>
+                      {/* <SelectItem value="canceled">Canceled</SelectItem> */}
                     </SelectContent>
                   </Select>
                 </div>

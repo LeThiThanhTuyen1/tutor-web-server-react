@@ -53,14 +53,14 @@ export const markNotificationAsRead = createAsyncThunk(
   "notifications/markAsRead",
   async (id: number, { rejectWithValue }) => {
     try {
-      const response = await markAsRead(id); // API call
+      const response = await markAsRead(id); 
       const { data, succeeded, message } = response;
 
       if (!succeeded || !data?.success) {
         return rejectWithValue(message || "Failed to mark as read");
       }
 
-      return data.notificationId; // Return the correct ID from the server
+      return data.notificationId; 
     } catch (error: any) {
       return rejectWithValue(error.message || "An error occurred");
     }

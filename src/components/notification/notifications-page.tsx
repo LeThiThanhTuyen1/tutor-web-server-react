@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
-import { Button } from "@/ui/button";
-import { Card, CardContent, CardHeader } from "@/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { Bell, Check, CheckCheck } from "lucide-react";
-import { Skeleton } from "@/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useNotification } from "@/hook/use-notification";
 
 export default function NotificationsPage() {
@@ -50,7 +50,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-8xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <h1 className="text-2xl font-bold mb-4 md:mb-0">
             <Bell className="h-6 w-6 mr-2 text-indigo-500 inline" />

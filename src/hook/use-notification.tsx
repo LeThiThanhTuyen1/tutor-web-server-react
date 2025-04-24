@@ -22,7 +22,7 @@ export const useNotification = () => {
   // Initialize SignalR connection
   useEffect(() => {
     if (token && !connectionInitialized.current) {
-      initializeSignalRConnection(token); // No callback needed here; signalRService handles it
+      initializeSignalRConnection(token); 
       connectionInitialized.current = true;
     }
 

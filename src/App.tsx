@@ -22,6 +22,11 @@ import { UserTable } from "./components/admin/user-management";
 import { CourseTable } from "./components/admin/course-management";
 import { StudentDashboard } from "./components/dashboard/student-dashboard";
 import { TutorDashboard } from "./components/dashboard/tutor-dashboard";
+import AboutPage from "./components/layout/about-page";
+import ContactPage from "./components/layout/contact-us";
+import PrivacyPolicyPage from "./components/layout/privacy";
+import TermsPage from "./components/layout/term-page";
+import FAQPage from "./components/layout/faq-page";
 
 // Lazy-loaded components
 const AuthPage = lazy(() => import("./components/auth/auth-page"));
@@ -150,7 +155,7 @@ export default function App() {
             <Route path="courses" element={<TutorCourseListComponent />} />
             <Route path="dashboard" element={<TutorDashboard />} />
             <Route path="courses/new" element={<CourseForm />} />
-            <Route path="schedules" element={<ScheduleView />}/>
+            <Route path="schedules" element={<ScheduleView />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="courses/:id/edit" element={<EditCoursePage />} />
             <Route path="students" element={<div>Students Management</div>} />
@@ -166,11 +171,15 @@ export default function App() {
             }
           >
             <Route index element={<HomePage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="faq" element={<FAQPage />} />
+            <Route path="terms" element={<TermsPage />} />
+            <Route path="privacy" element={<PrivacyPolicyPage />} />
             <Route path="courses" element={<CourseList />} />
             <Route path="tutors" element={<TutorList />} />
             <Route path="tutor/:id" element={<TutorProfile />} />
             <Route path="courses/:id" element={<CourseDetail />} />
-
             {/*  Protected Routes */}
             <Route
               path="profile"
@@ -205,11 +214,10 @@ export default function App() {
               </PublicLayout>
             }
           >
-            <Route index element={<HomePage />} />
             <Route path="courses" element={<StudentCourseList />} />
             <Route path="tutors" element={<TutorList />} />
             <Route path="dashboard" element={<StudentDashboard />} />
-            <Route path="schedules" element={<ScheduleView />}/>
+            <Route path="schedules" element={<ScheduleView />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="bill-history" element={<BillHistory />} />
             <Route path="tutor/:id" element={<TutorProfile />} />

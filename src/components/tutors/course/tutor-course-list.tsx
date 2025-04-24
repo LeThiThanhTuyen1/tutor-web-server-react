@@ -15,27 +15,27 @@ import {
   Clock,
   Eye,
 } from "lucide-react";
-import { Button } from "@/ui/button";
-import { Input } from "@/ui/input";
-import { Checkbox } from "@/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/ui/select";
-import { Tabs, TabsContent } from "@/ui/tabs";
+} from "@/components/ui/select";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hook/use-toast";
-import { ToastContainer } from "@/ui/toast";
-import { CancelCourseModal } from "@/ui/modals/cancel-course";
-import { PaginationFilter } from "@/types/paginated-response";
-import { cn } from "@/ui/cn";
-import { Badge } from "@/ui/badge";
-import { DeleteConfirmationModal } from "@/ui/modals/delete-confirm";
+import { ToastContainer } from "@/components/layout/toast";
+import { CancelCourseModal } from "@/components/ui/modals/cancel-course";
+import { cn } from "@/components/ui/cn";
+import { Badge } from "@/components/ui/badge";
+import { DeleteConfirmationModal } from "@/components/ui/modals/delete-confirm";
 import { useCourse } from "@/hook/use-course";
 import { formatRelativeDate } from "@/components/courses/course-utils";
 import { STATUS_STYLES } from "@/components/courses/course-card";
+import { PaginationFilter } from "@/store/authSlice";
 
 export default function TutorCourseList() {
   // Use our custom hook to access course state and actions
@@ -120,7 +120,7 @@ export default function TutorCourseList() {
         pagination.pageNumber > 1 &&
         tutorCourses.length <= selectedCourses.length
       ) {
-        setPagination((prev) => ({ ...prev, pageNumber: 1 }));
+        setPagination((prev: any) => ({ ...prev, pageNumber: 1 }));
       }
     } catch (err) {
       toast({
@@ -134,8 +134,8 @@ export default function TutorCourseList() {
   }, [selectedCourses, tutorCourses.length, pagination, deleteCourses]);
 
   const handlePageChange = useCallback((newPage: number) => {
-    setPagination((prev) => ({ ...prev, pageNumber: newPage }));
-    window.scrollTo({ top: 0, behavior: "smooth" }); 
+    setPagination((prev: any) => ({ ...prev, pageNumber: newPage }));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   // Select all courses

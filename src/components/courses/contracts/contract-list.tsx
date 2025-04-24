@@ -6,14 +6,19 @@ import { FileText, Eye, FileWarning } from "lucide-react";
 import { getContractsByUserId } from "@/services/contractService";
 import { createComplaint } from "@/services/complaintService";
 import { useAuth } from "@/hook/use-auth";
-import { Button } from "@/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/ui/card";
-import { Badge } from "@/ui/badge";
-import { Skeleton } from "@/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hook/use-toast";
-import { ContractViewModal } from "@/ui/modals/contract-view-modal";
-import { ComplaintDialog } from "@/ui/modals/complaint-dialog";
-import { ToastContainer } from "@/ui/toast";
+import { ContractViewModal } from "@/components/ui/modals/contract-view-modal";
+import { ComplaintDialog } from "@/components/ui/modals/complaint-dialog";
+import { ToastContainer } from "@/components/layout/toast";
 
 interface ContractDTO {
   id: number;
@@ -192,7 +197,7 @@ export default function ContractList() {
 
   const handlePageChange = (pageNumber: number) => {
     setPagination((prev) => ({ ...prev, pageNumber }));
-    window.scrollTo({ top: 0, behavior: "smooth" }); 
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (loading) {

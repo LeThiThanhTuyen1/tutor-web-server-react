@@ -8,7 +8,6 @@ import {
   type ReactNode,
   useCallback,
 } from "react";
-import { getTutorById } from "@/services/tutorService";
 import { getTutorFeedbacks } from "@/services/feedbackService";
 
 interface RatingContextType {
@@ -34,42 +33,38 @@ export const RatingProvider: React.FC<{ children: ReactNode }> = ({
 
   const refreshRating = useCallback(
     async (tutorId: number) => {
-      // Skip if already refreshing this tutor
       if (refreshingTutors.has(tutorId)) {
         return;
       }
 
-      setRefreshingTutors((prev) => {
-        const newSet = new Set(prev);
-        newSet.add(tutorId);
-        return newSet;
-      });
-
+      setRefreshingTutors((prev) => new Set(prev).add(tutorId));
       setIsRefreshing(true);
+
       try {
-        // Fetch updated tutor data and feedback
+        // Fetch tutor data and feedback data
         const [feedbackResponse] = await Promise.all([
-          getTutorById(tutorId),
+          // getTutorById(tutorId),
           getTutorFeedbacks(tutorId),
         ]);
+        // Ensure feedbacks is an array
+        const feedbacks = Array.isArray(feedbackResponse.data)
+          ? feedbackResponse.data
+          : [];
 
-        const feedbacks = feedbackResponse.data || [];
         // Calculate average rating
-        console.log(feedbacks)
         const totalRating = feedbacks.reduce(
-          (sum: number, feedback: any) => sum + feedback.rating,
+          (sum: number, feedback: any) => sum + (feedback.rating || 0),
           0
         );
         const averageRating =
           feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
-console.log(totalRating, averageRating)
+
         // Update state
         setTutorRatings((prev) => ({ ...prev, [tutorId]: averageRating }));
         setTutorFeedbackCounts((prev) => ({
           ...prev,
           [tutorId]: feedbacks.length,
         }));
-        console.log(tutorRatings)
       } catch (error) {
         console.error("Error refreshing rating data:", error);
       } finally {

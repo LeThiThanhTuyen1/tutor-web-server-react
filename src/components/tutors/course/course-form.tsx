@@ -5,18 +5,18 @@ import type React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hook/use-toast";
-import { Button } from "@/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
-import { Input } from "@/ui/input";
-import { Textarea } from "@/ui/textarea";
-import { Label } from "@/ui/label";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/ui/select";
+} from "@/components/ui/select";
 import {
   Calendar,
   Clock,
@@ -33,7 +33,7 @@ import {
   updateCourse,
 } from "@/services/courseService";
 import { Link } from "react-router-dom";
-import { ToastContainer } from "@/ui/toast";
+import { ToastContainer } from "@/components/layout/toast";
 import {
   createSchedule,
   deleteSchedules,

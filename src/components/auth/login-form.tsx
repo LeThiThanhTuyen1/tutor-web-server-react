@@ -9,7 +9,7 @@ import { login as loginAction } from "@/store/authSlice";
 import { validateEmail, validatePassword } from "@/utils/validation";
 import { login } from "@/services/authService";
 import { useToast } from "@/hook/use-toast";
-import { ToastContainer } from "@/ui/toast";
+import { ToastContainer } from "@/components/layout/toast";
 
 interface LoginFormProps {
   onSwitchForm: () => void;

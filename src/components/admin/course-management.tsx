@@ -8,11 +8,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/ui/table";
-import { Button } from "@/ui/button";
-import { Checkbox } from "@/ui/checkbox";
-import { Input } from "@/ui/input";
-import { Badge } from "@/ui/badge";
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,13 +22,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
 import { Trash2, Search, RefreshCw } from "lucide-react";
 import { getAllCourses, deleteCourses } from "@/services/courseService";
 import { useToast } from "@/hook/use-toast";
 import Pagination from "../layout/pagination";
-import { cn } from "@/ui/cn";
-import { ToastContainer } from "@/ui/toast";
+import { cn } from "@/components/ui/cn";
+import { ToastContainer } from "@/components/layout/toast";
 
 // Status styles
 const STATUS_STYLES: Record<string, string> = {

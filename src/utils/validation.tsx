@@ -6,18 +6,38 @@ export const validateEmail = (email: string) => {
 
 export const validatePhone = (phone: string) => {
   if (!phone) return "Phone number is required!";
-  const phoneRegex = /^(?:\+?\d{1,3}[-.\s]?)?\d{10,}$/;
-  return phoneRegex.test(phone) ? null : "Invalid Phone number!";
+  const trimmedPhone = phone.trim();
+  if (!trimmedPhone) return "Phone number is required!";
+
+  const phoneRegex =
+    /^(?:\+?\d{1,3}[-.\s]?)?(?:\(\d{3}\)\s?)?(?:\d[-.\s]?){9,14}\d$/;
+
+  if (!phoneRegex.test(trimmedPhone)) {
+    if (trimmedPhone.length < 10)
+      return "Phone number must be at least 10 digits!";
+    if (trimmedPhone.match(/[^\d+-.()\s]/))
+      return "Phone number contains invalid characters!";
+    return "Invalid phone number format!";
+  }
+
+  return null;
 };
 
 export const validatePassword = (password: string) => {
   if (!password) return "Password is required!";
-  return password.length >= 10 ? null : "Password must be at least 10 characters!";
+  return password.length >= 10
+    ? null
+    : "Password must be at least 10 characters!";
 };
 
-export const validateConfirmPassword = (password: string, confirmPassword: string) => {
+export const validateConfirmPassword = (
+  password: string,
+  confirmPassword: string
+) => {
   if (!confirmPassword) return "Please re-enter password!";
-  return password === confirmPassword ? null : "Confirmation password does not match!";
+  return password === confirmPassword
+    ? null
+    : "Confirmation password does not match!";
 };
 
 export const validateDateOfBirth = (dateOfBirth: Date) => {
@@ -28,7 +48,9 @@ export const validateDateOfBirth = (dateOfBirth: Date) => {
 };
 export const validateUsername = (username: string) => {
   if (!username) return "Username is required!";
-  return username.length >= 3 ? null : "Username must be at least 3 characters!";
+  return username.length >= 3
+    ? null
+    : "Username must be at least 3 characters!";
 };
 
 export const validateAddress = (address: string) => {

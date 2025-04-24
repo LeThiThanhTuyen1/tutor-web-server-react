@@ -1,8 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { refreshAccessToken } from "@/services/authService";
 import axios from "axios";
 export const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 export const API_BASE_URL = import.meta.env.VITE_API_URL;
+export const apiKey = "";
 
 const api = axios.create({
   baseURL: API_URL,
@@ -10,6 +10,7 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+
 
 api.interceptors.request.use(
   (config) => {
@@ -21,6 +22,9 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+
+export default api;
+
 
 // api.interceptors.response.use(
 //   (response) => response,
@@ -51,5 +55,3 @@ api.interceptors.request.use(
 //     return Promise.reject(error);
 //   }
 // );
-
-export default api;

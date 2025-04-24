@@ -24,10 +24,11 @@ import {
 } from "@/services/authService";
 import { updateUser } from "@/store/authSlice";
 import { useToast } from "@/hook/use-toast";
-import { ToastContainer } from "@/ui/toast";
+import { ToastContainer } from "@/components/layout/toast";
 import { API_BASE_URL } from "@/config/axiosInstance";
 import { EditProfileModal } from "./edit-profile";
 import { ChangePasswordModal } from "./change-password";
+import { validatePhone } from "@/utils/validation";
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
@@ -77,6 +78,16 @@ export default function ProfilePage() {
           id: profile?.id,
         };
 
+        const phoneToValidate = updatedProfile.phone || profile?.phone || "";
+        const phoneError = validatePhone(phoneToValidate);
+        if (phoneError) {
+          toast({
+            title: "Error",
+            description: phoneError,
+            variant: "destructive",
+          });
+          return;
+        }
         const result = await updateProfile(profileToUpdate);
 
         if (result.succeeded) {

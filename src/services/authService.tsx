@@ -1,6 +1,20 @@
 import api from "@/config/axiosInstance";
 import { AxiosError } from "axios";
 
+export interface AuthState {
+  user: any | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+}
+
+export interface ChangePassword {
+  oldPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+
 export const register = async (userData: any) => {
   try {
     const response = await api.post("/auth/register", userData);

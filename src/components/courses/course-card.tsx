@@ -4,21 +4,21 @@ import { memo, useState } from "react";
 import { motion } from "framer-motion";
 import { Calendar, Clock, DollarSign, User } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "../../ui/button.tsx";
+import { Button } from "../ui/button.tsx";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../../ui/card.tsx";
-import { cn } from "@/ui/cn.ts";
-import { Badge } from "@/ui/badge.tsx";
+} from "../ui/card.tsx";
+import { cn } from "@/components/ui/cn.ts";
+import { Badge } from "@/components/ui/badge.tsx";
 import { useAuth } from "@/hook/use-auth.tsx";
 import { useToast } from "@/hook/use-toast.tsx";
-import { ToastContainer } from "@/ui/toast.tsx";
+import { ToastContainer } from "@/components/layout/toast.tsx";
 import { enrollCourse } from "@/services/enrollmentService.tsx";
-import { ContractModal } from "@/ui/modals/contract-modal.tsx";
+import { ContractModal } from "@/components/ui/modals/contract-modal.tsx";
 
 interface CourseCardProps {
   course: any;
@@ -86,7 +86,7 @@ function CourseCardComponent({ course, isTutor, isAdmin }: CourseCardProps) {
       >
         <Card
           className={cn(
-            "flex flex-col h-full overflow-hidden transition-all duration-200 hover:shadow-md border-indigo-100 dark:border-indigo-900 min-h-[320px]" 
+            "flex flex-col h-full overflow-hidden transition-all duration-200 hover:shadow-md border-indigo-100 dark:border-indigo-900 min-h-[320px]"
           )}
         >
           <div className="h-1 bg-gradient-to-r from-indigo-600 to-blue-600"></div>

@@ -4,9 +4,9 @@ import type React from "react";
 
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Skeleton } from "@/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
-import { Button } from "@/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
   Calendar,
@@ -30,9 +30,9 @@ import {
   Star,
   Info,
 } from "lucide-react";
-import { cn } from "@/ui/cn";
+import { cn } from "@/components/ui/cn";
 import { motion } from "framer-motion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -40,20 +40,20 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/ui/table";
+} from "@/components/ui/table";
 import { useToast } from "@/hook/use-toast";
 import { useAuth } from "@/hook/use-auth";
-import { CancelCourseModal } from "@/ui/modals/cancel-course";
-import { Badge } from "@/ui/badge";
+import { CancelCourseModal } from "@/components/ui/modals/cancel-course";
+import { Badge } from "@/components/ui/badge";
 import { STATUS_STYLES } from "./course-card";
 import { useCourse } from "@/hook/use-course";
-import { Input } from "@/ui/input";
+import { Input } from "@/components/ui/input";
 import { API_BASE_URL } from "@/config/axiosInstance";
-import { ContractModal } from "@/ui/modals/contract-modal";
+import { ContractModal } from "@/components/ui/modals/contract-modal";
 import { enrollCourse } from "@/services/enrollmentService";
-import { Separator } from "@/ui/separator";
+import { Separator } from "@/components/ui/separator";
 import LazyImage from "../layout/lazy-image";
-import { ToastContainer } from "@/ui/toast";
+import { ToastContainer } from "@/components/layout/toast";
 
 // Day of week mapping
 const DAYS_OF_WEEK = [
@@ -205,7 +205,7 @@ export default function CourseDetail() {
         pending: students.filter((s) => s.status?.toLowerCase() === "pending")
           .length,
       }
-    : { all: 0, completed: 0, pending: 0};
+    : { all: 0, completed: 0, pending: 0 };
 
   // Check if course can be cancelled (only coming or ongoing courses)
   const canCancel =
