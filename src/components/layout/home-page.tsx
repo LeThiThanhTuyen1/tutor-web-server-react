@@ -242,7 +242,6 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-[url('/placeholder.svg?height=800&width=1600')] bg-cover bg-center opacity-10 z-0"></div>
         <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-purple-500 dark:bg-purple-700 rounded-full filter blur-3xl opacity-20 z-0"></div>
         <div className="absolute -top-16 -right-16 w-64 h-64 bg-indigo-500 dark:bg-indigo-700 rounded-full filter blur-3xl opacity-20 z-0"></div>
-
         <motion.div
           variants={staggerContainer(0.1, 0.2)}
           initial="hidden"
@@ -282,17 +281,19 @@ export default function HomePage() {
             </motion.div>
             <motion.div variants={fadeIn("left", 0.5)} className="md:w-1/2">
               <div className="relative z-0">
-                <div className="absolute -inset-4 bg-gradient-to-r from-pink-500 to-purple-500 dark:from-pink-600 dark:to-purple-600 rounded-lg blur-lg opacity-30 animate-pulse"></div>
+                <div className="absolute -inset-2 bg-gradient-to-r from-pink-400 to-purple-400 dark:from-pink-500 dark:to-purple-500 rounded-lg opacity-20"></div>
+
                 <img
-                  src="https://truonghoc247.vn/wp-content/uploads/2022/12/yy.jpg?height=400&width=600"
+                  src="/src/assets/images/banner-header.jpg"
                   alt="Students learning"
-                  className="rounded-lg shadow-2xl relative z-0"
+                  loading="lazy"
+                  decoding="async"
+                  className="rounded-lg shadow-xl relative z-10"
                 />
               </div>
             </motion.div>
           </div>
         </motion.div>
-
         {/* Wave divider */}
         <div className="absolute bottom-0 left-0 right-0 h-16 overflow-hidden z-0">
           <svg

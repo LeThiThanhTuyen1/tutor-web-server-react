@@ -22,11 +22,6 @@ import { UserTable } from "./components/admin/user-management";
 import { CourseTable } from "./components/admin/course-management";
 import { StudentDashboard } from "./components/dashboard/student-dashboard";
 import { TutorDashboard } from "./components/dashboard/tutor-dashboard";
-import AboutPage from "./components/layout/about-page";
-import ContactPage from "./components/layout/contact-us";
-import PrivacyPolicyPage from "./components/layout/privacy";
-import TermsPage from "./components/layout/term-page";
-import FAQPage from "./components/layout/faq-page";
 
 // Lazy-loaded components
 const AuthPage = lazy(() => import("./components/auth/auth-page"));
@@ -34,6 +29,11 @@ const HomePage = lazy(() => import("./components/layout/home-page"));
 const CourseList = lazy(() => import("./components/courses/course-list-grid"));
 const TutorList = lazy(() => import("./components/tutors/tutor-list"));
 const ProfilePage = lazy(() => import("./components/auth/profile-page"));
+const AboutPage = lazy(() => import("./components/layout/about-page"));
+const ContactPage = lazy(() => import("./components/layout/contact-us"));
+const PrivacyPolicyPage = lazy(() => import("./components/layout/privacy"));
+const TermsPage = lazy(() => import("./components/layout/term-page"));
+const FAQPage = lazy(() => import("./components/layout/faq-page"));
 const TutorProfile = lazy(() => import("./components/tutors/tutor-detail"));
 const CourseDetail = lazy(() => import("./components/courses/course-detail"));
 const CourseForm = lazy(() => import("./components/tutors/course/course-form"));

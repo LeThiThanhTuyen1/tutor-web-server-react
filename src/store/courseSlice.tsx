@@ -10,7 +10,7 @@ import {
   deleteCourses,
   getStudentsByCourseId,
 } from "@/services/courseService";
-import { PaginationFilter } from "@/types/paginated-response";
+import { PaginationFilter } from "./authSlice";
 
 // Define types
 export interface Course {
@@ -229,9 +229,9 @@ const courseSlice = createSlice({
       })
       .addCase(fetchAllCourses.fulfilled, (state, action) => {
         state.loading = false;
-        state.courses = action.payload.data || [];
+        // state.courses = action.payload.data || [];
         state.totalPages = action.payload.totalPages || 1;
-        state.totalItems = action.payload.totalItems || 0;
+        // state.totalItems = action.payload.totalItems || 0;
       })
       .addCase(fetchAllCourses.rejected, (state, action) => {
         state.loading = false;

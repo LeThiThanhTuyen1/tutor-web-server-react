@@ -13,7 +13,7 @@ import {
   resetCourseError,
   studentsByCourseId,
 } from "@/store/courseSlice";
-import { PaginationFilter } from "@/types/paginated-response";
+import { PaginationFilter } from "@/store/authSlice";
 
 export const useCourse = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -58,7 +58,6 @@ export const useCourse = () => {
     deleteCourses: (ids: number[]) => dispatch(deleteSelectedCourses(ids)),
     clearCourse: () => dispatch(clearCurrentCourse()),
     resetError: () => dispatch(resetCourseError()),
-    getStudentsByCourseId: (id: number) =>
-        dispatch(studentsByCourseId(id)),
+    getStudentsByCourseId: (id: number) => dispatch(studentsByCourseId(id)),
   };
 };

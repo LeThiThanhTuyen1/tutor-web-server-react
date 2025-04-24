@@ -109,7 +109,7 @@ export function EditProfileModal({
       const phoneValidation = validatePhone(formData.phone || "");
       if (phoneValidation) {
         setPhoneError(phoneValidation);
-        return; // Prevent submission if phone is invalid
+        return; 
       }
       await onSave(formData);
     },
