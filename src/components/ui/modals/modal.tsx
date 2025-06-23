@@ -94,7 +94,7 @@ export function Modal({
                   className="h-8 w-8 rounded-full"
                 >
                   <X className="h-4 w-4" />
-                  <span className="sr-only">Close</span>
+                  <span className="sr-only">Đóng</span>
                 </Button>
               </div>
 

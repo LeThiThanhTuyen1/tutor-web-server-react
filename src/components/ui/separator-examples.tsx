@@ -1,5 +1,3 @@
-"use client"
-
 import { Separator } from "@radix-ui/react-separator"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card"
 import { CustomSeparator } from "./custom-separator"

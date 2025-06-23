@@ -4,7 +4,7 @@ import { Routes, Route, Navigate, useNavigate, Outlet } from "react-router-dom";
 import { login } from "./store/authSlice";
 
 // Layouts
-import PublicLayout from "./components/layout/public-layout";
+import PublicLayout from "./components/page/layout/public-layout";
 
 // Context Providers
 import { RatingProvider } from "./context/rating-context";
@@ -13,49 +13,61 @@ import { RatingProvider } from "./context/rating-context";
 import { getProfile } from "./services/authService";
 import { useAuth } from "./hook/use-auth";
 import { useDispatch } from "react-redux";
-import NotFound from "./components/error/not-found";
-import Forbidden from "./components/error/forbidden";
-import { AdminDashboard } from "./components/dashboard/admin-dashboard";
-import { UserTable } from "./components/admin/user-management";
-import { CourseTable } from "./components/admin/course-management";
-import { StudentDashboard } from "./components/dashboard/student-dashboard";
-import { TutorDashboard } from "./components/dashboard/tutor-dashboard";
+import NotFound from "./components/page/error/not-found";
+import Forbidden from "./components/page/error/forbidden";
+import { AdminDashboard } from "./components/page/dashboard/admin-dashboard";
+import { UserTable } from "./components/page/auth/admin/user-management";
+import { CourseTable } from "./components/page/auth/admin/course-management";
+import { StudentDashboard } from "./components/page/dashboard/student-dashboard";
+import { TutorDashboard } from "./components/page/dashboard/tutor-dashboard";
 
 // Lazy-loaded components
-const AuthPage = lazy(() => import("./components/auth/auth-page"));
-const HomePage = lazy(() => import("./components/layout/home-page"));
-const CourseList = lazy(() => import("./components/courses/course-list-grid"));
-const TutorList = lazy(() => import("./components/tutors/tutor-list"));
-const ProfilePage = lazy(() => import("./components/auth/profile-page"));
-const AboutPage = lazy(() => import("./components/layout/about-page"));
-const ContactPage = lazy(() => import("./components/layout/contact-us"));
-const PrivacyPolicyPage = lazy(() => import("./components/layout/privacy"));
-const TermsPage = lazy(() => import("./components/layout/term-page"));
-const FAQPage = lazy(() => import("./components/layout/faq-page"));
-const TutorProfile = lazy(() => import("./components/tutors/tutor-detail"));
-const CourseDetail = lazy(() => import("./components/courses/course-detail"));
-const CourseForm = lazy(() => import("./components/tutors/course/course-form"));
+const AuthPage = lazy(() => import("./components/page/auth/auth-page"));
+const HomePage = lazy(() => import("./components/page/basket/home-page"));
+const CourseList = lazy(
+  () => import("./components/page/courses/course-list-grid")
+);
+const TutorList = lazy(
+  () => import("./components/page/auth/tutors/tutor-list")
+);
+const ProfilePage = lazy(() => import("./components/page/auth/profile-page"));
+const AboutPage = lazy(() => import("./components/page/basket/about-page"));
+const ContactPage = lazy(() => import("./components/page/basket/contact-us"));
+const PrivacyPolicyPage = lazy(
+  () => import("./components/page/basket/privacy")
+);
+const TermsPage = lazy(() => import("./components/page/basket/term-page"));
+const FAQPage = lazy(() => import("./components/page/basket/faq-page"));
+const TutorProfile = lazy(
+  () => import("./components/page/auth/tutors/tutor-detail")
+);
+const CourseDetail = lazy(
+  () => import("./components/page/courses/course-detail")
+);
+const CourseForm = lazy(() => import("./components/page/courses/course-form"));
 const EditCoursePage = lazy(
-  () => import("./components/tutors/course/edit-course")
+  () => import("./components/page/courses/edit-course")
 );
 const TutorCourseListComponent = lazy(
-  () => import("./components/tutors/course/tutor-course-list")
+  () => import("./components/page/courses/tutor-course-list")
 );
 const StudentCourseList = lazy(
-  () => import("./components/student/course/student-course-list")
+  () => import("./components/page/courses/student-course-list")
 );
 const ScheduleView = lazy(
-  () => import("./components/courses/schedule/schedule-view")
+  () => import("./components/page/courses/schedule/schedule-view")
 );
-const SettingsPage = lazy(() => import("./components/layout/setting-page"));
+const SettingsPage = lazy(
+  () => import("./components/page/basket/setting-page")
+);
 const NotificationsPage = lazy(
-  () => import("./components/notification/notifications-page")
+  () => import("./components/page/auth/notification/notifications-page")
 );
 const ContractList = lazy(
-  () => import("./components/courses/contracts/contract-list")
+  () => import("./components/page/courses/contracts/contract-list")
 );
 const ContractManagement = lazy(
-  () => import("./components/admin/contract-management")
+  () => import("./components/page/auth/admin/contract-management")
 );
 
 // Loading component for suspense fallback
@@ -133,6 +145,7 @@ export default function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="contracts/manage" element={<ContractManagement />} />
             <Route path="users" element={<UserTable />} />
+            {/* <Route path="courses/:id/edit" element={<EditCoursePage />} /> */}
             <Route path="courses" element={<CourseTable />} />
           </Route>
 
@@ -152,7 +165,7 @@ export default function App() {
             <Route path="courses/new" element={<CourseForm />} />
             <Route path="schedules" element={<ScheduleView />} />
             <Route path="notifications" element={<NotificationsPage />} />
-            <Route path="courses/:id/edit" element={<EditCoursePage />} />
+            {/* <Route path="courses/:id/edit" element={<EditCoursePage />} /> */}
             <Route path="students" element={<div>Students Management</div>} />
           </Route>
 
@@ -165,9 +178,10 @@ export default function App() {
               </PublicLayout>
             }
           >
+            <Route path="tutor/courses/:id/edit" element={<EditCoursePage />} />
             <Route index element={<HomePage />} />
-            <Route path="about" element={<AboutPage />} />
             <Route path="contact" element={<ContactPage />} />
+            <Route path="about" element={<AboutPage />} />
             <Route path="faq" element={<FAQPage />} />
             <Route path="terms" element={<TermsPage />} />
             <Route path="privacy" element={<PrivacyPolicyPage />} />

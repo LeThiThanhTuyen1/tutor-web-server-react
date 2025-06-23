@@ -40,7 +40,7 @@ export default function SearchBar({
           onChange={(e) => onStatusChange(e.target.value)}
           className="p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
         >
-          <option value="All">all</option>
+          <option value="All">Tất cả</option>
           {statusOptions.map((status) => (
             <option key={status} value={status}>
               {status}

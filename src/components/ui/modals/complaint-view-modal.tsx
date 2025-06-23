@@ -26,23 +26,23 @@ export function ComplaintViewModal({
     switch (status.toLowerCase()) {
       case "pending":
         return (
-          <Badge className="bg-yellow-500 hover:bg-yellow-500">Pending</Badge>
+          <Badge className="bg-yellow-500 hover:bg-yellow-500">Đang xử lý</Badge>
         );
       case "canceled":
         return (
           <Badge className="bg-red-500 hover:bg-red-500">
-            Cancelled/Rejected
+            Đã hủy/Đã từ chối
           </Badge>
         );
       case "approved":
         return (
-          <Badge className="bg-green-500 hover:bg-green-500">Approved</Badge>
+          <Badge className="bg-green-500 hover:bg-green-500">Đã được chấp nhận</Badge>
         );
       case "rejected":
-        return <Badge className="bg-red-500 hover:bg-red-500">Rejected</Badge>;
+        return <Badge className="bg-red-500 hover:bg-red-500">Đã bị từ chối</Badge>;
       case "completed":
         return (
-          <Badge className="bg-gray-400 hover:bg-gray-500">Completed</Badge>
+          <Badge className="bg-gray-400 hover:bg-gray-500">Đã hoàn thành</Badge>
         );
       default:
         return <Badge>{status}</Badge>;
@@ -55,23 +55,23 @@ export function ComplaintViewModal({
         {complaint.status === "pending" ? (
           <span className="text-yellow-500 flex items-center">
             <Clock className="h-4 w-4 mr-1" />
-            Pending Review
+            Đang xử lý
           </span>
         ) : complaint.status === "approved" ? (
           <span className="text-green-500 flex items-center">
             <CheckCircle className="h-4 w-4 mr-1" />
-            Approved
+            Đã được chấp nhận
           </span>
         ) : complaint.status === "rejected" ? (
           <span className="text-red-500 flex items-center">
             <AlertTriangle className="h-4 w-4 mr-1" />
-            Rejected
+            Đã bị từ chối
           </span>
         ) : null}
       </div>
       <div className="flex gap-2">
         <Button variant="outline" onClick={onClose} disabled={isProcessing}>
-          Close
+          Đóng
         </Button>
         {complaint.status === "pending" && (
           <>
@@ -82,7 +82,7 @@ export function ComplaintViewModal({
               disabled={isProcessing}
             >
               <X className="h-4 w-4 mr-2" />
-              {isProcessing ? "Processing..." : "Reject"}
+              {isProcessing ? "Đang xử lý..." : "Từ chối"}
             </Button>
             <Button
               className="bg-green-600 hover:bg-green-700"
@@ -90,7 +90,7 @@ export function ComplaintViewModal({
               disabled={isProcessing}
             >
               <CheckCircle className="h-4 w-4 mr-2" />
-              {isProcessing ? "Processing..." : "Approve"}
+              {isProcessing ? "Đang xử lý..." : "Chấp nhận"}
             </Button>
           </>
         )}
@@ -102,7 +102,7 @@ export function ComplaintViewModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Complaint #${complaint.id} Details`}
+      title={`Chi tiết khiếu nại #${complaint.id}`}
       footer={footer}
       maxWidth="max-w-3xl"
     >
@@ -111,16 +111,16 @@ export function ComplaintViewModal({
           <div className="flex justify-between items-center">
             <div>
               <p className="text-sm text-gray-500">
-                Submitted on {new Date(complaint.createdAt).toLocaleString()}
+                Gửi vào ngày {new Date(complaint.createdAt).toLocaleString()}
               </p>
             </div>
             {getStatusBadge(complaint.status)}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="text-sm font-medium text-gray-500 mb-1">User</h4>
+              <h4 className="text-sm font-medium text-gray-500 mb-1">Người gửi</h4>
               <p className="font-medium">
-                {complaint.user?.name || `User #${complaint.userId}`}
+                {complaint.user?.name || `Người dùng #${complaint.userId}`}
               </p>
               {complaint.user?.email && (
                 <p className="text-sm text-gray-500">{complaint.user.email}</p>
@@ -129,25 +129,23 @@ export function ComplaintViewModal({
 
             <div>
               <h4 className="text-sm font-medium text-gray-500 mb-1">
-                Contract
+                Hợp đồng liên quan
               </h4>
               <p className="font-medium">
                 {complaint.contract?.courseName ||
-                  `Contract #${complaint.contractId}`}
+                  `Hợp đồng #${complaint.contractId}`}
               </p>
               {complaint.contract && (
                 <p className="text-sm text-gray-500">
-                  {complaint.contract.tutorName} (Tutor) |{" "}
-                  {complaint.contract.studentName} (Student)
+                  {complaint.contract.tutorName} (Gia sư) |{" "}
+                  {complaint.contract.studentName} (Học viên)
                 </p>
               )}
             </div>
           </div>
 
           <div>
-            <h4 className="text-sm font-medium text-gray-500 mb-2">
-              Description
-            </h4>
+            <h4 className="text-sm font-medium text-gray-500 mb-2">Mô tả khiếu nại</h4>
             <div className="bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 p-4 max-h-[200px] overflow-y-auto">
               <p className="whitespace-pre-line">{complaint.description}</p>
             </div>
@@ -158,93 +156,42 @@ export function ComplaintViewModal({
               <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
                 <div className="flex items-center mb-4">
                   <FileText className="h-5 w-5 text-indigo-600 mr-2" />
-                  <h4 className="font-medium">Related Contract Details</h4>
+                  <h4 className="font-medium">Thông tin hợp đồng liên quan</h4>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800 rounded-md p-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Course</p>
+                    <p className="text-sm font-medium text-gray-500">Khóa học</p>
                     <p>{complaint.contract.courseName}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Status</p>
+                    <p className="text-sm font-medium text-gray-500">Trạng thái</p>
                     {getStatusBadge(complaint.contract.status)}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Fee</p>
-                    <p>${complaint.contract.fee.toFixed(2)}</p>
+                    <p className="text-sm font-medium text-gray-500">Học phí</p>
+                    <p>{complaint.contract.fee.toLocaleString()} VNĐ</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">
-                      Duration
-                    </p>
+                    <p className="text-sm font-medium text-gray-500">Thời gian học</p>
                     <p>
-                      {new Date(
-                        complaint.contract.startDate
-                      ).toLocaleDateString()}{" "}
-                      -
-                      {new Date(
-                        complaint.contract.endDate
-                      ).toLocaleDateString()}
+                      {new Date(complaint.contract.startDate).toLocaleDateString()} - {new Date(complaint.contract.endDate).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
               </div>
               <div>
-                <h4 className="font-medium mb-2">Terms and Conditions:</h4>
+                <h4 className="font-medium mb-2">Điều khoản và Điều kiện:</h4>
                 <div className="text-sm space-y-2 text-gray-700 dark:text-gray-300">
-                  <p>
-                    1. <span className="font-medium">Enrollment:</span> By
-                    agreeing to this contract, the Student (Party B) enrolls in
-                    the course provided by the Tutor (Party A).
-                  </p>
-                  <p>
-                    2. <span className="font-medium">Payment:</span> The Student
-                    agrees to pay the course fee as specified above. Payment
-                    must be made according to the payment schedule provided.
-                  </p>
-                  <p>
-                    3. <span className="font-medium">Attendance:</span> The
-                    Student is expected to attend all scheduled classes. Absence
-                    does not exempt the Student from payment obligations.
-                  </p>
-                  <p>
-                    4. <span className="font-medium">Cancellation:</span> The
-                    Student may cancel enrollment within 48 hours of signing
-                    this agreement for a full refund. After this period, refunds
-                    will be subject to the cancellation policy.
-                  </p>
-                  <p>
-                    5. <span className="font-medium">Course Materials:</span>{" "}
-                    All course materials provided by the Tutor are for the
-                    Student's personal use only and may not be reproduced or
-                    distributed.
-                  </p>
-                  <p>
-                    6. <span className="font-medium">Conduct:</span> The Student
-                    agrees to maintain appropriate behavior during classes. The
-                    Tutor reserves the right to terminate enrollment for
-                    disruptive behavior without refund.
-                  </p>
-                  <p>
-                    7. <span className="font-medium">Liability:</span> The Tutor
-                    is not liable for any damages or injuries that may occur
-                    during the course, except in cases of gross negligence.
-                  </p>
-                  <p>
-                    8. <span className="font-medium">Modifications:</span> Any
-                    modifications to this agreement must be made in writing and
-                    agreed upon by both parties.
-                  </p>
-                  <p>
-                    9. <span className="font-medium">Governing Law:</span> This
-                    agreement is governed by the laws of the state/country in
-                    which the course is provided.
-                  </p>
-                  <p>
-                    10. <span className="font-medium">Entire Agreement:</span>{" "}
-                    This document constitutes the entire agreement between the
-                    parties with respect to the course enrollment.
-                  </p>
+                  <p>1. <span className="font-medium">Đăng ký:</span> Học viên (Bên B) đăng ký tham gia khóa học do Gia sư (Bên A) cung cấp.</p>
+                  <p>2. <span className="font-medium">Thanh toán:</span> Học viên đồng ý thanh toán học phí theo thông tin đã nêu. Thanh toán phải thực hiện đúng lịch trình.</p>
+                  <p>3. <span className="font-medium">Điểm danh:</span> Học viên phải tham gia đầy đủ các buổi học. Việc vắng mặt không miễn trừ trách nhiệm thanh toán.</p>
+                  <p>4. <span className="font-medium">Hủy bỏ:</span> Học viên có thể hủy đăng ký trong vòng 48 giờ sau khi ký hợp đồng để được hoàn tiền toàn bộ. Sau thời gian này, chính sách hoàn tiền sẽ được áp dụng.</p>
+                  <p>5. <span className="font-medium">Tài liệu khóa học:</span> Tài liệu chỉ dành cho cá nhân học viên, không được sao chép hay phân phối lại.</p>
+                  <p>6. <span className="font-medium">Hành vi:</span> Học viên cần giữ thái độ học tập nghiêm túc. Gia sư có quyền chấm dứt hợp đồng nếu học viên có hành vi gây rối, và không hoàn trả học phí.</p>
+                  <p>7. <span className="font-medium">Trách nhiệm pháp lý:</span> Gia sư không chịu trách nhiệm về các sự cố xảy ra trong quá trình học, trừ trường hợp cố ý hoặc do lỗi nghiêm trọng.</p>
+                  <p>8. <span className="font-medium">Sửa đổi hợp đồng:</span> Mọi sửa đổi phải được lập thành văn bản và đồng ý bởi cả hai bên.</p>
+                  <p>9. <span className="font-medium">Luật áp dụng:</span> Hợp đồng này chịu sự điều chỉnh bởi pháp luật Việt Nam.</p>
+                  <p>10. <span className="font-medium">Toàn bộ thỏa thuận:</span> Tài liệu này là toàn bộ thỏa thuận giữa hai bên về khóa học.</p>
                 </div>
               </div>
             </div>

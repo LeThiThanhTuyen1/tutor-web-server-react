@@ -1,0 +1,763 @@
+import { useState, useEffect } from "react";
+import { FileText, AlertTriangle, Search, Filter, Eye } from "lucide-react";
+import { getAllContracts } from "@/services/contractService";
+import {
+  getAllComplaints,
+  processComplaint,
+  getComplaintById,
+} from "@/services/complaintService";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hook/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { ContractViewModal } from "@/components/ui/modals/contract-view-modal";
+import { ComplaintViewModal } from "@/components/ui/modals/complaint-view-modal";
+import { ToastContainer } from "@/components/ui/toast";
+
+export interface ContractDTO {
+  id: number;
+  tutorName: string;
+  studentName: string;
+  courseName: string;
+  terms: string;
+  fee: number;
+  startDate: string;
+  endDate: string;
+  status: string;
+}
+
+interface Complaint {
+  id: number;
+  contractId: number;
+  userId: number;
+  description: string;
+  status: string;
+  createdAt: string;
+  contract?: ContractDTO;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+  };
+}
+
+interface PaginationFilter {
+  pageNumber: number;
+  pageSize: number;
+}
+
+export default function ContractManagement() {
+  const { toast, toasts, dismiss } = useToast();
+  const [activeTab, setActiveTab] = useState("contracts");
+  const [contracts, setContracts] = useState<ContractDTO[]>([]);
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [loadingContracts, setLoadingContracts] = useState(true);
+  const [loadingComplaints, setLoadingComplaints] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [contractPagination, setContractPagination] =
+    useState<PaginationFilter>({
+      pageNumber: 1,
+      pageSize: 6,
+    });
+  const [complaintPagination, setComplaintPagination] =
+    useState<PaginationFilter>({
+      pageNumber: 1,
+      pageSize: 6,
+    });
+  const [contractTotalPages, setContractTotalPages] = useState(1);
+  const [complaintTotalPages, setComplaintTotalPages] = useState(1);
+  const [selectedContract, setSelectedContract] = useState<ContractDTO | null>(
+    null
+  );
+  const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(
+    null
+  );
+  const [isContractModalOpen, setIsContractModalOpen] = useState(false);
+  const [isComplaintModalOpen, setIsComplaintModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === "contracts") {
+      fetchContracts();
+    } else if (activeTab === "complaints") {
+      fetchComplaints();
+    }
+  }, [activeTab, contractPagination, complaintPagination]);
+
+  const fetchContracts = async () => {
+    try {
+      setLoadingContracts(true);
+      const response = await getAllContracts(contractPagination);
+      if (response.succeeded && response.data) {
+        setContracts(response.data);
+        setContractTotalPages(response.totalPages || 1);
+      } else {
+        toast({
+          title: "Lỗi",
+          description: response.message || "Lỗi khi lấy danh sách hợp đồng.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi không mong muốn xảy ra.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingContracts(false);
+    }
+  };
+
+  const fetchComplaints = async () => {
+    try {
+      setLoadingComplaints(true);
+      const response = await getAllComplaints(complaintPagination);
+      if (response.succeeded && response.data) {
+        setComplaints(response.data || []);
+        setComplaintTotalPages(response.totalPages || 1);
+      } else {
+        toast({
+          title: "Lỗi",
+          description: response.message || "Lỗi khi lấy danh sách khiếu nại",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi không mong muốn xảy ra.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingComplaints(false);
+    }
+  };
+
+  const fetchComplaintById = async (id: number) => {
+    try {
+      const response = await getComplaintById(id);
+      if (response.succeeded && response.data) {
+        if (!response.data.contract || !response.data.user) {
+          toast({
+            title: "Cảnh báo",
+            description:
+              "Dữ liệu khiếu nại có thể làm mất một vài thông tin không mong muốn.",
+            variant: "destructive",
+          });
+        }
+        setSelectedComplaint(response.data);
+        setIsComplaintModalOpen(true);
+      } else {
+        toast({
+          title: "Lỗi",
+          description: response.message || "Lỗi khi lấy chi tiết khiếu nại.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi không mong muốn xảy ra.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleProcessComplaint = async (action: "approve" | "reject") => {
+    if (!selectedComplaint) return;
+
+    try {
+      setIsProcessing(true);
+      const response = await processComplaint(selectedComplaint.id, action);
+
+      if (response.succeeded) {
+        toast({
+          title: "Thành công",
+          description: `Khiếu nại ${
+            action === "approve" ? "đã được chấp nhận" : "đã bị từ chối"
+          } thành công`,
+          variant: "success",
+        });
+
+        await fetchComplaints();
+        if (action === "approve") {
+          await fetchContracts();
+        }
+
+        setTimeout(() => {
+          setIsComplaintModalOpen(false);
+        }, 1000);
+      } else {
+        toast({
+          title: "Lỗi",
+          description: response.message || `Lỗi khi xử lý khiếu nại`,
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          setIsComplaintModalOpen(false);
+        }, 1000);
+      }
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Có lỗi không mong muốn xảy ra.",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        setIsComplaintModalOpen(false);
+      }, 1000);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return (
+          <Badge className="bg-yellow-500 hover:bg-yellow-600">Đang xử lý</Badge>
+        );
+      case "canceled":
+        return (
+          <Badge className="bg-red-500 hover:bg-red-600">
+            Bị từ chối/Đã bị hủy
+          </Badge>
+        );
+      case "approved":
+        return (
+          <Badge className="bg-green-500 hover:bg-green-600">
+            Đã được duyệt
+          </Badge>
+        );
+      case "rejected":
+        return (
+          <Badge className="bg-red-500 hover:bg-red-600">Đã bị từ chối</Badge>
+        );
+      case "completed":
+        return (
+          <Badge className="bg-green-500 hover:bg-green-600">
+            Đã hoàn thành
+          </Badge>
+        );
+      case "active":
+        return (
+          <Badge className="bg-blue-500 hover:bg-blue-600">Đã kích hoạt</Badge>
+        );
+      default:
+        return <Badge>{status}</Badge>;
+    }
+  };
+
+  const filteredContracts = contracts.filter((contract) => {
+    const matchesSearch =
+      contract.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contract.tutorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contract.studentName.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all" ||
+      contract.status.toLowerCase() === statusFilter.toLowerCase();
+
+    return matchesSearch && matchesStatus;
+  });
+
+  const filteredComplaints = complaints.filter((complaint) => {
+    const matchesSearch =
+      complaint.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (complaint.user?.name?.toLowerCase() || "").includes(
+        searchTerm.toLowerCase()
+      ) ||
+      (complaint.contract?.courseName?.toLowerCase() || "").includes(
+        searchTerm.toLowerCase()
+      );
+
+    const matchesStatus =
+      statusFilter === "all" ||
+      complaint.status.toLowerCase() === statusFilter.toLowerCase();
+
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleViewContract = (contract: ContractDTO) => {
+    setSelectedContract(contract);
+    setIsContractModalOpen(true);
+  };
+
+  const handleViewComplaintDetails = (complaint: Complaint) => {
+    fetchComplaintById(complaint.id);
+  };
+
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  const handlePageChange = (
+    tab: "contracts" | "complaints",
+    pageNumber: number
+  ) => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (tab === "contracts") {
+      setContractPagination((prev) => ({ ...prev, pageNumber }));
+    } else {
+      setComplaintPagination((prev) => ({ ...prev, pageNumber }));
+    }
+  };
+
+  return (
+    <div className="container mx-auto py-8 px-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Quản lý hợp đồng</h1>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="contracts">
+            <FileText className="h-4 w-4 mr-2" />
+            Hợp đồng
+          </TabsTrigger>
+          <TabsTrigger value="complaints">
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            Khiếu nại
+          </TabsTrigger>
+        </TabsList>
+
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Nhập vào gì đó..."
+              className="pl-10 bg-white dark:bg-gray-800 dark:text-white"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800">
+              <div className="flex items-center">
+                <Filter className="h-4 w-4 mr-2" />
+                <span>
+                  {statusFilter === "all"
+                    ? "Tất cả"
+                    : statusFilter.charAt(0).toUpperCase() +
+                      statusFilter.slice(1)}
+                </span>
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả</SelectItem>
+              {activeTab === "contracts" ? (
+                <>
+                  <SelectItem value="active">Đã kích hoạt</SelectItem>
+                  <SelectItem value="pending">Đang xử lý</SelectItem>
+                  <SelectItem value="completed">Đã hoàn thành</SelectItem>
+                  <SelectItem value="canceled">Đã bị hủy</SelectItem>
+                </>
+              ) : (
+                <>
+                  <SelectItem value="pending">Đang xử lý</SelectItem>
+                  <SelectItem value="approved">Đã chấp nhận</SelectItem>
+                  <SelectItem value="rejected">Bị từ chối</SelectItem>
+                </>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <TabsContent value="contracts" className="mt-0">
+          {loadingContracts ? (
+            <div className="grid gap-4">
+              {[1, 2, 3].map((i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          ) : filteredContracts.length === 0 ? (
+            <NoDataCard
+              type="contracts"
+              searchTerm={searchTerm}
+              statusFilter={statusFilter}
+            />
+          ) : (
+            <>
+              <div className="overflow-hidden border rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Tên khóa học
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Gia sư
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Học viên
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Học phí
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Thời gian
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Trạng thái
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Hành động
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                    {filteredContracts.map((contract) => (
+                      <tr
+                        key={contract.id}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {contract.courseName}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            {contract.tutorName}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            {contract.studentName}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            {contract.fee.toLocaleString("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            })}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            {formatDate(contract.startDate)} -{" "}
+                            {contract.endDate
+                              ? formatDate(contract.endDate)
+                              : "Đang diễn ra"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(contract.status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
+                            onClick={() => handleViewContract(contract)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Xem
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="flex justify-between items-center mt-4">
+                <Button
+                  disabled={contractPagination.pageNumber === 1}
+                  onClick={() =>
+                    handlePageChange(
+                      "contracts",
+                      contractPagination.pageNumber - 1
+                    )
+                  }
+                  variant="outline"
+                >
+                  Trước
+                </Button>
+                <span>
+                  Trang {contractPagination.pageNumber} / {contractTotalPages}
+                </span>
+                <Button
+                  disabled={contractPagination.pageNumber >= contractTotalPages}
+                  onClick={() =>
+                    handlePageChange(
+                      "contracts",
+                      contractPagination.pageNumber + 1
+                    )
+                  }
+                  variant="outline"
+                >
+                  Sau
+                </Button>
+              </div>
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="complaints" className="mt-0">
+          {loadingComplaints ? (
+            <div className="grid gap-4">
+              {[1, 2, 3].map((i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          ) : filteredComplaints.length === 0 ? (
+            <NoDataCard
+              type="complaints"
+              searchTerm={searchTerm}
+              statusFilter={statusFilter}
+            />
+          ) : (
+            <>
+              <div className="overflow-hidden border rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Mã ID
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Hợp đồng
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Người khiếu nại
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Mô tả
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Ngày khiếu nại
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Trạng thái
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        Hành động
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                    {filteredComplaints.map((complaint) => (
+                      <tr
+                        key={complaint.id}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            #{complaint.id}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            {complaint.contract?.courseName ||
+                              `#${complaint.contractId}`}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            {complaint.user?.name || `#${complaint.userId}`}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900 dark:text-gray-400 line-clamp-2">
+                            {complaint.description}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-400">
+                            {new Date(complaint.createdAt).toLocaleString()}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(complaint.status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
+                            onClick={() =>
+                              handleViewComplaintDetails(complaint)
+                            }
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Xem
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="flex justify-between items-center mt-4">
+                <Button
+                  disabled={complaintPagination.pageNumber === 1}
+                  onClick={() =>
+                    handlePageChange(
+                      "complaints",
+                      complaintPagination.pageNumber - 1
+                    )
+                  }
+                  variant="outline"
+                >
+                  Trước
+                </Button>
+                <span>
+                  Trang {complaintPagination.pageNumber} / {complaintTotalPages}
+                </span>
+                <Button
+                  disabled={
+                    complaintPagination.pageNumber >= complaintTotalPages
+                  }
+                  onClick={() =>
+                    handlePageChange(
+                      "complaints",
+                      complaintPagination.pageNumber + 1
+                    )
+                  }
+                  variant="outline"
+                >
+                  Sau
+                </Button>
+              </div>
+            </>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Contract View Modal */}
+      <ContractViewModal
+        isOpen={isContractModalOpen}
+        onClose={() => setIsContractModalOpen(false)}
+        contract={selectedContract}
+        // canFileComplaint={false}
+      />
+
+      {/* Complaint View Modal */}
+      <ComplaintViewModal
+        isOpen={isComplaintModalOpen}
+        onClose={() => setIsComplaintModalOpen(false)}
+        complaint={selectedComplaint}
+        isProcessing={isProcessing}
+        onProcessComplaint={handleProcessComplaint}
+      />
+
+      <ToastContainer
+        toasts={toasts.map((toast) => ({ ...toast, onDismiss: dismiss }))}
+        dismiss={dismiss}
+      />
+    </div>
+  );
+}
+
+// Helper Components
+const SkeletonCard = ({ key }: { key: number }) => (
+  <Card key={key} className="w-full">
+    <CardHeader className="pb-2">
+      <Skeleton className="h-6 w-3/4 mb-2" />
+      <Skeleton className="h-4 w-1/2" />
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
+      </div>
+    </CardContent>
+    <CardFooter>
+      <Skeleton className="h-9 w-24" />
+    </CardFooter>
+  </Card>
+);
+
+const NoDataCard = ({
+  type,
+  searchTerm,
+  statusFilter,
+}: {
+  type: string;
+  searchTerm: string;
+  statusFilter: string;
+}) => (
+  <Card className="w-full">
+    <CardContent className="flex flex-col items-center justify-center py-12">
+      {type === "contracts" ? (
+        <FileText className="h-16 w-16 text-gray-400 mb-4" />
+      ) : (
+        <AlertTriangle className="h-16 w-16 text-gray-400 mb-4" />
+      )}
+      <h3 className="text-xl font-medium text-gray-700 dark:text-gray-300 mb-2">
+        No {type === "contracts" ? "Contracts" : "Complaints"} Found
+      </h3>
+      <p className="text-gray-500 dark:text-gray-400 text-center max-w-md">
+        {searchTerm || statusFilter !== "all"
+          ? `No ${type} match your search criteria. Try adjusting your filters.`
+          : `There are no ${type} in the system yet.`}
+      </p>
+    </CardContent>
+  </Card>
+);

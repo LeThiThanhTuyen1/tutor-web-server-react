@@ -41,9 +41,12 @@ export interface AdminDashboardData {
 export interface User {
   id: number;
   name: string;
+  password: string;
   email: string;
   phone: string;
   role: string;
+  dateOfBirth: string;
+  gender: string;
   profileImage: string;
   location: string;
   school: string;
@@ -57,10 +60,10 @@ export interface PagedResponse<T> {
   totalPages: number;
   nextPage: string | null;
   previousPage: string | null;
-  succeeded: false,
-  message: string,
-  firstPage: null,
-  lastPage: null,
+  succeeded: false;
+  message: string;
+  firstPage: null;
+  lastPage: null;
 }
 
 export interface Response<T> {
@@ -70,7 +73,9 @@ export interface Response<T> {
   errors?: string[];
 }
 
-export const getAdminDashboard = async (): Promise<Response<AdminDashboardData>> => {
+export const getAdminDashboard = async (): Promise<
+  Response<AdminDashboardData>
+> => {
   try {
     const response = await api.get("/Admin/dashboard");
     return response.data;
@@ -123,6 +128,41 @@ export const deleteUsers = async (
       data: null,
       succeeded: false,
       message: errorMessage,
+    };
+  }
+};
+
+// Create a new user
+export const createUser = async (
+  userData: Partial<User>
+): Promise<Response<User>> => {
+  try {
+    const response = await api.post("/Admin/users", userData);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error creating user:", error);
+    return {
+      data: null,
+      succeeded: false,
+      message: error.response?.data?.message || "Failed to create user",
+    };
+  }
+};
+
+// Update an existing user
+export const updateUser = async (
+  userId: number,
+  userData: Partial<User>
+): Promise<Response<User>> => {
+  try {
+    const response = await api.put(`/Admin/users/${userId}`, userData);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error updating user:", error);
+    return {
+      data: null,
+      succeeded: false,
+      message: error.response?.data?.message || "Failed to update user",
     };
   }
 };

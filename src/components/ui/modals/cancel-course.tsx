@@ -21,11 +21,11 @@ const CancelCourseModal = ({
         <div className="mb-4">
           <h3 className="text-xl font-bold mb-2 flex items-center text-red-600">
             <AlertTriangle className="h-5 w-5 mr-2" />
-            Cancel Course
+            Hủy Khóa học
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            Are you sure you want to cancel this course? This action cannot be
-            undone and will notify all enrolled students.
+          Bạn có chắc chắn muốn hủy khóa học này không? Hành động này không thể
+          hoàn tác và sẽ thông báo cho tất cả học viên đã đăng ký.
           </p>
         </div>
         <div className="flex justify-end space-x-3 mt-6">
@@ -34,7 +34,7 @@ const CancelCourseModal = ({
             disabled={isCancelling}
             className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
           >
-            Cancel
+            Thoát
           </button>
           <button
             onClick={onConfirm}
@@ -63,10 +63,10 @@ const CancelCourseModal = ({
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Cancelling...
+                Đang hủy...
               </>
             ) : (
-              "Yes, cancel course"
+              "Hủy"
             )}
           </button>
         </div>

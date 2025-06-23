@@ -32,18 +32,18 @@ const useSpeechToText = (options: SpeechToTextOptions = {}) => {
   // Start listening with provided options
   const startListening = useCallback(() => {
     if (browserSupportsSpeechRecognition && !isListening) {
-      resetTranscript(); // Clear previous transcript
       SpeechRecognition.startListening({
+        interimResults: false,
         continuous: options.continuous ?? false,
-        interimResults: options.interimResults ?? true,
-        language: options.lang ?? "en-US",
+        // interimResults: options.interimResults ?? true,
+        language: options.lang ?? "vi-VN",
       });
     }
   }, [
     browserSupportsSpeechRecognition,
     isListening,
     options.continuous,
-    options.interimResults,
+    // options.interimResults,
     options.lang,
   ]);
 
@@ -54,6 +54,13 @@ const useSpeechToText = (options: SpeechToTextOptions = {}) => {
     }
   }, [browserSupportsSpeechRecognition, isListening]);
 
+  // Manual reset transcript
+  const reset = useCallback(() => {
+    resetTranscript();
+  }, [resetTranscript]);
+
+  const cleanTranscript = transcript.replace(/\.$/, '');
+
   // Check browser support
   if (!browserSupportsSpeechRecognition) {
     console.error("Speech recognition is not supported in this browser.");
@@ -61,9 +68,11 @@ const useSpeechToText = (options: SpeechToTextOptions = {}) => {
 
   return {
     isListening,
+    cleanTranscript,
     transcript,
     startListening,
     stopListening,
+    reset,
   };
 };
 

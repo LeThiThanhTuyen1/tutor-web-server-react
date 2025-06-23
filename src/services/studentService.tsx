@@ -22,6 +22,16 @@ export interface StudentCourse {
   nextLesson: string;
 }
 
+export interface TutorRecommended {
+  tutorId: number;
+  tutorName: string;
+  subjects: string;
+  image: string;
+  experience: number;
+  rating: number;
+  compatibilityScore: number;
+}
+
 export interface Tutor {
   id: number;
   tutorName: string;
@@ -65,6 +75,22 @@ export const getStudentStats = async () => {
 export const getStudentSubjects = async () => {
   try {
     const response = await api.get("/student/subjects");
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching student subjects:", error);
+    const errorMessage =
+      error.response?.data?.message || "An unexpected error occurred";
+    return {
+      data: null,
+      succeeded: false,
+      message: errorMessage,
+    };
+  }
+};
+
+export const getTutorRecommended = async () => {
+  try {
+    const response = await api.get("/student/recommendations/tutors");
     return response.data;
   } catch (error: any) {
     console.error("Error fetching student subjects:", error);

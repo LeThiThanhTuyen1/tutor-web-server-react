@@ -14,6 +14,7 @@ import { PaginationFilter } from "./authSlice";
 
 // Define types
 export interface Course {
+  subject: ReactNode;
   id: number;
   courseName: string;
   description: string;

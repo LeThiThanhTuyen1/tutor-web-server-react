@@ -1,33 +1,30 @@
 export const validateEmail = (email: string) => {
-  if (!email) return "Email is required!";
+  if (!email) return "Email không được để trống!";
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  return emailRegex.test(email) ? null : "Invalid Email!";
+  return emailRegex.test(email) ? null : "Email không hợp lệ!";
 };
 
 export const validatePhone = (phone: string) => {
-  if (!phone) return "Phone number is required!";
+  if (!phone) return "Phone number không được để trống!";
   const trimmedPhone = phone.trim();
-  if (!trimmedPhone) return "Phone number is required!";
+  if (!trimmedPhone) return "Phone number không được để trống!";
 
-  const phoneRegex =
-    /^(?:\+?\d{1,3}[-.\s]?)?(?:\(\d{3}\)\s?)?(?:\d[-.\s]?){9,14}\d$/;
+  const phoneRegex = /^0[-\s.]?[0-9]{3}[-\s.]?[0-9]{3}[-\s.]?[0-9]{3}$/;
 
   if (!phoneRegex.test(trimmedPhone)) {
-    if (trimmedPhone.length < 10)
-      return "Phone number must be at least 10 digits!";
-    if (trimmedPhone.match(/[^\d+-.()\s]/))
-      return "Phone number contains invalid characters!";
-    return "Invalid phone number format!";
+    const digitCount = trimmedPhone.replace(/[^\d]/g, "").length;
+    if (digitCount !== 10) {
+      return "Số điện thoại phải chứa 10 chữ số!";
+    }
+    return "Số điện thoại không đúng định dạng!";
   }
 
   return null;
 };
 
 export const validatePassword = (password: string) => {
-  if (!password) return "Password is required!";
-  return password.length >= 10
-    ? null
-    : "Password must be at least 10 characters!";
+  if (!password) return "Mật khẩu không được để trống!";
+  return password.length >= 10 ? null : "Mật khẩu phải chứa ít nhất 10 ký tự!";
 };
 
 export const validateConfirmPassword = (

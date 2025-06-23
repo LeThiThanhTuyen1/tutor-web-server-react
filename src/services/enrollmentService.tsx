@@ -1,3 +1,4 @@
+// services/enrollmentService.ts
 import api from "@/config/axiosInstance";
 import { PagedResponse, Response } from "./adminService";
 import { PaginationFilter } from "@/store/authSlice";
@@ -10,8 +11,8 @@ export interface BillHistoryModel {
   createdAt: string;
   status: string;
   transactionId: string;
-  paymentMethod?: string; // Optional, to support both Stripe and VNPay
-  vnPayResponseCode?: string; // Optional, for VNPay only
+  paymentMethod?: string;
+  vnPayResponseCode?: string;
 }
 
 export const enrollCourse = async (courseId: number) => {
@@ -85,12 +86,12 @@ export const getBillHistory = async (filter: PaginationFilter): Promise<PagedRes
   }
 };
 
-export const initiatePayment = async (enrollmentId: number) => {
+export const initiatePayment = async (enrollmentId: number, paymentMethod: 'stripe' | 'vnpay') => {
   try {
-    const response = await api.post(`/Payment/enroll-and-pay`, { enrollmentId });
+    const response = await api.post(`/Payment/enroll-and-pay`, { enrollmentId, paymentMethod });
     return response.data.paymentUrl;
   } catch (error: any) {
-    console.error(`Error initiating payment for enrollment ${enrollmentId}:`, error);
+    console.error(`Error initiating payment for enrollment ${enrollmentId} with method ${paymentMethod}:`, error);
     throw error;
   }
 };

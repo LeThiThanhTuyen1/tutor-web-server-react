@@ -49,8 +49,6 @@ export function ContractDialog({
   isOpen,
   onClose,
   contract,
-  // onFileComplaint,
-  // canFileComplaint = false,
   isRegistrationMode = false,
   onSignContract,
   isSigningContract = false,
@@ -60,7 +58,6 @@ export function ContractDialog({
 
   useEffect(() => {
     if (contract?.attachments) {
-      // Check if there's a signed contract in the attachments
       const hasSignedContract = contract.attachments.some(
         (attachment) =>
           attachment.name.toLowerCase().includes("contract") &&
@@ -83,15 +80,13 @@ export function ContractDialog({
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case "active":
-        return <Badge className="bg-green-500">Active</Badge>;
+        return <Badge className="bg-green-500">Đang hiệu lực</Badge>;
       case "pending":
-        return <Badge className="bg-yellow-500">Pending</Badge>;
+        return <Badge className="bg-yellow-500">Đang chờ</Badge>;
       case "completed":
-        return <Badge className="bg-blue-500">Completed</Badge>;
-      case "cancelled":
-        return <Badge className="bg-red-500">Cancelled</Badge>;
-      case "disputed":
-        return <Badge className="bg-purple-500">Disputed</Badge>;
+        return <Badge className="bg-blue-500">Đã hoàn thành</Badge>;
+      case "canceled":
+        return <Badge className="bg-red-500">Đã hủy</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -128,8 +123,8 @@ export function ContractDialog({
                 <FileText className="h-5 w-5 text-indigo-600 mr-2" />
                 <h2 className="text-xl font-semibold">
                   {contract
-                    ? `Contract: ${contract.courseName}`
-                    : "Contract Details"}
+                    ? `Hợp đồng: ${contract.courseName}`
+                    : "Chi tiết hợp đồng"}
                 </h2>
               </div>
               <Button
@@ -139,7 +134,7 @@ export function ContractDialog({
                 className="h-8 w-8 rounded-full"
               >
                 <X className="h-4 w-4" />
-                <span className="sr-only">Close</span>
+                <span className="sr-only">Đóng</span>
               </Button>
             </div>
 
@@ -148,21 +143,20 @@ export function ContractDialog({
               <div className="p-6">
                 <div className="flex justify-between items-start mb-6">
                   <h3 className="text-lg font-medium">
-                    Contract #{contract.id}
+                    Hợp đồng #{contract.id}
                   </h3>
                   {getStatusBadge(contract.status)}
                 </div>
 
-                {/* Signed Contract Confirmation */}
                 {isSigned && (
                   <div className="mb-6 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md flex items-center">
                     <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
                     <div>
                       <p className="font-medium text-green-800 dark:text-green-300">
-                        Contract has been signed
+                        Hợp đồng đã được ký
                       </p>
                       <p className="text-sm text-green-700 dark:text-green-400">
-                        This contract was signed and is now active
+                        Hợp đồng này đã được ký và đang hiệu lực
                       </p>
                     </div>
                   </div>
@@ -173,7 +167,7 @@ export function ContractDialog({
                     <div className="flex items-start">
                       <User className="h-5 w-5 text-indigo-600 mr-2 mt-0.5" />
                       <div>
-                        <h4 className="font-medium">Tutor</h4>
+                        <h4 className="font-medium">Gia sư</h4>
                         <p>{contract.tutorName}</p>
                       </div>
                     </div>
@@ -181,7 +175,7 @@ export function ContractDialog({
                     <div className="flex items-start">
                       <User className="h-5 w-5 text-indigo-600 mr-2 mt-0.5" />
                       <div>
-                        <h4 className="font-medium">Student</h4>
+                        <h4 className="font-medium">Học viên</h4>
                         <p>{contract.studentName}</p>
                       </div>
                     </div>
@@ -189,7 +183,7 @@ export function ContractDialog({
                     <div className="flex items-start">
                       <Book className="h-5 w-5 text-indigo-600 mr-2 mt-0.5" />
                       <div>
-                        <h4 className="font-medium">Course</h4>
+                        <h4 className="font-medium">Khóa học</h4>
                         <p>{contract.courseName}</p>
                       </div>
                     </div>
@@ -199,7 +193,7 @@ export function ContractDialog({
                     <div className="flex items-start">
                       <DollarSign className="h-5 w-5 text-indigo-600 mr-2 mt-0.5" />
                       <div>
-                        <h4 className="font-medium">Fee</h4>
+                        <h4 className="font-medium">Học phí</h4>
                         <p>${contract.fee.toFixed(2)}</p>
                       </div>
                     </div>
@@ -207,7 +201,7 @@ export function ContractDialog({
                     <div className="flex items-start">
                       <Calendar className="h-5 w-5 text-indigo-600 mr-2 mt-0.5" />
                       <div>
-                        <h4 className="font-medium">Start Date</h4>
+                        <h4 className="font-medium">Ngày bắt đầu</h4>
                         <p>
                           {new Date(contract.startDate).toLocaleDateString()}
                         </p>
@@ -217,7 +211,7 @@ export function ContractDialog({
                     <div className="flex items-start">
                       <Calendar className="h-5 w-5 text-indigo-600 mr-2 mt-0.5" />
                       <div>
-                        <h4 className="font-medium">End Date</h4>
+                        <h4 className="font-medium">Ngày kết thúc</h4>
                         <p>{new Date(contract.endDate).toLocaleDateString()}</p>
                       </div>
                     </div>
@@ -228,7 +222,7 @@ export function ContractDialog({
                   <div className="flex items-start">
                     <FileSignature className="h-5 w-5 text-indigo-600 mr-2 mt-0.5" />
                     <div className="w-full">
-                      <h4 className="font-medium mb-2">Terms and Conditions</h4>
+                      <h4 className="font-medium mb-2">Điều khoản & điều kiện</h4>
                       <ScrollArea className="h-[200px] w-full rounded-md border p-4">
                         <p className="whitespace-pre-line">{contract.terms}</p>
                       </ScrollArea>
@@ -238,37 +232,25 @@ export function ContractDialog({
               </div>
             ) : (
               <div className="p-6 flex items-center justify-center">
-                <p>No contract data available</p>
+                <p>Không có dữ liệu hợp đồng</p>
               </div>
             )}
 
             {/* Footer */}
             <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
               <Button variant="outline" onClick={handleClose} className="mr-2">
-                Close
+                Đóng
               </Button>
 
-              {/* Show Sign Contract button only in registration mode and if not already signed */}
               {isRegistrationMode && !isSigned && onSignContract && (
                 <Button
                   onClick={onSignContract}
                   disabled={isSigningContract}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
-                  {isSigningContract ? "Signing..." : "Sign Contract"}
+                  {isSigningContract ? "Đang ký..." : "Ký hợp đồng"}
                 </Button>
               )}
-
-              {/* Show File Complaint button only in normal viewing mode */}
-              {/* {!isRegistrationMode && canFileComplaint && onFileComplaint && (
-                <Button
-                  variant="outline"
-                  onClick={onFileComplaint}
-                  className="text-red-600 border-red-200 hover:bg-red-50"
-                >
-                  File a Complaint
-                </Button>
-              )} */}
             </div>
           </motion.div>
         </div>

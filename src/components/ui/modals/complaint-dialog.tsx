@@ -68,7 +68,7 @@ export function ComplaintDialog({
             <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center">
                 <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
-                <h2 className="text-xl font-semibold">File a Complaint</h2>
+                <h2 className="text-xl font-semibold">Nộp đơn khiếu nại</h2>
               </div>
               <Button
                 variant="ghost"
@@ -78,22 +78,22 @@ export function ComplaintDialog({
                 className="h-8 w-8 rounded-full"
               >
                 <X className="h-4 w-4" />
-                <span className="sr-only">Close</span>
+                <span className="sr-only">Đóng</span>
               </Button>
             </div>
 
             {/* Content */}
             <div className="p-6">
               <p className="mb-4 text-gray-600 dark:text-gray-400">
-                Please describe your issue with this contract. Our team will
-                review your complaint and get back to you.
+              Vui lòng mô tả vấn đề của bạn với hợp đồng này. Nhóm của chúng tôi sẽ
+              xem xét khiếu nại của bạn và phản hồi lại bạn.
               </p>
 
               <div className="space-y-2">
-                <Label htmlFor="complaint-description">Complaint Details</Label>
+                <Label htmlFor="complaint-description">Chi tiết khiếu nại</Label>
                 <Textarea
                   id="complaint-description"
-                  placeholder="Describe your issue in detail..."
+                  placeholder="Mô tả chi tiết vấn đề của bạn..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={5}
@@ -111,7 +111,7 @@ export function ComplaintDialog({
                 disabled={isSubmitting}
                 className="mr-2"
               >
-                Cancel
+                Hủy
               </Button>
 
               <Button
@@ -119,7 +119,7 @@ export function ComplaintDialog({
                 disabled={isSubmitting || !description.trim()}
                 className="bg-indigo-600 hover:bg-indigo-700"
               >
-                {isSubmitting ? "Submitting..." : "Submit Complaint"}
+                {isSubmitting ? "Đang gửi..." : "Gửi khiếu nại"}
               </Button>
             </div>
           </motion.div>
